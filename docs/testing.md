@@ -14,6 +14,7 @@ Kết quả local đã quan sát trong repo AS2, database test tách biệt. Kh�
 | Docker Compose sạch | Web/API/DB up --build --wait đạt; seed 5 món |
 | Container smoke | Web, /api/health, /api/products, manifest, service worker trả 200 |
 | UML | 7 sơ đồ có nguồn PlantUML và SVG |
+| VPS DB roles local | Migrator/app không superuser; migrate bằng migrator, app SELECT được và CREATE TABLE bị từ chối |
 
 Tổng cộng 100 test local: 84 backend + 5 frontend + 9 integration + 2 browser. Unit/API authorization dùng mocks không được coi là PostgreSQL integration; suite checkout.integration-spec dùng PostgreSQL thật và browser không mock API.
 
@@ -37,4 +38,4 @@ Tổng cộng 100 test local: 84 backend + 5 frontend + 9 integration + 2 browse
 Xem README và apps/api/test/checkout.integration-spec.ts; dùng TEST_DATABASE_URL trỏ DB riêng, chạy migrate deploy trước test. Test browser tạo tài khoản/đơn demo trong DB test dùng một lần. Docker local smoke dùng project riêng brewlite-as2-smoke, cổng 3200/3201.
 
 ## Chưa có minh chứng bên ngoài
-Chờ link PR/CI GitHub và required checks. VPS/Vercel/Render, HTTPS thật, merchant sandbox, release production và demo có người nghiệm thu chưa được cấu hình hoặc xác minh. Log cục bộ không chứng minh các mục này đã hoàn thành.
+PR thực tế: [AS2 #1](https://github.com/https-monstiez/BrewLite-AS2/pull/1). Lần CI đầu [43630037027](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43630037027) phát hiện lỗi quoting health command PostgreSQL ở bước khởi tạo container (chưa chạy lint/test); sửa bằng health command một từ và chạy lại. Không coi log lỗi khởi tạo là test nghiệp vụ đã chạy. VPS/Vercel/Render, HTTPS thật, merchant sandbox, release production và demo có người nghiệm thu chưa được cấu hình hoặc xác minh. Log cục bộ không chứng minh các mục này đã hoàn thành.

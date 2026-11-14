@@ -10,7 +10,7 @@ Một VPS Linux chạy Docker Compose: Caddy nhận cổng 80/443 và cấp HTTP
 2. Có domain/subdomain A/AAAA trỏ đúng IP VPS. Chỉ mở 80/443 và SSH cần dùng; không mở 5432/3000/3001. Hạn chế SSH theo IP khi có thể.
 3. Clone **repo AS2** vào thư mục riêng, ví dụ `/opt/brewlite-as2`; không dùng checkout AS1. Đảm bảo tài khoản deploy có quyền Docker (quyền này tương đương quản trị máy).
 4. `cd deploy/vps`, `cp env.example .env`, `chmod 600 .env`. Điền domain/email và sinh bốn secret khác nhau bằng `openssl rand -hex 32`, nhập trực tiếp vào file. Password dùng HEX để không lỗi URL encoding. Không gửi các secret vào chat hoặc commit.
-5. Đăng nhập GHCR trên VPS bằng credential chỉ read:packages cho repo AS2 private: `docker login ghcr.io -u https-monstiez`. Lưu credential an toàn trên máy chủ.
+5. Đăng nhập GHCR trên VPS bằng credential chỉ read:packages để pull image GHCR khi registry để private: `docker login ghcr.io -u https-monstiez`. Lưu credential an toàn trên máy chủ.
 6. Chọn SHA image có CI đạt và đã push registry. Chạy `bash deploy.sh <FULL_COMMIT_SHA>`. Script pull image, đợi health, kiểm cùng SHA cho API/web và HTTPS. File `.last-good-image` chỉ cập nhật sau smoke đạt.
 7. Seed menu một lần nếu DB mới: `IMAGE_TAG=<SHA> docker compose --env-file .env -f compose.yml exec api npm run db:seed`. Không tự tạo tài khoản demo trên production.
 
