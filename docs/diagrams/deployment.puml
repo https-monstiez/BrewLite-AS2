@@ -7,8 +7,7 @@ node "Local development" {
  node "Docker Compose" {
   artifact "Next.js :3000" as localweb
   artifact "NestJS :3001/api" as localapi
-  database "Postgres :5432
-persistent volume" as localdb
+  database "Postgres :5432\npersistent volume" as localdb
  }
  localweb --> localapi : HTTP
  localapi --> localdb : internal TCP
@@ -25,12 +24,9 @@ node "Production (target)" {
   artifact "Next.js PWA" as web
  }
  node "Render" {
-  artifact "NestJS Docker Web Service
-PORT=3001, /api/health" as api
-  database "PostgreSQL :5432
-persistent managed storage" as db
-  artifact "Environment secrets
-DB URL, JWT, VNPay" as secrets
+  artifact "NestJS Docker Web Service\nPORT=3001, /api/health" as api
+  database "PostgreSQL :5432\npersistent managed storage" as db
+  artifact "Environment secrets\nDB URL, JWT, VNPay" as secrets
   artifact "Runtime logs" as logs
  }
 }
