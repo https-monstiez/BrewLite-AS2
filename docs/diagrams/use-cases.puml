@@ -1,0 +1,31 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+left to right direction
+actor Customer
+actor Barista
+actor Manager
+actor "Payment Service" as PSP
+rectangle BrewLite {
+ usecase "UC-02 Browse menu / details" as browse
+ usecase "UC-03 Manage cart" as cart
+ usecase "UC-04 Register / log in" as auth
+ usecase "UC-01 Order and pay" as checkout
+ usecase "UC-05 Track own orders" as history
+ usecase "UC-06 Prepare paid orders" as queue
+ usecase "UC-07 Manage menu / stock" as menu
+ usecase "UC-08 Manage vouchers / users" as manage
+ usecase "UC-09 Reports / audit" as report
+}
+Customer --> browse
+Customer --> cart
+Customer --> auth
+Customer --> checkout
+Customer --> history
+Barista --> queue
+Manager --> menu
+Manager --> manage
+Manager --> report
+checkout --> PSP
+@enduml

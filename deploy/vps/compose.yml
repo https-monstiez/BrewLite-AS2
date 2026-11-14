@@ -1,0 +1,84 @@
+name: brewlite-as2
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: brewlite
+      POSTGRES_PASSWORD: ${DB_ADMIN_PASSWORD:?Set admin DB password}
+      DB_MIGRATION_PASSWORD: ${DB_MIGRATION_PASSWORD:?Set migrator password}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD:?Set application password}
+    volumes:
+      - database:/var/lib/postgresql/data
+      - ./db-init.sql:/docker-entrypoint-initdb.d/10-roles.sql:ro
+    networks: [data]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U postgres -d brewlite]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  api:
+    image: ${IMAGE_REGISTRY:-ghcr.io/https-monstiez/brewlite-as2}-api:${IMAGE_TAG:?Set a verified commit SHA}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      APP_VERSION: ${IMAGE_TAG}
+      TRUST_PROXY_HOPS: 1
+      DATABASE_URL: postgresql://brewlite_app:${DB_APP_PASSWORD}@db:5432/brewlite?schema=public
+      MIGRATION_DATABASE_URL: postgresql://brewlite_migrator:${DB_MIGRATION_PASSWORD}@db:5432/brewlite?schema=public
+      JWT_SECRET: ${JWT_SECRET:?Set JWT secret}
+      FRONTEND_ORIGIN: https://${DOMAIN:?Set public domain}
+      PAYMENT_MODE: ${PAYMENT_MODE:-simulation}
+      VNPAY_TMN_CODE: ${VNPAY_TMN_CODE:-}
+      VNPAY_HASH_SECRET: ${VNPAY_HASH_SECRET:-}
+      VNPAY_RETURN_URL: https://${DOMAIN}/payment-return
+    networks: [edge, data]
+    depends_on:
+      db: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://localhost:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    logging:
+      options: {max-size: 10m, max-file: '3'}
+  web:
+    image: ${IMAGE_REGISTRY:-ghcr.io/https-monstiez/brewlite-as2}-web:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      APP_VERSION: ${IMAGE_TAG}
+    networks: [edge]
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://localhost:3000/version').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    logging:
+      options: {max-size: 10m, max-file: '3'}
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?Set certificate email}
+    ports: ['80:80', '443:443']
+    networks: [edge]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - certificates:/data
+      - caddy-config:/config
+    depends_on:
+      web: {condition: service_healthy}
+      api: {condition: service_healthy}
+volumes:
+  database:
+  certificates:
+  caddy-config:
+networks:
+  edge:
+  data:
+    internal: true

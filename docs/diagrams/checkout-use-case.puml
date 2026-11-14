@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+left to right direction
+actor Customer
+actor "Payment Service" as PSP
+rectangle "UC-01 Order and pay" {
+ usecase "Submit order" as order
+ usecase "Authenticate and validate" as validate
+ usecase "Server quote" as quote
+ usecase "Reserve inventory atomically" as reserve
+ usecase "Pay simulated wallet/card" as sim
+ usecase "Pay VNPay sandbox" as vnp
+ usecase "Redeem loyalty points" as points
+ usecase "Confirm result" as result
+}
+Customer --> order
+order ..> validate : <<include>>
+order ..> quote : <<include>>
+order ..> reserve : <<include>>
+Customer --> sim
+Customer --> vnp
+Customer --> points
+PSP --> result
+vnp --> PSP
+sim --> result
+points --> result
+@enduml

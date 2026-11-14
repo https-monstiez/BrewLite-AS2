@@ -1,0 +1,43 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+|Customer|
+start
+:Browse menu and choose options;
+:Add to cart;
+if (Logged in?) then (no)
+ :Register / log in;
+endif
+:Request quote;
+|NestJS API|
+:Validate JWT and payload;
+:Read current prices, voucher, inventory;
+if (Available and valid?) then (no)
+ |Customer|
+ :Show out-of-stock / validation error;
+ stop
+else (yes)
+ :Transaction: reserve stock and create PENDING;
+endif
+|Customer|
+:Choose payment and confirm;
+|Payment Service|
+:Simulate or sandbox authorization;
+if (Success?) then (yes)
+ |NestJS API|
+ :Verify signature / owner, amount, reference;
+ :Transaction: claim PENDING -> PAID;
+ :Record payment and loyalty ledger once;
+ |Customer|
+ :View confirmed order from API;
+ |Barista|
+ :PAID -> PREPARING -> READY -> COMPLETED;
+else (no)
+ |NestJS API|
+ :PAYMENT_FAILED; restore stock once;
+ |Customer|
+ :Display failure and retry as new order;
+endif
+stop
+@enduml

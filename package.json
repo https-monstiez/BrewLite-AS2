@@ -1,0 +1,10 @@
+{
+  "name": "brewlite-as2",
+  "private": true,
+  "scripts": {
+    "install:apps": "npm ci --prefix apps/api && npm ci --prefix apps/web",
+    "lint": "npm run lint --prefix apps/api && npm run lint --prefix apps/web",
+    "test": "npm test --prefix apps/api -- --runInBand && npm test --prefix apps/web",
+    "build": "npm run build --prefix apps/api && npm run build --prefix apps/web"
+  }
+}
