@@ -1,0 +1,56 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+title Target deployment — actual production URLs pending verification
+node "Local development" {
+ node "Docker Compose" {
+  artifact "Next.js :3000" as localweb
+  artifact "NestJS :3001/api" as localapi
+  database "Postgres :5432
+persistent volume" as localdb
+ }
+ localweb --> localapi : HTTP
+ localapi --> localdb : internal TCP
+}
+node "GitHub Actions / CI" {
+ artifact "Install, lint, tests, build" as gate
+ artifact "Docker build tagged SHA" as build
+}
+node "GHCR" {
+ artifact "Private API image :SHA" as image
+}
+node "Production (target)" {
+ node "Vercel CDN" {
+  artifact "Next.js PWA" as web
+ }
+ node "Render" {
+  artifact "NestJS Docker Web Service
+PORT=3001, /api/health" as api
+  database "PostgreSQL :5432
+persistent managed storage" as db
+  artifact "Environment secrets
+DB URL, JWT, VNPay" as secrets
+  artifact "Runtime logs" as logs
+ }
+}
+node "Customer device" {
+ artifact "Browser / installed PWA" as client
+}
+cloud "VNPay sandbox" as vnp
+client --> web : HTTPS 443
+client --> api : HTTPS 443 / REST + JWT
+api --> db : private network TCP 5432
+api --> vnp : signed redirect
+vnp --> api : HTTPS Return/IPN
+secrets ..> api
+api --> logs
+gate --> build : success only
+build --> image : push SHA
+image --> api : deploy pinned SHA
+build --> api : deploy hook + health smoke
+note right of db
+ No public DB access intended.
+ This target is not evidence of a live environment.
+end note
+@enduml

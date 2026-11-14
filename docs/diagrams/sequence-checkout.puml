@@ -1,0 +1,51 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+actor Customer
+participant "Next.js UI" as UI
+participant "NestJS API" as API
+database PostgreSQL as DB
+participant "Payment Service" as PSP
+Customer -> UI : Select options, checkout
+UI -> API : POST /api/orders/quote + JWT
+API -> API : Validate JWT, DTO
+API -> DB : Read prices, stock, voucher
+DB --> API : Current values
+API --> UI : Server quote
+UI -> API : POST /api/orders + JWT + Idempotency-Key
+API -> DB : Lookup key + compare payload
+alt existing identical request
+ DB --> API : Existing order
+ API --> UI : Same order ID (no stock deduction)
+else new request
+ API -> DB : BEGIN transaction
+ API -> DB : UPDATE product WHERE version and stock >= qty
+ alt conflict or out of stock
+  API -> DB : ROLLBACK
+  API --> UI : Retry OCC with limit / reject unavailable
+ else reserve successful
+  API -> DB : INSERT Order + OrderItem; COMMIT
+  API --> UI : PENDING order, server total
+ end
+end
+UI -> API : POST /api/payments + JWT + stable key
+API -> DB : Claim unique payment request
+API --> UI : Simulated payment or signed sandbox URL
+UI -> PSP : Authorize payment
+PSP -> API : Signed Return / IPN, or simulation outcome
+API -> API : Verify owner/signature, merchant, amount, reference
+API -> DB : BEGIN; conditional claim PENDING order/payment
+alt success and first confirmation
+ API -> DB : PAID + SUCCEEDED + points + ledger; COMMIT
+else failed authorization
+ API -> DB : PAYMENT_FAILED + FAILED + restore stock; COMMIT
+else duplicate callback
+ API -> DB : No mutation
+end
+API --> PSP : Result / already confirmed
+UI -> API : GET /api/orders/:id + JWT
+API -> DB : Read owned order
+API --> UI : Authoritative status and total
+UI --> Customer : Confirmation or failure
+@enduml

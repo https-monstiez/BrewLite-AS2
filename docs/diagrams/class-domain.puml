@@ -1,0 +1,94 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+hide methods
+class User {
+ id: String
+ email: String
+ passwordHash: String
+ role: UserRole
+ loyaltyPoints: Int
+}
+class Product {
+ id: String
+ name: String
+ price: Int
+ stock: Int
+ version: Int
+ isActive: Boolean
+}
+class Order {
+ id: String
+ idempotencyKey: String unique
+ status: OrderStatus
+ total: Int
+ promotionCode: String?
+ discountAmount: Int
+ inventoryRestored: Boolean
+}
+class OrderItem {
+ qty: Int
+ size: String
+ toppings: String[]
+ sugar: String
+ ice: String
+ unitPrice: Int
+ lineTotal: Int
+}
+class Payment {
+ id: String
+ idempotencyKey: String unique
+ amount: Int
+ method: String
+ status: PaymentStatus
+ providerRef: String?
+}
+class Promotion {
+ code: String unique
+ discountType: DiscountType
+ discountValue: Int
+ startAt: DateTime
+ endAt: DateTime
+ usageLimit: Int?
+ usedCount: Int
+}
+class LoyaltyTransaction {
+ points: Int
+ kind: String
+ reference: String unique
+ createdAt: DateTime
+}
+enum OrderStatus {
+ PENDING
+ PAID
+ PREPARING
+ READY
+ COMPLETED
+ PAYMENT_FAILED
+ CANCELLED
+}
+enum PaymentStatus {
+ PENDING
+ SUCCEEDED
+ FAILED
+ REFUND_PENDING
+ REFUNDED
+}
+enum UserRole {
+ CUSTOMER
+ STAFF
+ ADMIN
+}
+enum DiscountType {
+ PERCENTAGE
+ FIXED_AMOUNT
+}
+User "1" -- "0..*" Order
+Order "1" *-- "1..*" OrderItem
+Product "1" -- "0..*" OrderItem
+Order "1" -- "0..*" Payment
+Order "0..*" ..> "0..1" Promotion : code snapshot
+User "1" -- "0..*" LoyaltyTransaction
+Order "0..1" -- "0..*" LoyaltyTransaction
+@enduml
