@@ -188,7 +188,14 @@ describe("PostgreSQL checkout integration", () => {
   });
   it("settles simulated payment once, records one ledger entry, and forbids customer status writes", async () => {
     const order = await createOrder(prefix + "-sim");
-    const payment = await makePayment(order.id, prefix + "-sim-pay");
+    const paymentResponses = await Promise.all([
+      request('/payments', 'POST', { orderId: order.id, method: 'CARD_SIM' }, prefix + '-sim-pay'),
+      request('/payments', 'POST', { orderId: order.id, method: 'CARD_SIM' }, prefix + '-sim-pay'),
+    ]);
+    expect(paymentResponses.map(r => r.status)).toEqual([201, 201]);
+    const payments = await Promise.all(paymentResponses.map(r => r.json()));
+    expect(payments[0].id).toBe(payments[1].id);
+    const payment = payments[0];
     const repeated = await makePayment(order.id, prefix + "-sim-pay");
     expect(repeated.id).toBe(payment.id);
     await Promise.all([

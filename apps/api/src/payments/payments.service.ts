@@ -78,6 +78,12 @@ export class PaymentsService {
           throw new NotFoundException('Không tìm thấy đơn hàng');
         }
 
+        const repeated = order.payments.find(p => p.idempotencyKey === key);
+        if (repeated) {
+          if (repeated.method !== dto.method) throw new ConflictException('Idempotency-Key đã được dùng cho phương thức thanh toán khác');
+          return repeated;
+        }
+
         if (order.status !== OrderStatus.PENDING) {
           throw new BadRequestException(
             `Đơn hàng đang ở trạng thái ${order.status}, không thể thanh toán`,

@@ -88,6 +88,16 @@ export default function Checkout() {
 
   const cartSignature = JSON.stringify(items);
 
+  useEffect(() => {
+    if (!token || JSON.parse(cartSignature).length === 0) return;
+    let active = true;
+    quote(JSON.parse(cartSignature), token, appliedPromotion || undefined)
+      .then(result => { if (active) { setFinalTotal(result.total); setPromotionSubtotal(result.subtotal); setDiscountAmount(result.discountAmount); } })
+      .catch(e => { if (active) E(e instanceof Error ? e.message : 'Không thể báo giá.'); });
+    return () => { active = false; };
+  }, [cartSignature, token, appliedPromotion]);
+
+
   const pointsAmount = finalTotal ?? total;
   const pointsRequired = Math.ceil(pointsAmount / 500);
   const pointsMissing = Math.max(0, pointsRequired - currentPoints);
@@ -247,12 +257,6 @@ export default function Checkout() {
     B(true);
 
     try {
-      if (!idempotencyRef.current.orderId) {
-        const serverQuote = await quote(items, token, promotionToUse);
-        setFinalTotal(serverQuote.total);
-        setPromotionSubtotal(serverQuote.subtotal);
-        setDiscountAmount(serverQuote.discountAmount);
-      }
       const o = idempotencyRef.current.orderId ? await getOrder(idempotencyRef.current.orderId, token) : await order(
         items,
         token,
