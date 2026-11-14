@@ -83,8 +83,14 @@ Playwright tự chạy API :3101 và web :3100, dùng database test được ch�
 - 500 VND/điểm khi đổi; 10.000 VND chi tiêu nhận 1 điểm. Ledger ghi nhận trừ/nhận/hoàn/thu hồi điểm. Thu hồi điểm đã tiêu có thể tạo số dư âm và ngăn đổi tiếp đến khi bù đủ.
 - Idempotency-Key: cùng key/payload trả cùng kết quả; khác payload/phương thức bị từ chối. UI lưu key checkout qua reload.
 - Chỉ giao dịch thanh toán đổi PENDING→PAID. Nhân viên chỉ PAID→PREPARING→READY→COMPLETED; bước sai trả 409.
-- Ví/Thẻ mô phỏng không thu tiền thật. VNPay là sandbox có HMAC-SHA512/Return/IPN; cần merchant cấu hình. QR nội bộ của phương thức thủ công là minh họa, không phải QR ngân hàng/MoMo thật.
+- Ví/Thẻ mô phỏng không thu tiền thật. VNPay là sandbox có HMAC-SHA512/Return/IPN; cần merchant cấu hình. BANK_TRANSFER sử dụng VietQR với tài khoản nhận trong env riêng, tổng tiền và reference từ DB; đây là chuyển khoản thật nhưng phải chờ STAFF/ADMIN đối soát. MoMo chưa có merchant nên không được hiển thị/khởi tạo như cổng đang hoạt động.
 - PWA có manifest/icons/offline fallback; không cache API riêng tư, không tự replay thanh toán khi có mạng lại.
+
+## Deploy miễn phí cho đồ án
+
+Hạn nộp 16/11/2026, demo 18/11/2026: dùng Vercel Hobby + Render Free API/PostgreSQL, không cần VPS/domain. Xem [hướng dẫn từng bước](docs/deploy-mien-phi.md).
+
+[Deploy API + DB lên Render](https://render.com/deploy?repo=https://github.com/https-monstiez/BrewLite-AS2) — kiểm tra cả hai tài nguyên vẫn là Free trước khi xác nhận. Database Free hết hạn sau 30 ngày; backend có cold start. `render.yaml` chặn DB public và lấy URL nội bộ, JWT được tạo trên nền tảng.
 
 ## Triển khai VPS từ đầu
 

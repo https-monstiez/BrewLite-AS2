@@ -48,3 +48,11 @@ PR thực tế: [AS2 #1](https://github.com/https-monstiez/BrewLite-AS2/pull/1).
 - Repo AS2 đã chuyển public theo xác nhận của chủ tài khoản; main có required check `Lint, tests and build`, strict/up-to-date và enforce_admins.
 - Caddy production config đã validate bằng image caddy:2-alpine; DB init VPS đã thử trong container, migrator/app không superuser và app role bị từ chối CREATE TABLE.
 - VPS thật, domain/HTTPS thật, merchant VNPay và deploy production vẫn chưa có. Không thay thế các mục này bằng kết quả local/CI.
+
+## Kiểm chứng bổ sung cho deploy Free và VietQR
+- Render Blueprint đạt JSON Schema chính thức; đúng 1 Web Service Free + 1 Postgres Free, ipAllowList rỗng.
+- Chạy seed trên DB test trống: có 5 sản phẩm; lần sau giữ nguyên giá/tồn đã sửa và không tạo tài khoản mặc định.
+- PostgreSQL integration mở rộng: bootstrap quản trị không reset password/nâng quyền khách; hướng dẫn VietQR chỉ chủ đơn PENDING được đọc; total/reference do server quyết định; quét QR không đổi trạng thái; CUSTOMER không confirm, STAFF confirm một lần.
+- Thông tin tài khoản nhận của nhóm chỉ được lưu trong env riêng. Dữ liệu CI/browser dùng tài khoản giả và không chuyển tiền thật.
+
+Kết quả local bổ sung đã đạt: 84 backend unit/HTTP + 5 frontend + 11 PostgreSQL integration + 4 browser = **104 test**. Browser gồm chuyển khoản chờ đối soát và đăng nhập/refresh trang quản trị. Các lần CI trước vẫn là minh chứng của bản nền; bản bổ sung được kiểm tra qua PR triển khai Free/VietQR.

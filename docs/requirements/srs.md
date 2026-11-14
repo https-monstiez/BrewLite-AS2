@@ -20,7 +20,7 @@ Must bắt buộc PDF; Should mở rộng ưu tiên; Could mở rộng có đi�
 | FR-12 | VNPay sandbox | Should | URL ký HMAC-SHA512; Return/IPN kiểm chữ ký, merchant, amount và reference; callback lặp không cộng điểm hai lần; thiếu cấu hình báo lỗi rõ ràng. |
 | FR-13 | Quản trị và audit | Should | ADMIN quản lý khách/vai trò, báo cáo; API không trả passwordHash; STAFF không thể gọi endpoint chỉ ADMIN. |
 | FR-14 | Nguyên liệu và công thức | Could | ADMIN nhập kho nguyên liệu, gán định lượng/món; kiểm tra đủ nguyên liệu và ghi biến động khi xác nhận nghiệp vụ. |
-| FR-15 | Thanh toán thật/giao hàng | Won’t | Không thu tiền thật, lưu số thẻ hoặc cung cấp giao hàng trong bản AS2. |
+| FR-15 | Cổng production chưa merchant/giao hàng | Won’t | Không tự trích tiền qua cổng production khi chưa có merchant, không lưu số thẻ hoặc cung cấp giao hàng; chuyển khoản ngân hàng qua VietQR là phạm vi bổ sung. |
 
 ## Yêu cầu phi chức năng
 | ID | Yêu cầu | MoSCoW | Tiêu chí chấp nhận |
@@ -35,3 +35,6 @@ Must bắt buộc PDF; Should mở rộng ưu tiên; Could mở rộng có đi�
 
 ## Use-case tổng quát
 Nguồn: [use-cases.puml](../diagrams/use-cases.puml); bản xuất: [use-cases.svg](../diagrams/use-cases.svg). UC-01 đặc tả trong checkout-use-case.md.
+
+## FR-16 — Chuyển khoản ngân hàng qua VietQR (Must theo cập nhật nhóm)
+Khách tạo đơn/phương thức BANK_TRANSFER rồi nhận QR có tài khoản từ cấu hình, amount từ DB và reference riêng theo payment; API chỉ trả hướng dẫn cho chủ đơn đang PENDING. Trang hiển thị tiền thật/chờ đối soát, không tin status hoặc total từ URL/localStorage. CUSTOMER không tự confirm; STAFF/ADMIN xác nhận sau đối soát, trùng confirm không cộng điểm lại. Cổng MoMo chưa cấu hình phải bị từ chối, không phát sinh giao dịch giả. Thông tin tài khoản không vào Git.

@@ -21,6 +21,7 @@ type C = {
   qty: (k: string, n: number) => void;
   remove: (k: string) => void;
   clear: () => void;
+  ready: boolean;
   token: string | null;
   setToken: (s: string | null) => void;
   name: string;
@@ -229,6 +230,7 @@ useEffect(() => {
               ),
         remove: (k) => S((a) => a.filter((i) => i.key !== k)),
         clear: () => S([]),
+        ready,
         token,
         setToken,
         name,

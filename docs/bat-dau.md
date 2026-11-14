@@ -37,3 +37,6 @@ Chọn **một** phương án: VPS hoặc Vercel/Render. Bộ cấu hình đã c
 
 ## 6. Hồ sơ còn cần nhóm thực hiện thật
 Điền thành viên/lịch họp, Sprint Review/Retrospective; ghi video/demo; cung cấp URL production; tạo release nghiệm thu. Các mẫu có sẵn trong docs/process/handover.md, không dùng mẫu làm minh chứng sự kiện đã diễn ra.
+
+## Đợt nộp 16–18/11/2026
+Ưu tiên [deploy miễn phí](deploy-mien-phi.md): Vercel Hobby + Render Free API/DB. Nhóm đã chọn nhận chuyển khoản qua VietQR; cấu hình tài khoản nhận ở env riêng. VNPay/MoMo production cần merchant được duyệt; không dùng nhãn cổng thật khi chưa có.

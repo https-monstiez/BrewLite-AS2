@@ -2310,3 +2310,5 @@ footer{
   }
 }
 .offline-banner{position:sticky;top:0;z-index:99;margin:0;padding:12px;background:#ffe7a6;color:#4b2e22;text-align:center}label select{display:block;max-width:100%;padding:10px;margin:8px 0 16px;border:1px solid #d8cabe;border-radius:8px;background:#fffaf4}label input{max-width:100%}table{width:100%;text-align:left;border-collapse:collapse}th,td{padding:12px;border-bottom:1px solid #ddd}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #a86b32;outline-offset:3px}
+
+.bank-transfer-panel{width:min(100%,540px);margin:24px auto;padding:24px;border:1px solid #dccbbb;border-radius:18px;background:#fffaf4;text-align:left}.bank-qr-image{display:block;width:min(100%,320px);height:auto;margin:16px auto}.bank-transfer-panel dl{display:grid;grid-template-columns:minmax(110px,1fr) 1.5fr;gap:12px}.bank-transfer-panel dd{margin:0;font-weight:650;overflow-wrap:anywhere}.transfer-reference{font-family:monospace}.real-payment-label{font-weight:650;color:#805021}

@@ -3,6 +3,7 @@
 skinparam shadowing false
 skinparam defaultFontName SansSerif
 actor Customer
+actor Staff
 participant "Next.js UI" as UI
 participant "NestJS API" as API
 database PostgreSQL as DB
@@ -32,6 +33,18 @@ end
 UI -> API : POST /api/payments + JWT + stable key
 API -> DB : Claim unique payment request
 API --> UI : Simulated payment or signed sandbox URL
+alt BANK_TRANSFER
+ UI -> API : GET /api/payments/bank-transfer/:orderId + JWT
+ API -> DB : Read owned PENDING bank payment and server amount
+ API --> UI : VietQR URL + recipient config + unique reference
+ UI -> PSP : GET VietQR image (no funds moved)
+ Customer -> PSP : Transfer in bank application
+ note over UI,API : Order stays PENDING until staff verifies received funds
+ Staff -> API : POST /api/payments/:orderId/confirm + JWT
+ API -> API : Verify STAFF / ADMIN role
+ API -> DB : Atomic claim PENDING -> PAID, payment SUCCEEDED, loyalty ledger
+ API --> Staff : Confirmed (duplicate claim rejected)
+else sandbox gateway or simulation
 UI -> PSP : Authorize payment
 PSP -> API : Signed Return / IPN, or simulation outcome
 API -> API : Verify owner/signature, merchant, amount, reference
@@ -44,6 +57,7 @@ else duplicate callback
  API -> DB : No mutation
 end
 API --> PSP : Result / already confirmed
+end
 UI -> API : GET /api/orders/:id + JWT
 API -> DB : Read owned order
 API --> UI : Authoritative status and total

@@ -1,12 +1,20 @@
-import { Controller, Get } from '@nestjs/common';
-import { PrismaService } from './database/prisma.service';
+import { Controller, Get } from "@nestjs/common";
+import { PrismaService } from "./database/prisma.service";
 
-@Controller('health')
+@Controller("health")
 export class HealthController {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
   @Get()
   async health() {
     await this.prisma.$queryRaw`SELECT 1`;
-    return { version: process.env.APP_VERSION || 'local', status: 'ok', service: 'brewlite-api', timestamp: new Date().toISOString() };
+    return {
+      version:
+        (process.env.APP_VERSION && process.env.APP_VERSION !== "local"
+          ? process.env.APP_VERSION
+          : process.env.RENDER_GIT_COMMIT) || "local",
+      status: "ok",
+      service: "brewlite-api",
+      timestamp: new Date().toISOString(),
+    };
   }
 }
