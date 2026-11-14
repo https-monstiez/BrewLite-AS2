@@ -23,7 +23,15 @@ endif
 |Customer|
 :Choose payment and confirm;
 |Payment Service|
-:Simulate or sandbox authorization;
+if (Bank transfer?) then (yes)
+ |Customer|
+ :Open VietQR, verify recipient and transfer in bank app;
+ |Barista|
+ :Reconcile received funds in bank statement;
+ |Payment Service|
+else (no)
+ :Simulate or sandbox authorization;
+endif
 if (Success?) then (yes)
  |NestJS API|
  :Verify signature / owner, amount, reference;

@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { AppModule } from "../src/app.module";
@@ -10,6 +11,9 @@ if (!process.env.TEST_DATABASE_URL)
 process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
 process.env.JWT_SECRET = "integration-secret-at-least-32-characters";
 process.env.PAYMENT_MODE = "simulation";
+process.env.BANK_BIN = "970436";
+process.env.BANK_ACCOUNT_NUMBER = "1234567890";
+process.env.BANK_ACCOUNT_NAME = "TEST RECEIVER";
 process.env.VNPAY_TMN_CODE = "TESTCODE";
 process.env.VNPAY_HASH_SECRET = "integration-sandbox-secret";
 process.env.VNPAY_RETURN_URL = "http://localhost/payment-return";
@@ -189,11 +193,21 @@ describe("PostgreSQL checkout integration", () => {
   it("settles simulated payment once, records one ledger entry, and forbids customer status writes", async () => {
     const order = await createOrder(prefix + "-sim");
     const paymentResponses = await Promise.all([
-      request('/payments', 'POST', { orderId: order.id, method: 'CARD_SIM' }, prefix + '-sim-pay'),
-      request('/payments', 'POST', { orderId: order.id, method: 'CARD_SIM' }, prefix + '-sim-pay'),
+      request(
+        "/payments",
+        "POST",
+        { orderId: order.id, method: "CARD_SIM" },
+        prefix + "-sim-pay",
+      ),
+      request(
+        "/payments",
+        "POST",
+        { orderId: order.id, method: "CARD_SIM" },
+        prefix + "-sim-pay",
+      ),
     ]);
-    expect(paymentResponses.map(r => r.status)).toEqual([201, 201]);
-    const payments = await Promise.all(paymentResponses.map(r => r.json()));
+    expect(paymentResponses.map((r) => r.status)).toEqual([201, 201]);
+    const payments = await Promise.all(paymentResponses.map((r) => r.json()));
     expect(payments[0].id).toBe(payments[1].id);
     const payment = payments[0];
     const repeated = await makePayment(order.id, prefix + "-sim-pay");
@@ -413,6 +427,116 @@ describe("PostgreSQL checkout integration", () => {
       `MENU_PERFORMANCE samples=${timings.length} concurrency=20 products>=100 p95_ms=${p95.toFixed(1)}`,
     );
     expect(p95).toBeLessThan(1000);
+  });
+  it("creates owner-only bank instructions from server totals and waits for staff reconciliation", async () => {
+    const methods = await request("/payments/methods");
+    const available = (await methods.json()).available;
+    expect(available).toContain("BANK_TRANSFER");
+    expect(available).not.toContain("MOMO");
+    const order = await createOrder(prefix + "-bank");
+    const payment = await makePayment(
+      order.id,
+      prefix + "-bank-pay",
+      "BANK_TRANSFER",
+    );
+    const instructionsResponse = await request(
+      `/payments/bank-transfer/${order.id}?amount=1`,
+    );
+    expect(instructionsResponse.status).toBe(200);
+    const instructions = await instructionsResponse.json();
+    expect(instructions.amount).toBe(order.total);
+    expect(instructions.accountNumber).toBe("1234567890");
+    expect(instructions.confirmation).toBe("STAFF_RECONCILIATION");
+    const qr = new URL(instructions.qrImageUrl);
+    expect(qr.hostname).toBe("img.vietqr.io");
+    expect(qr.searchParams.get("amount")).toBe(String(order.total));
+    expect(qr.searchParams.get("addInfo")).toBe(payment.id.toUpperCase());
+    expect(
+      (await prisma.order.findUniqueOrThrow({ where: { id: order.id } }))
+        .status,
+    ).toBe("PENDING");
+    expect(
+      (
+        await request(
+          `/payments/bank-transfer/${order.id}`,
+          "GET",
+          undefined,
+          undefined,
+          otherToken,
+        )
+      ).status,
+    ).toBe(404);
+    expect(
+      (await request(`/payments/${order.id}/confirm`, "POST")).status,
+    ).toBe(403);
+    const user = await prisma.user.findFirstOrThrow({
+      where: { email: `${prefix}@test.invalid` },
+    });
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { role: "STAFF" },
+    });
+    try {
+      expect(
+        (await request(`/payments/${order.id}/confirm`, "POST")).status,
+      ).toBe(201);
+      expect(
+        (await request(`/payments/${order.id}/confirm`, "POST")).status,
+      ).toBe(409);
+    } finally {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { role: "CUSTOMER" },
+      });
+    }
+    expect(
+      (await prisma.order.findUniqueOrThrow({ where: { id: order.id } }))
+        .status,
+    ).toBe("PAID");
+    expect((await request(`/payments/bank-transfer/${order.id}`)).status).toBe(
+      404,
+    );
+  });
+  it("bootstraps a cloud administrator without resetting credentials or elevating an existing customer", async () => {
+    const email = `${prefix}-bootstrap@test.invalid`;
+    const password = "CloudBootstrapTest123!";
+    const run = (targetEmail: string, targetPassword: string) =>
+      execFileSync(
+        process.execPath,
+        ["--import", "tsx", "prisma/bootstrap-admin.ts"],
+        {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            BOOTSTRAP_ADMIN_EMAIL: targetEmail,
+            BOOTSTRAP_ADMIN_PASSWORD: targetPassword,
+          },
+          stdio: "pipe",
+        },
+      );
+    run(email, password);
+    const original = await prisma.user.findUniqueOrThrow({ where: { email } });
+    expect(original.role).toBe("ADMIN");
+    run(email, "DifferentBootstrapPassword123!");
+    expect(
+      (await prisma.user.findUniqueOrThrow({ where: { email } })).passwordHash,
+    ).toBe(original.passwordHash);
+    expect(() => run(`${prefix}@test.invalid`, password)).toThrow();
+    expect(
+      (
+        await prisma.user.findUniqueOrThrow({
+          where: { email: `${prefix}@test.invalid` },
+        })
+      ).role,
+    ).toBe("CUSTOMER");
+    const login = await request(
+      "/auth/login",
+      "POST",
+      { email, password },
+      undefined,
+      "",
+    );
+    expect(login.status).toBe(201);
   });
   it("does not oversell the last product under concurrent orders", async () => {
     await prisma.product.update({

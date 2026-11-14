@@ -21,11 +21,12 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { token, role, name } = useApp();
+  const { token, role, name, ready } = useApp();
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
+    if (!ready) return;
     if (!token) {
       router.replace("/login");
       return;
@@ -34,9 +35,9 @@ export default function AdminLayout({
     if (role && role !== "ADMIN" && role !== "STAFF") {
       router.replace("/");
     }
-  }, [token, role, router]);
+  }, [token, role, router, ready]);
 
-  if (!token || (role !== "ADMIN" && role !== "STAFF")) {
+  if (!ready || !token || (role !== "ADMIN" && role !== "STAFF")) {
     return (
       <div className="admin-loading">
         Đang kiểm tra quyền truy cập...

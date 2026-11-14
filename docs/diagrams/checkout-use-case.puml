@@ -12,6 +12,7 @@ rectangle "UC-01 Order and pay" {
  usecase "Reserve inventory atomically" as reserve
  usecase "Pay simulated wallet/card" as sim
  usecase "Pay VNPay sandbox" as vnp
+ usecase "Bank app transfer / staff reconciliation" as bank
  usecase "Redeem loyalty points" as points
  usecase "Confirm result" as result
 }
@@ -22,6 +23,8 @@ order ..> reserve : <<include>>
 Customer --> sim
 Customer --> vnp
 Customer --> points
+Customer --> bank
+bank --> result
 PSP --> result
 vnp --> PSP
 sim --> result

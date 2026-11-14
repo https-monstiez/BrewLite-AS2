@@ -60,6 +60,8 @@ async function req<T>(
       );
     }
 
+    if (r.status === 503) throw Error(message || "Phương thức này hiện chưa sẵn sàng.");
+
     if (r.status >= 500) {
       throw Error("Máy chủ đang gặp sự cố. Vui lòng thử lại sau.");
     }
@@ -561,3 +563,7 @@ export async function getProduct(id: string): Promise<Product> {
  const x=await req<ManagedProduct>(`/products/${encodeURIComponent(id)}`);
  return {id:x.id,name:x.name,price:x.price,stock:x.stock,image:x.imageUrl||undefined,description:x.description||'',category:'Đồ uống'};
 }
+
+export type BankInstructions = { bankBin:string; bankName:string; accountNumber:string; accountName:string; orderId:string; paymentId:string; amount:number; transferContent:string; qrImageUrl:string; confirmation:'STAFF_RECONCILIATION' };
+export const paymentMethods = (token:string) => req<{available:Method[]}>("/payments/methods",{},token);
+export const bankInstructions = (token:string,orderId:string) => req<BankInstructions>(`/payments/bank-transfer/${encodeURIComponent(orderId)}`,{},token);

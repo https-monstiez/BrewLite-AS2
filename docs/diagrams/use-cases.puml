@@ -12,6 +12,7 @@ rectangle BrewLite {
  usecase "UC-03 Manage cart" as cart
  usecase "UC-04 Register / log in" as auth
  usecase "UC-01 Order and pay" as checkout
+ usecase "Bank transfer via VietQR" as bank
  usecase "UC-05 Track own orders" as history
  usecase "UC-06 Prepare paid orders" as queue
  usecase "UC-07 Manage menu / stock" as menu
@@ -23,6 +24,9 @@ Customer --> cart
 Customer --> auth
 Customer --> checkout
 Customer --> history
+Customer --> bank
+bank --> PSP
+Barista --> bank : reconcile payment
 Barista --> queue
 Manager --> menu
 Manager --> manage

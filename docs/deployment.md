@@ -46,3 +46,6 @@ Secrets: RENDER_API_KEY, RENDER_SERVICE_ID, VERCEL_DEPLOY_HOOK. Variables: API_H
 
 ## Phương án VPS
 Nhóm hiện chưa có hạ tầng. Bộ triển khai tự quản nằm trong [vps-deployment.md](vps-deployment.md); chọn DEPLOY_TARGET=vps để dùng job SSH sau khi đã chuẩn bị máy chủ. Không cần triển khai đồng thời cả VPS và Render/Vercel.
+
+## Phương án được chọn cho đợt nộp 16–18/11/2026
+Nhóm chọn gói miễn phí Vercel Hobby + Render Free API/PostgreSQL. Xem [deploy-mien-phi.md](deploy-mien-phi.md) và render.yaml. Cấu hình đã chuẩn bị; chưa điền URL thực tế khi chưa deploy/kiểm tra. Cơ sở dữ liệu có thời hạn 30 ngày, API cold start.

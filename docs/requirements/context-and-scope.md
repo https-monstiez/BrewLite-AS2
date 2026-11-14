@@ -21,7 +21,7 @@ MVP: Next.js mobile-first/PWA; NestJS REST API; PostgreSQL/Prisma; menu, chi ti�
 Mở rộng theo yêu cầu nhóm: quote server-side, voucher, điểm và sổ giao dịch LoyaltyTransaction, VNPay sandbox có Return/IPN, optimistic locking tồn kho, tùy chọn đường/đá, quản lý định lượng nguyên liệu. ADMIN tương ứng vai trò Manager trong nghiệp vụ; STAFF tương ứng Barista. Không tạo vai trò MANAGER thứ tư.
 
 ## Out-of-scope
-Thanh toán tiền thật, lưu thông tin thẻ, tích hợp MoMo production, giao hàng/định tuyến, multi-store, hoàn tiền ngân hàng tự động, SLA thương mại. VNPay là sandbox; hoàn tiền bên ngoài cần đối soát, không được hiển thị đã hoàn khi mới yêu cầu.
+Tự trích tiền/thanh toán cổng production khi chưa có merchant, lưu thông tin thẻ, tích hợp MoMo production, giao hàng/định tuyến, multi-store, hoàn tiền ngân hàng tự động, SLA thương mại. VNPay là sandbox; hoàn tiền bên ngoài cần đối soát, không được hiển thị đã hoàn khi mới yêu cầu.
 
 ## Giả định, ràng buộc, rủi ro
 - Giữ Next.js/NestJS/PostgreSQL bắt buộc; monorepo apps/web, apps/api, docs.
@@ -32,3 +32,6 @@ Thanh toán tiền thật, lưu thông tin thẻ, tích hợp MoMo production, g
 - Rủi ro: callback lặp, request đồng thời, hết hàng, mất mạng, cloud free tier ngủ, hết quota CI.
 - Giảm thiểu: idempotency, transaction/OCC, unique constraint, health check, test đồng thời, retry có giới hạn và rollback.
 - Không thể tạo lại lịch sử Sprint/PR đã xảy ra trước đây. Minh chứng quy trình phải lấy từ hoạt động thật sau thời điểm khởi tạo AS2.
+
+## Cập nhật phạm vi 15/11/2026 — website đồ án có liên kết thực tế
+Theo yêu cầu nhóm: thêm chuyển khoản ngân hàng thật bằng VietQR, số tiền/nội dung lấy từ payment server; staff đối chiếu tiền về rồi xác nhận. Quét/mở QR không phải xác thực đã thanh toán. Thông tin người nhận chỉ nằm trong env riêng. VNPay giữ sandbox; MoMo không được hiển thị như cổng hoạt động khi chưa có merchant. Không tự chuyển/trích tiền trong kiểm thử.

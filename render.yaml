@@ -1,0 +1,47 @@
+# Student demo only. All compute resources are explicitly Free.
+# Database expires 30 days after creation. No public database access.
+services:
+  - type: web
+    name: brewlite-as2-api
+    runtime: docker
+    repo: https://github.com/https-monstiez/BrewLite-AS2
+    branch: main
+    region: singapore
+    plan: free
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: ./apps/api
+    autoDeployTrigger: checksPass
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: brewlite-as2-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: BANK_BIN
+        sync: false
+      - key: BANK_ACCOUNT_NUMBER
+        sync: false
+      - key: BANK_ACCOUNT_NAME
+        sync: false
+      - key: PAYMENT_MODE
+        value: simulation
+      - key: SEED_CATALOG_ON_STARTUP
+        value: "true"
+databases:
+  - name: brewlite-as2-db
+    plan: free
+    region: singapore
+    postgresMajorVersion: "16"
+    databaseName: brewlite
+    user: brewlite
+    ipAllowList: []

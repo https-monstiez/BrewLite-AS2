@@ -19,6 +19,7 @@ Nguồn thiết kế trong docs/diagrams, mã nguồn trong apps/api và apps/we
 | FR-13 | US-07 | use-cases | admin, audit modules | admin.e2e-spec | Manager dùng ADMIN |
 | FR-14 | US-09 | class-domain | inventory module, reservations, ingredients page | integration stock/receipts/roles | Nguyên liệu + công thức |
 | FR-15 | Ngoài phạm vi | context-and-scope | Không cung cấp thanh toán thật/giao hàng | Kiểm tra phạm vi | Won’t |
+| FR-16 | UC-01 chuyển khoản thật | sequence-checkout, cập nhật phạm vi | BankTransferService; /payments/methods; /payments/bank-transfer/:orderId; confirmation | PostgreSQL bank reconciliation + browser bank checkout | VietQR tạo QR; staff đối soát; không tuyên bố xác minh tài khoản/thực nhận tiền khi chưa đối soát |
 | NFR-01 | Menu | overview | products API | integration performance 100 sản phẩm/20 clients | Đo local; không suy ra SLA cloud |
 | NFR-02 | Auth/checkout | ADR-002/003 | JWT/RBAC/DTO/security headers | authorization, JWT, integration tampering | HTTPS/private DB cần xác minh cloud |
 | NFR-03 | PWA | ADR-005 | manifest/icons/sw/offline, health | UI states; browser; health.e2e-spec | Chưa kiểm install trên thiết bị vật lý |

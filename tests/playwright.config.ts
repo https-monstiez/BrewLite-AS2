@@ -24,7 +24,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { browserName: "chromium" } }],
   webServer: [
     {
-      command: "npm run start:prod",
+      command: "node scripts/start-production.mjs",
       cwd: path.join(root, "apps/api"),
       url: "http://127.0.0.1:3101/api/health",
       env: {
@@ -33,6 +33,12 @@ export default defineConfig({
         JWT_SECRET: "browser-test-secret-at-least-32-characters",
         FRONTEND_ORIGIN: "http://127.0.0.1:3100",
         PAYMENT_MODE: "simulation",
+        SEED_CATALOG_ON_STARTUP: "true",
+        BOOTSTRAP_ADMIN_EMAIL: "browser-admin@test.invalid",
+        BOOTSTRAP_ADMIN_PASSWORD: "BrowserAdminTest123!",
+        BANK_BIN: "970436",
+        BANK_ACCOUNT_NUMBER: "1234567890",
+        BANK_ACCOUNT_NAME: "TEST RECEIVER",
       },
       reuseExistingServer: false,
     },

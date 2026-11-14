@@ -48,6 +48,7 @@ export class VnpayService {
       );
     return { code, secret, returnUrl };
   }
+  isConfigured() { try { this.settings(); return true; } catch { return false; } }
   assertConfigured() {
     this.settings();
   }
