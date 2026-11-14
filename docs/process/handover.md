@@ -6,7 +6,7 @@
 - [x] ADR, backlog và Definition of Done.
 - [x] Code apps/web, apps/api, migration/seed và Docker Compose.
 - [x] Unit/API tests, integration PostgreSQL và browser E2E có mã nguồn.
-- [ ] Log CI GitHub thành công, minh chứng lỗi và required checks main.
+- [x] Log CI GitHub thành công, minh chứng lỗi cấu hình và required checks main — xem [testing.md](../testing.md).
 - [ ] GHCR image SHA và CD chạy thật.
 - [ ] URL HTTPS web/API/health và DB production private.
 - [ ] Release/tag được kiểm chứng, URL release notes.

@@ -37,5 +37,14 @@ Tổng cộng 100 test local: 84 backend + 5 frontend + 9 integration + 2 browse
 ## Tái lập
 Xem README và apps/api/test/checkout.integration-spec.ts; dùng TEST_DATABASE_URL trỏ DB riêng, chạy migrate deploy trước test. Test browser tạo tài khoản/đơn demo trong DB test dùng một lần. Docker local smoke dùng project riêng brewlite-as2-smoke, cổng 3200/3201.
 
-## Chưa có minh chứng bên ngoài
+## Minh chứng GitHub và giới hạn production
 PR thực tế: [AS2 #1](https://github.com/https-monstiez/BrewLite-AS2/pull/1). Lần CI đầu [43630037027](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43630037027) phát hiện lỗi quoting health command PostgreSQL ở bước khởi tạo container (chưa chạy lint/test); sửa bằng health command một từ và chạy lại. Không coi log lỗi khởi tạo là test nghiệp vụ đã chạy. VPS/Vercel/Render, HTTPS thật, merchant sandbox, release production và demo có người nghiệm thu chưa được cấu hình hoặc xác minh. Log cục bộ không chứng minh các mục này đã hoàn thành.
+
+
+## CI và bảo vệ nhánh đã kiểm chứng
+- PR: https://github.com/https-monstiez/BrewLite-AS2/pull/1
+- CI đạt đầy đủ trên GitHub: https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43630218891 (commit 2dcdc0f; gồm browser E2E).
+- CI phát hiện lỗi cấu hình trước khi sửa: https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43630037027. Lỗi ở PostgreSQL service health quoting, không phải test nghiệp vụ thất bại.
+- Repo AS2 đã chuyển public theo xác nhận của chủ tài khoản; main có required check `Lint, tests and build`, strict/up-to-date và enforce_admins.
+- Caddy production config đã validate bằng image caddy:2-alpine; DB init VPS đã thử trong container, migrator/app không superuser và app role bị từ chối CREATE TABLE.
+- VPS thật, domain/HTTPS thật, merchant VNPay và deploy production vẫn chưa có. Không thay thế các mục này bằng kết quả local/CI.

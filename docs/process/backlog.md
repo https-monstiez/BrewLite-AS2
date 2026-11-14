@@ -4,15 +4,15 @@
 
 | Story | Yêu cầu | Sprint | Tiêu chí hoàn thành | Minh chứng |
 |---|---|---|---|---|
-| US-01 Xem menu | FR-01 | 1 | API list/detail, loading/empty/error, test UI/API | Chờ PR/CI |
-| US-02 Nền tảng dự án | NFR-04/06 | 1 | apps/*, env mẫu, compose, CI lint/test/build | Chờ PR/CI |
+| US-01 Xem menu | FR-01 | 1 | API list/detail, loading/empty/error, test UI/API | PR #1 / CI: xem docs/testing.md |
+| US-02 Nền tảng dự án | NFR-04/06 | 1 | apps/*, env mẫu, compose, CI lint/test/build | PR #1 / CI: xem docs/testing.md |
 | US-03 Hồ sơ yêu cầu/thiết kế | Task 1–3 | 1 | SRS, use-case, UML source/SVG, ADR | docs/ |
-| US-04 Tùy chọn và giỏ | FR-02/03 | 2 | size/topping/đường/đá, lưu giỏ, validate | Chờ kiểm thử |
-| US-05 Đặt/thanh toán | FR-04/05/06/12 | 2 | JWT, quote, idempotency/OCC, simulation/sandbox | Chờ kiểm thử |
-| US-06 Theo dõi và pha chế | FR-07/08 | 2 | owner-only history, queue/state machine | Chờ kiểm thử |
-| US-07 Quản trị/loyalty | FR-09/10/11/13 | 2 | menu/voucher/users/audit/ledger | Chờ kiểm thử |
+| US-04 Tùy chọn và giỏ | FR-02/03 | 2 | size/topping/đường/đá, lưu giỏ, validate | Đã kiểm thử local + CI; xem docs/testing.md |
+| US-05 Đặt/thanh toán | FR-04/05/06/12 | 2 | JWT, quote, idempotency/OCC, simulation/sandbox | Đã kiểm thử local + CI; xem docs/testing.md |
+| US-06 Theo dõi và pha chế | FR-07/08 | 2 | owner-only history, queue/state machine | Đã kiểm thử local + CI; xem docs/testing.md |
+| US-07 Quản trị/loyalty | FR-09/10/11/13 | 2 | menu/voucher/users/audit/ledger | Đã kiểm thử local + CI; xem docs/testing.md |
 | US-08 Delivery | NFR-07 | 2 | image SHA, deploy/smoke, URL thật, rollback | Bị phụ thuộc cloud |
-| US-09 Nguyên liệu | FR-14 | mở rộng | công thức, nhập/trừ kho transaction | Chưa hiện thực |
+| US-09 Nguyên liệu | FR-14 | mở rộng | công thức, nhập/trừ kho transaction | Đã hiện thực kho/công thức; integration CI đạt |
 
 ## Branch và PR
 - Repo AS1 `leehieu36/BrewLite` chỉ là nguồn nền, không push thay đổi AS2.

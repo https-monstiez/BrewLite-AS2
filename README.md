@@ -20,6 +20,10 @@ tests/e2e/                Playwright: mobile menu → xác nhận
 scripts/deploy.mjs        Render deploy + smoke SHA, Vercel hook + smoke SHA
 ```
 
+## Bắt đầu từ đầu
+
+Nhóm chưa có VPS/cloud có thể theo [hướng dẫn từng bước](docs/bat-dau.md) để chạy và demo local trước.
+
 ## Chạy local với Docker
 Cần Docker Compose v2. Từ root:
 ```sh
@@ -57,7 +61,11 @@ npm run build
 Unit/HTTP tests backend dùng mocks có kiểm soát; **không** coi đó là test PostgreSQL thực. Test tích hợp dùng DB tách riêng, migration đầy đủ và kiểm tra transaction/idempotency/OCC/callback:
 ```sh
 # Chỉ dùng URL của database test, không phải production.
-export TEST_DATABASE_URL='postgresql://as2test:as2_test_only@127.0.0.1:55432/brewlite_as2_test'
+# Nếu chưa có database test, tạo một PostgreSQL riêng bằng Docker:
+docker run --name brewlite-as2-test-db -e POSTGRES_USER=as2test -e POSTGRES_PASSWORD=as2_test_only -e POSTGRES_DB=brewlite_as2_test -p 127.0.0.1:55432:5432 -d postgres:16-alpine
+# Đợi pg_isready báo accepting connections; nếu container đã có, dùng docker start thay docker run.
+docker exec brewlite-as2-test-db pg_isready -U as2test -d brewlite_as2_test
+export TEST_DATABASE_URL='postgresql://as2test:as2_test_only@127.0.0.1:55432/brewlite_as2_test' 
 DATABASE_URL="$TEST_DATABASE_URL" npm run prisma:deploy --prefix apps/api
 npm run test:integration --prefix apps/api
 DATABASE_URL="$TEST_DATABASE_URL" npm run db:seed --prefix apps/api
