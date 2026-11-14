@@ -24,5 +24,5 @@ Nguồn thiết kế trong docs/diagrams, mã nguồn trong apps/api và apps/we
 | NFR-03 | PWA | ADR-005 | manifest/icons/sw/offline, health | UI states; browser; health.e2e-spec | Chưa kiểm install trên thiết bị vật lý |
 | NFR-04 | US-02 | deployment | Dockerfile/compose/migrations/seed | Compose smoke và migrations | Compose build/up/health/seed local đã đạt |
 | NFR-05 | UC-01 | ADR-002 | transaction/unique/OCC/row claims | PostgreSQL concurrent integration | Đã có test tranh chấp |
-| NFR-06 | US-02 | ADR-001 | ci.yml | GitHub PR workflow runs | Cần minh chứng CI và branch protection thật |
+| NFR-06 | US-02 | ADR-001 | ci.yml | GitHub PR workflow runs | CI GitHub đạt, main required check đã bật; xem testing.md |
 | NFR-07 | US-08 | deployment/ADR-004 | cd.yml, deploy.mjs | Production smoke/version | Chưa có cloud/URL; chưa hoàn thành |
