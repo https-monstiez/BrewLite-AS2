@@ -1,6 +1,8 @@
 # Deploy miễn phí để nộp đồ án — Vercel + Render
 
-Kế hoạch: nộp sản phẩm 16/11/2026, demo trực tiếp 18/11/2026. Tài liệu này chuẩn bị cấu hình; chưa có URL thật cho đến khi tài khoản được kết nối và triển khai đạt.
+Trạng thái cập nhật 15/11/2026: web và API đã được deploy; public smoke đạt. URL/SHA và giới hạn xác minh ghi tại [deployment.md](deployment.md). Hướng dẫn dưới đây ghi lại cấu hình/kiểm tra nền tảng; không tạo thêm tài nguyên nếu đã có service.
+
+**Lưu ý database:** Render dashboard báo PostgreSQL Free sẽ bị xóa ngày **15/12/2026** nếu không nâng cấp lên gói compute trả phí. Không tự nâng cấp. Nhóm cần xuất/backup dữ liệu trước hạn hoặc lên kế hoạch chuyển database; kiểm tra khả năng khôi phục backup trước khi xóa/hết hạn.
 
 ## Thành phần
 - Web Next.js: Vercel **Hobby**, root `apps/web`.
@@ -8,14 +10,14 @@ Kế hoạch: nộp sản phẩm 16/11/2026, demo trực tiếp 18/11/2026. Tài
 - PostgreSQL: Render Postgres **Free**, cùng region Singapore; chặn toàn bộ kết nối public (`ipAllowList: []`), API dùng internal connection string.
 - Không cần VPS, mua domain, disk hoặc nâng gói. Dùng URL HTTPS mặc định của hai nền tảng.
 
-## 1. Tạo web trên Vercel
+## 1. Web trên Vercel
 Đăng nhập GitHub tại https://vercel.com/signup. Chọn tài khoản cá nhân **Hobby**, không chọn Pro trial.
 
 Add New → Project → import `https-monstiez/BrewLite-AS2` → Root Directory **apps/web** → Framework **Next.js** → Install `npm ci` → Build `npm run build` → Deploy.
 
 Lưu URL production thực tế dạng `https://<ten-project>.vercel.app`. Ở giai đoạn này menu có thể báo chưa kết nối backend; bước 3 sẽ nối URL API. Không dùng URL preview ngẫu nhiên làm CORS origin lâu dài.
 
-## 2. Tạo API và database trên Render
+## 2. API và database trên Render
 Đăng nhập GitHub tại https://dashboard.render.com/register và cho Render truy cập **repo AS2**. Tạo Blueprint từ repo, nhánh `main`, file `render.yaml`. Có thể dùng [Deploy to Render](https://render.com/deploy?repo=https://github.com/https-monstiez/BrewLite-AS2).
 
 Blueprint khai báo đúng **hai tài nguyên**, cả hai `plan: free`. Nhập FRONTEND_ORIGIN bằng URL Vercel ở bước 1, không có dấu `/` cuối và không thêm `/api`. Nhập BANK_BIN, BANK_ACCOUNT_NUMBER, BANK_ACCOUNT_NAME trực tiếp vào Render bằng thông tin nhận tiền đã thống nhất trong nhóm; không commit các giá trị này. Vietcombank dùng BIN 970436. Kiểm tra màn hình xác nhận: API Free, database Free; không xác nhận nếu nền tảng đổi sang plan trả phí. Nếu tài khoản yêu cầu xác minh thanh toán, dừng và thông báo để xem phương án khác; không tự nâng gói.

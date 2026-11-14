@@ -21,9 +21,9 @@ Nguồn thiết kế trong docs/diagrams, mã nguồn trong apps/api và apps/we
 | FR-15 | Ngoài phạm vi | context-and-scope | Không cung cấp thanh toán thật/giao hàng | Kiểm tra phạm vi | Won’t |
 | FR-16 | UC-01 chuyển khoản thật | sequence-checkout, cập nhật phạm vi | BankTransferService; /payments/methods; /payments/bank-transfer/:orderId; confirmation | PostgreSQL bank reconciliation + browser bank checkout | VietQR tạo QR; staff đối soát; không tuyên bố xác minh tài khoản/thực nhận tiền khi chưa đối soát |
 | NFR-01 | Menu | overview | products API | integration performance 100 sản phẩm/20 clients | Đo local; không suy ra SLA cloud |
-| NFR-02 | Auth/checkout | ADR-002/003 | JWT/RBAC/DTO/security headers | authorization, JWT, integration tampering | HTTPS/private DB cần xác minh cloud |
+| NFR-02 | Auth/checkout | ADR-002/003 | JWT/RBAC/DTO/security headers | authorization, JWT, integration tampering | HTTPS web/API smoke đạt; privacy DB cần xác minh dashboard |
 | NFR-03 | PWA | ADR-005 | manifest/icons/sw/offline, health | UI states; browser; health.e2e-spec | Chưa kiểm install trên thiết bị vật lý |
 | NFR-04 | US-02 | deployment | Dockerfile/compose/migrations/seed | Compose smoke và migrations | Compose build/up/health/seed local đã đạt |
 | NFR-05 | UC-01 | ADR-002 | transaction/unique/OCC/row claims | PostgreSQL concurrent integration | Đã có test tranh chấp |
 | NFR-06 | US-02 | ADR-001 | ci.yml | GitHub PR workflow runs | CI GitHub đạt, main required check đã bật; xem testing.md |
-| NFR-07 | US-08 | deployment/ADR-004 | cd.yml, deploy.mjs | Production smoke/version | Chưa có cloud/URL; chưa hoàn thành |
+| NFR-07 | US-08 | deployment/ADR-004 | Render Git deploy (`render.yaml`); GH Actions build SHA (`cd.yml`) | Public web, API health/menu và version smoke; CI/Delivery runs | Production web/API hoạt động, cùng SHA; dashboard DB/billing, GitHub Release/tag và video còn cần xác minh |

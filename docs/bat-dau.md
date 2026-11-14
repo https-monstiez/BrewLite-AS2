@@ -32,11 +32,11 @@ Tài khoản demo hiện có trong apps/api/prisma/seed.ts; chỉ dùng dữ li�
 ## 4. Làm việc nhóm
 Mọi thay đổi ở repo AS2, mở nhánh/PR; đợi required CI xanh mới merge. Không sửa/push repo AS1. Đọc backlog, SRS và ma trận truy vết trước khi sửa nghiệp vụ; cập nhật tài liệu/test liên quan cùng PR. GitHub Project có thể bổ sung sau, không cản việc chạy app.
 
-## 5. Khi cần public demo để nộp
-Chọn **một** phương án: VPS hoặc Vercel/Render. Bộ cấu hình đã chuẩn bị trong deploy/vps và docs/deployment.md. Lúc đó mới cần máy chủ, domain/URL và cấu hình secret trực tiếp trên nền tảng. Không gửi secret vào chat/Git. Chỉ đánh dấu deploy hoàn thành khi URL HTTPS hoạt động và smoke/version check đạt.
+## 5. Public demo
+Production hiện dùng Vercel cho web và Render cho API/PostgreSQL; URL, health/version và SHA đã được ghi nhận tại [deployment.md](deployment.md). Không cần dựng thêm VPS cho đợt nộp này. Không gửi secret vào chat/Git; chỉ thay đổi cấu hình cloud nếu nhóm thống nhất.
 
 ## 6. Hồ sơ còn cần nhóm thực hiện thật
-Điền thành viên/lịch họp, Sprint Review/Retrospective; ghi video/demo; cung cấp URL production; tạo release nghiệm thu. Các mẫu có sẵn trong docs/process/handover.md, không dùng mẫu làm minh chứng sự kiện đã diễn ra.
+Điền thông tin thành viên/MSSV và giảng viên/ngày nộp nếu mẫu yêu cầu; quay/cung cấp video demo; tổ chức buổi Sprint Review/Retrospective và ghi lại phản hồi thật. Release `v0.2.0` và URL production đã có. Các mẫu có sẵn trong [handover.md](process/handover.md), không dùng mẫu làm minh chứng sự kiện đã diễn ra.
 
 ## Đợt nộp 16–18/11/2026
 Ưu tiên [deploy miễn phí](deploy-mien-phi.md): Vercel Hobby + Render Free API/DB. Nhóm đã chọn nhận chuyển khoản qua VietQR; cấu hình tài khoản nhận ở env riêng. VNPay/MoMo production cần merchant được duyệt; không dùng nhãn cổng thật khi chưa có.

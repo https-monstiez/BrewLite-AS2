@@ -9,14 +9,14 @@ Kết quả local đã quan sát trong repo AS2, database test tách biệt. Kh�
 | Next.js production build | Pass, 20 routes |
 | Backend Jest unit/HTTP authorization | 84/84 pass (8 suites) |
 | Frontend Vitest UI/cart | 5/5 pass (2 files) |
-| PostgreSQL integration | 9/9 pass, migration đầy đủ trên DB sạch |
-| Playwright Chromium mobile | 2/2 pass: checkout thực + PWA offline |
+| PostgreSQL integration | 11/11 pass, migration đầy đủ trên DB sạch |
+| Playwright Chromium mobile | 4/4 pass: checkout, PWA offline, chuyển khoản và quản trị |
 | Docker Compose sạch | Web/API/DB up --build --wait đạt; seed 5 món |
 | Container smoke | Web, /api/health, /api/products, manifest, service worker trả 200 |
 | UML | 7 sơ đồ có nguồn PlantUML và SVG |
 | VPS DB roles local | Migrator/app không superuser; migrate bằng migrator, app SELECT được và CREATE TABLE bị từ chối |
 
-Tổng cộng 100 test local: 84 backend + 5 frontend + 9 integration + 2 browser. Unit/API authorization dùng mocks không được coi là PostgreSQL integration; suite checkout.integration-spec dùng PostgreSQL thật và browser không mock API.
+Tổng cộng 104 test local: 84 backend + 5 frontend + 11 integration + 4 browser. Unit/API authorization dùng mocks không được coi là PostgreSQL integration; suite checkout.integration-spec dùng PostgreSQL thật và browser không mock API.
 
 ## Các tình huống đã kiểm chứng
 - JWT/RBAC, owner-only order, client không tự gửi total.
@@ -38,7 +38,7 @@ Tổng cộng 100 test local: 84 backend + 5 frontend + 9 integration + 2 browse
 Xem README và apps/api/test/checkout.integration-spec.ts; dùng TEST_DATABASE_URL trỏ DB riêng, chạy migrate deploy trước test. Test browser tạo tài khoản/đơn demo trong DB test dùng một lần. Docker local smoke dùng project riêng brewlite-as2-smoke, cổng 3200/3201.
 
 ## Minh chứng GitHub và giới hạn production
-PR thực tế: [AS2 #1](https://github.com/https-monstiez/BrewLite-AS2/pull/1). Lần CI đầu [43630037027](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43630037027) phát hiện lỗi quoting health command PostgreSQL ở bước khởi tạo container (chưa chạy lint/test); sửa bằng health command một từ và chạy lại. Không coi log lỗi khởi tạo là test nghiệp vụ đã chạy. VPS/Vercel/Render, HTTPS thật, merchant sandbox, release production và demo có người nghiệm thu chưa được cấu hình hoặc xác minh. Log cục bộ không chứng minh các mục này đã hoàn thành.
+PR thực tế: [AS2 #1](https://github.com/https-monstiez/BrewLite-AS2/pull/1). Lần CI đầu [43630037027](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43630037027) phát hiện lỗi quoting health command PostgreSQL ở bước khởi tạo container (chưa chạy lint/test); sửa bằng health command một từ và chạy lại. Không coi log lỗi khởi tạo là test nghiệp vụ đã chạy. Ngày 15/11/2026, website Vercel và API Render production trả lời công khai; GET menu trả 5 sản phẩm, health `status: ok`, `/version` và health cùng SHA `ab5af1728c75be75c6b5c7d150fcd6ed6028d409`. Render dashboard xác nhận service/database Free và PostgreSQL inbound rules trống; `DATABASE_URL` có trong Environment nhưng giá trị không được xem/chia sẻ. GitHub Release [v0.2.0](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.0) đã tạo trên commit production. Chưa xác minh Vercel settings, billing chi tiết, merchant Sandbox, giao dịch thật hoặc video/demo có người nghiệm thu.
 
 
 ## CI và bảo vệ nhánh đã kiểm chứng
@@ -47,7 +47,7 @@ PR thực tế: [AS2 #1](https://github.com/https-monstiez/BrewLite-AS2/pull/1).
 - CI phát hiện lỗi cấu hình trước khi sửa: https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43630037027. Lỗi ở PostgreSQL service health quoting, không phải test nghiệp vụ thất bại.
 - Repo AS2 đã chuyển public theo xác nhận của chủ tài khoản; main có required check `Lint, tests and build`, strict/up-to-date và enforce_admins.
 - Caddy production config đã validate bằng image caddy:2-alpine; DB init VPS đã thử trong container, migrator/app không superuser và app role bị từ chối CREATE TABLE.
-- VPS thật, domain/HTTPS thật, merchant VNPay và deploy production vẫn chưa có. Không thay thế các mục này bằng kết quả local/CI.
+- VPS không phải phương án hosting production được chọn; production hiện dùng Vercel/Render như nêu trên. Chưa có merchant VNPay production hoặc giao dịch tiền thật; không thay thế các mục này bằng kết quả Sandbox/local/CI.
 
 ## Kiểm chứng bổ sung cho deploy Free và VietQR
 - Render Blueprint đạt JSON Schema chính thức; đúng 1 Web Service Free + 1 Postgres Free, ipAllowList rỗng.

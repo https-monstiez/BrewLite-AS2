@@ -7,11 +7,15 @@
 - [x] Code apps/web, apps/api, migration/seed và Docker Compose.
 - [x] Unit/API tests, integration PostgreSQL và browser E2E có mã nguồn.
 - [x] Log CI GitHub thành công, minh chứng lỗi cấu hình và required checks main — xem [testing.md](../testing.md).
-- [ ] GHCR image SHA và CD chạy thật.
-- [ ] URL HTTPS web/API/health và DB production private.
-- [ ] Release/tag được kiểm chứng, URL release notes.
+- [x] URL HTTPS web/API/health hoạt động; web và API cùng SHA — xem [deployment.md](../deployment.md).
+- [x] Deployment production hoạt động; CI và Delivery GitHub đạt trên SHA đang chạy — xem [testing.md](../testing.md). GHCR image không đồng nghĩa GitHub Actions đã triển khai Render.
+- [x] Render dashboard xác nhận PostgreSQL gói Free, PostgreSQL Inbound IP Rules trống (Render chặn toàn bộ traffic Internet), hết hạn/xóa 15/12/2026.
+- [x] Environment có `DATABASE_URL`; Blueprint ánh xạ tới `brewlite-as2-db` internal connection string (giá trị secret không được mở/chia sẻ).
+- [x] GitHub Release/tag `v0.2.0` trên commit production — [Release](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.0).
 - [ ] Video/demo có người nghiệm thu.
 - [ ] Sprint Review/Retrospective có thành viên, thời điểm và phản hồi thật.
+
+Ghi chú vận hành (không phải tiêu chí nghiệm thu trong PDF): Render thông báo database Free sẽ bị xóa ngày 15/12/2026. Nhóm nên tự quyết định kế hoạch lưu trữ/chuyển dữ liệu trước hạn.
 
 ## Kịch bản demo đề xuất
 1. Điện thoại xem/tìm menu, mở chi tiết, chọn size/topping/đường/đá, thêm giỏ và reload.

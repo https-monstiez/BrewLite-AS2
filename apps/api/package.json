@@ -25,7 +25,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.4.15",
     "@prisma/client": "^6.19.3",
-    "bcrypt": "^5.1.1",
+    "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "passport": "^0.7.0",
@@ -52,5 +52,11 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "overrides": {
+    "lodash": "^4.18.1",
+    "body-parser@<2": "^1.20.9",
+    "multer": "^2.5.0",
+    "deepmerge-ts": "^8.0.2"
   }
 }

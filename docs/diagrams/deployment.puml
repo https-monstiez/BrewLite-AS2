@@ -2,51 +2,74 @@
 !pragma layout smetana
 skinparam shadowing false
 skinparam defaultFontName SansSerif
-title Target deployment — actual production URLs pending verification
-node "Local development" {
- node "Docker Compose" {
-  artifact "Next.js :3000" as localweb
-  artifact "NestJS :3001/api" as localapi
-  database "Postgres :5432\npersistent volume" as localdb
- }
- localweb --> localapi : HTTP
- localapi --> localdb : internal TCP
+title BrewLite AS2 — deployed topology (15 Nov 2026)
+
+node "Developer / Local" {
+  node "Docker Compose" {
+    artifact "Next.js web :3000" as localweb
+    artifact "NestJS API :3001/api" as localapi
+    database "PostgreSQL :5432\npersistent local volume" as localdb
+    localweb --> localapi : HTTP
+    localapi --> localdb : private Compose network
+  }
 }
-node "GitHub Actions / CI" {
- artifact "Install, lint, tests, build" as gate
- artifact "Docker build tagged SHA" as build
+
+node "GitHub — BrewLite-AS2" {
+  artifact "main branch\ncommit ab5af172..." as source
+  node "GitHub Actions" {
+    artifact "CI quality gate\nlint, tests, build, PostgreSQL,\nPlaywright E2E" as ci
+    artifact "Delivery\nbuild Docker images\npinned by commit SHA" as delivery
+  }
+  node "GHCR" {
+    artifact "API and web images\ncommit-SHA tags" as images
+  }
+  source --> ci : PR / push
+  ci --> delivery : success
+  delivery --> images : push
 }
-node "GHCR" {
- artifact "Private API image :SHA" as image
+
+node "Production — Vercel + Render" {
+  node "Vercel Hobby" {
+    artifact "Next.js production web\nHTTPS / Edge Network" as web
+    artifact "/version\nab5af172..." as webversion
+    web --> webversion
+  }
+  node "Render — Singapore" {
+    artifact "Git-backed Docker Web Service\nbrewlite-as2-api\nPORT /api/health" as api
+    database "Render PostgreSQL Free\nprivate inbound rules\nno public IP ranges" as db
+    artifact "Environment configuration\nDATABASE_URL from database\nJWT and bank settings" as secrets
+    artifact "Render service logs" as logs
+    api --> db : internal connection string\nPostgreSQL TCP
+    secrets ..> api : injected environment
+    api --> logs
+  }
+  source --> web : Vercel Git integration\nproduction deployment
+  source --> api : Render Blueprint\nmain / checksPass
 }
-node "Production (target)" {
- node "Vercel CDN" {
-  artifact "Next.js PWA" as web
- }
- node "Render" {
-  artifact "NestJS Docker Web Service\nPORT=3001, /api/health" as api
-  database "PostgreSQL :5432\npersistent managed storage" as db
-  artifact "Environment secrets\nDB URL, JWT, VNPay" as secrets
-  artifact "Runtime logs" as logs
- }
-}
+
 node "Customer device" {
- artifact "Browser / installed PWA" as client
+  artifact "Browser / installed PWA" as client
 }
-cloud "VNPay sandbox" as vnp
+
+cloud "VNPay Sandbox\noptional; requires merchant config" as vnp
 client --> web : HTTPS 443
 client --> api : HTTPS 443 / REST + JWT
-api --> db : private network TCP 5432
-api --> vnp : signed redirect
-vnp --> api : HTTPS Return/IPN
-secrets ..> api
-api --> logs
-gate --> build : success only
-build --> image : push SHA
-image --> api : deploy pinned SHA
-build --> api : deploy hook + health smoke
-note right of db
- No public DB access intended.
- This target is not evidence of a live environment.
+api --> vnp : signed payment URL (when configured)
+vnp --> api : HTTPS Return / IPN
+
+note right of images
+GHCR image build/push is verified
+by GitHub Delivery. The current Render
+service deploys from Git, not GHCR.
+end note
+note bottom of db
+Render dashboard: PostgreSQL Inbound IP Rules
+is empty; Internet traffic to PostgreSQL is blocked.
+Free database deletion notice: 15 Dec 2026.
+end note
+note bottom of web
+Production smoke checked 15 Nov 2026:
+web and API report commit
+ab5af1728c75be75c6b5c7d150fcd6ed6028d409.
 end note
 @enduml

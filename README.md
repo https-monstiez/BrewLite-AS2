@@ -92,13 +92,14 @@ Hạn nộp 16/11/2026, demo 18/11/2026: dùng Vercel Hobby + Render Free API/Po
 
 [Deploy API + DB lên Render](https://render.com/deploy?repo=https://github.com/https-monstiez/BrewLite-AS2) — kiểm tra cả hai tài nguyên vẫn là Free trước khi xác nhận. Database Free hết hạn sau 30 ngày; backend có cold start. `render.yaml` chặn DB public và lấy URL nội bộ, JWT được tạo trên nền tảng.
 
-## Triển khai VPS từ đầu
+## Triển khai VPS (phương án thay thế)
 
-Nhóm chưa cần có hạ tầng để chạy bản local. Bộ [deploy/vps](deploy/vps) gồm Compose, Caddy HTTPS, DB roles và deploy/rollback theo SHA; xem [hướng dẫn VPS](docs/vps-deployment.md). Cấu hình đã chuẩn bị, chưa có máy chủ production.
+Production hiện dùng Vercel + Render. Bộ [deploy/vps](deploy/vps) là phương án tự quản thay thế, gồm Compose, Caddy HTTPS, DB roles và deploy/rollback theo SHA; xem [hướng dẫn VPS](docs/vps-deployment.md). Không cần vận hành song song VPS với hosting hiện tại.
 
 ## CI/CD và production
 [Hướng dẫn triển khai/rollback](docs/deployment.md), [ma trận truy vết](docs/traceability-matrix.md), [checklist](docs/process/handover.md).
+[Báo cáo Assignment 2](docs/report-as2.md) (bản nội dung; nhóm bổ sung thông tin thành viên, video demo và biên bản Review/Retrospective thực tế trước khi nộp).
 
-CI chạy Install→Lint→Test→Build, integration PostgreSQL và browser E2E. Required check cần cấu hình riêng trên main. CD đóng gói API image SHA lên GHCR và chỉ deploy khi `PRODUCTION_DEPLOY_ENABLED=true` cùng đủ secret/URLs.
+CI chạy Install→Lint→Test→Build, integration PostgreSQL và browser E2E. Nhánh `main` có required check `Lint, tests and build`. CD đóng gói API image SHA lên GHCR và chỉ chạy job deploy khi `PRODUCTION_DEPLOY_ENABLED=true` cùng đủ secret/URLs.
 
-**Production chưa được nghiệm thu:** chưa có URL Vercel/Render và merchant sandbox do nhóm cung cấp. Không coi workflow/config là bằng chứng đã deploy. Release notes bản dự kiến nằm trong docs/release-notes.md.
+**Production đã triển khai và smoke công khai:** [website](https://brew-lite-as-2.vercel.app/), [API health](https://brewlite-as2-api.onrender.com/api/health), [API menu](https://brewlite-as2-api.onrender.com/api/products). Web và API cùng báo SHA `ab5af1728c75be75c6b5c7d150fcd6ed6028d409` khi kiểm tra ngày 15/11/2026. Chi tiết và giới hạn xác minh xem [deployment.md](docs/deployment.md). GitHub Release/tag, demo/video và review/retro cần minh chứng riêng; không suy ra chúng từ deployment.
