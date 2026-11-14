@@ -2,11 +2,18 @@
 "use client";
 
 import Link from "next/link";
+import { getOrder } from "@/lib/api";
+import { useApp } from "@/context/AppContext";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 function Content() {
   const p = useSearchParams();
+  const { token } = useApp();
+  const [verified, setVerified] = useState<{ id: string; status: string; total?: number } | null>(null);
+  const [error, setError] = useState("");
+  const requestedId = p.get("id");
+  useEffect(() => { if (!token || !requestedId) return; let active=true; getOrder(requestedId, token).then(o => { if(active) setVerified(o); }).catch(e => { if(active) setError(e instanceof Error ? e.message : "Không thể tải đơn."); }); return () => {active=false;}; }, [token, requestedId]);
   const [saved, S] = useState<any>(null);
 
   useEffect(() => {
@@ -17,12 +24,12 @@ function Content() {
     }
   }, []);
 
-  const id = p.get("id") || saved?.id || "—";
-  const status = p.get("status") || saved?.status || "PENDING";
+  const id = verified?.id || requestedId || "—";
+  const status = verified?.status || "VERIFYING";
   const method = saved?.method;
 
   const title =
-    status === "PAYMENT_FAILED"
+    status === "VERIFYING" ? "Đang xác minh đơn hàng" : status === "PAYMENT_FAILED"
       ? "Thanh toán chưa thành công"
       : status === "PENDING"
         ? "Đơn hàng đang chờ xác nhận thanh toán"
@@ -56,7 +63,7 @@ function Content() {
 
       <h1>{title}</h1>
 
-      <p>{description}</p>
+      <p>{status === "VERIFYING" ? error || "Đang tải trạng thái từ máy chủ. Vui lòng đăng nhập nếu cần." : description}</p>
 
       <div className="confirmdetail">
         <p>

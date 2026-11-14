@@ -9,6 +9,7 @@ import { PassportModule } from '@nestjs/passport';
 import { OrdersController } from '../src/orders/orders.controller';
 import { OrdersService } from '../src/orders/orders.service';
 import { PaymentsController } from '../src/payments/payments.controller';
+import { VnpayService } from '../src/payments/vnpay.service';
 import { PaymentsService } from '../src/payments/payments.service';
 import { JwtAuthGuard } from '../src/auth/jwt-auth.guard';
 import { JwtStrategy } from '../src/auth/jwt.strategy';
@@ -69,6 +70,7 @@ describe('Orders and payments API authorization (e2e)', () => {
       ],
       controllers: [OrdersController, PaymentsController],
       providers: [
+        { provide: VnpayService, useValue: {} },
         Reflector,
         JwtAuthGuard,
         JwtStrategy,

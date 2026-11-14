@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useApp } from "@/context/AppContext";
 
 const navItems = [
+  { href: "/admin/ingredients", label: "Nguyên liệu & công thức", adminOnly: true },
   { href: "/admin/inventory", label: "Tình trạng tồn kho" },
   { href: "/admin/orders", label: "Quản lý đơn hàng" },
   { href: "/admin/menu", label: "Quản lý thực đơn" },

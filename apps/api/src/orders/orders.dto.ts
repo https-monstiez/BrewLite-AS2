@@ -10,6 +10,8 @@ import {
   IsString,
   MaxLength,
   Min,
+  Max,
+  ArrayMaxSize,
   ValidateNested,
   IsEnum,
 } from 'class-validator';
@@ -23,6 +25,7 @@ export class OrderLineDto {
 
   @IsInt()
   @Min(1)
+  @Max(100)
   @Type(() => Number)
   qty: number;
 
@@ -32,7 +35,16 @@ export class OrderLineDto {
   size?: string;
 
   @IsOptional()
+  @IsIn(['0', '30', '50', '70', '100'])
+  sugar?: string;
+
+  @IsOptional()
+  @IsIn(['0', '50', '100'])
+  ice?: string;
+
+  @IsOptional()
   @IsArray()
+  @ArrayMaxSize(3)
   @IsString({ each: true })
   @IsIn(['Trân châu', 'Kem cheese', 'Thạch cà phê'], { each: true })
   toppings?: string[];
@@ -41,6 +53,7 @@ export class OrderLineDto {
 export class CreateOrderDto {
   @IsArray()
   @ArrayMinSize(1)
+  @ArrayMaxSize(100)
   @ValidateNested({ each: true })
   @Type(() => OrderLineDto)
   items: OrderLineDto[];

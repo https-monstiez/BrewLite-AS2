@@ -59,6 +59,9 @@ export class OrdersController {
     );
   }
 
+  @Post('quote')
+  quote(@Body() dto: CreateOrderDto) { return this.orders.validatePromotion(dto); }
+
   @Post('validate-promotion')
   validatePromotion(@Body() dto: CreateOrderDto) {
     return this.orders.validatePromotion(dto);

@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useCartStore } from "@/lib/cart-store";
 import type { Item, Product, Size } from "@/lib/types";
 import { getMyProfile } from "@/lib/api";
 
@@ -16,7 +17,7 @@ type C = {
   cart: Item[];
   count: number;
   total: number;
-  add: (p: Product, s: Size, t: string[], q: number) => void;
+  add: (p: Product, s: Size, t: string[], q: number, sugar?: string, ice?: string) => void;
   qty: (k: string, n: number) => void;
   remove: (k: string) => void;
   clear: () => void;
@@ -33,7 +34,8 @@ type C = {
 const X = createContext<C | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [cart, S] = useState<Item[]>([]);
+  const cart = useCartStore(state => state.cart);
+  const S = useCartStore(state => state.setCart);
   const [token, T] = useState<string | null>(null);
   const [name, N] = useState("");
   const [role, Q] = useState("CUSTOMER");
@@ -128,8 +130,8 @@ useEffect(() => {
     }
   }, [cart, ready]);
 
-  const add = (p: Product, s: Size, t: string[], q: number) => {
-    const k = p.id + s + t.slice().sort().join("");
+  const add = (p: Product, s: Size, t: string[], q: number, sugar?: string, ice?: string) => {
+    const k = JSON.stringify([p.id, s, [...new Set(t)].sort(), sugar ?? "100", ice ?? "100"]);
     const unitPrice =
       p.price + (s === "S" ? 0 : s === "M" ? 5000 : 10000) + t.length * 7000;
 
@@ -149,6 +151,8 @@ useEffect(() => {
               image: p.image,
               size: s,
               toppings: t,
+              sugar: sugar ?? "100",
+              ice: ice ?? "100",
               quantity: q,
               unitPrice,
             },

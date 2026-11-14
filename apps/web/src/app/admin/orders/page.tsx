@@ -42,23 +42,25 @@ const methodLabels: Record<string, string> = {
   LOYALTY_POINTS: "Điểm tích lũy",
   CASH: "Tiền mặt",
   MOMO: "Ví MoMo",
-  VNPAY: "Ví VNPay",
+  VNPAY: "VNPay sandbox",
+  WALLET_SIM: "Ví mô phỏng",
+  CARD_SIM: "Thẻ mô phỏng",
 };
 
-const externalPaymentMethods = ["BANK_TRANSFER", "VNPAY", "MOMO"];
+const externalPaymentMethods = ["BANK_TRANSFER", "MOMO"];
 
 const money = (value: number) =>
   Number(value || 0).toLocaleString("vi-VN") + "đ";
 
 export default function OrdersPage() {
-  const { token, confirm } = useApp();
+  const { token, role, confirm } = useApp();
 
   const [orders, setOrders] = useState<ManagedOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [filter, setFilter] = useState("ALL");
+  const [filter, setFilter] = useState(role === "STAFF" ? "PAID" : "ALL");
 
   const load = useCallback(async () => {
     if (!token) {
@@ -358,6 +360,7 @@ export default function OrdersPage() {
                         {order.items?.map((item) => (
                           <div key={item.id}>
                             {item.product?.name} × {item.qty}
+                            <small>Size {item.size} · Đường {item.sugar ?? "100"}% · Đá {item.ice ?? "100"}% · {item.toppings?.join(", ") || "Không topping"}</small>
                           </div>
                         ))}
                       </td>

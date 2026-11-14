@@ -81,49 +81,6 @@ const arr = <T,>(x: any): T[] =>
         ? x.items
         : [];
 
-const catalog: Product[] = [
-  {
-    id: "1",
-    name: "Cà phê sữa",
-    price: 35000,
-    category: "Cà phê",
-    description: "Cà phê đậm vị cùng sữa thơm béo.",
-    image:
-      "https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?auto=format&fit=crop&w=900&q=80",
-     stock: 0,
-  },
-  {
-    id: "2",
-    name: "Americano",
-    price: 40000,
-    category: "Cà phê",
-    description: "Espresso pha với nước nóng.",
-    image:
-      "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=900&q=80",
-     stock: 0,
-  },
-  {
-    id: "3",
-    name: "Cappuccino",
-    price: 45000,
-    category: "Cà phê",
-    description: "Espresso, sữa nóng và bọt sữa mịn.",
-    image:
-      "https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=900&q=80",
-     stock: 0,
-  },
-  {
-    id: "4",
-    name: "Trà đào",
-    price: 39000,
-    category: "Trà",
-    description: "Trà thơm mát cùng vị đào dịu ngọt.",
-    image:
-      "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=900&q=80",
-     stock: 0,
-  },
-];
-
 export async function products() {
   const p = arr<any>(await req("/products"));
 
@@ -291,13 +248,14 @@ export const pay = (
   orderId: string,
   method: Method,
   token: string,
+  key = crypto.randomUUID(),
 ) =>
   req<any>(
     "/payments",
     {
       method: "POST",
       headers: {
-        "Idempotency-Key": crypto.randomUUID(),
+        "Idempotency-Key": key,
       },
       body: JSON.stringify({ orderId, method }),
     },
@@ -425,6 +383,8 @@ export type ManagedOrder = {
     qty: number;
     size: string;
     toppings: string[];
+    sugar: string;
+    ice: string;
     lineTotal: number;
     product: {
       name: string;
@@ -585,4 +545,19 @@ export async function createAdminPromotion(
     },
     token,
   );
+}
+export const quote = (items: unknown[], token: string, promotionCode?: string) => req<{ subtotal: number; discountAmount: number; total: number }>("/orders/quote", { method: "POST", body: JSON.stringify({ items, ...(promotionCode ? { promotionCode } : {}) }) }, token);
+export const simulatePayment = (id: string, token: string, outcome: "success" | "failure") => req<{ status: string }>(`/payments/${encodeURIComponent(id)}/simulate`, { method: "POST", body: JSON.stringify({ outcome }) }, token);
+export const getOrder = (id: string, token: string) => req<Order>(`/orders/${encodeURIComponent(id)}`, {}, token);
+export const paymentReturn = (query: string) => req<{ RspCode: string; orderId?: string }>(`/payments/vnpay/return?${query}`);
+
+export type Ingredient = { id: string; name: string; unit: string; stock: number; recipe: {productId: string; quantity: number; product: {id: string; name: string}}[]; movements: {id: string; quantity: number; reason: string; createdAt: string}[] };
+export const ingredients = (token: string) => req<Ingredient[]>("/inventory",{},token);
+export const createIngredient = (token: string, name: string, unit: string) => req<Ingredient>("/inventory",{method:"POST",body:JSON.stringify({name,unit})},token);
+export const receiveIngredient = (token: string,id: string,quantity: number,reference: string) => req<Ingredient>(`/inventory/${encodeURIComponent(id)}/receive`,{method:"POST",body:JSON.stringify({quantity,reference})},token);
+export const saveRecipe = (token: string,productId: string,items: {ingredientId:string;quantity:number}[]) => req(`/inventory/recipes/${encodeURIComponent(productId)}`,{method:"PUT",body:JSON.stringify({items})},token);
+
+export async function getProduct(id: string): Promise<Product> {
+ const x=await req<ManagedProduct>(`/products/${encodeURIComponent(id)}`);
+ return {id:x.id,name:x.name,price:x.price,stock:x.stock,image:x.imageUrl||undefined,description:x.description||'',category:'Đồ uống'};
 }

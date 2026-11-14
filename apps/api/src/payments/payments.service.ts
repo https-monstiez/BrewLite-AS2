@@ -64,6 +64,8 @@ export class PaymentsService {
 
     try {
       const payment = await this.prisma.$transaction(async (tx) => {
+        await tx.$queryRaw`SELECT "id" FROM "Order" WHERE "id" = ${dto.orderId} AND "userId" = ${userId} FOR UPDATE`;
+
         const order = await tx.order.findFirst({
           where: {
             id: dto.orderId,
@@ -159,6 +161,8 @@ export class PaymentsService {
             });
           }
         }
+
+        if (isPoints) await tx.loyaltyTransaction.create({ data: { userId, orderId: order.id, points: -Math.ceil(Number(order.total) / POINT_REDEMPTION_VALUE) + Math.floor(Number(order.total) / SPENDING_PER_POINT), kind: 'REDEEM_AND_EARN', reference: `redeem:${order.id}` } });
 
         const pointsRequired = Math.ceil(
           Number(order.total) / POINT_REDEMPTION_VALUE,
@@ -281,7 +285,7 @@ export class PaymentsService {
         );
       }
 
-      if (pendingPayment.method === 'LOYALTY_POINTS') {
+      if (['LOYALTY_POINTS', 'VNPAY', 'WALLET_SIM', 'CARD_SIM'].includes(pendingPayment.method)) {
         throw new BadRequestException(
           'Thanh toán bằng điểm không cần xác nhận thủ công',
         );
@@ -316,6 +320,8 @@ export class PaymentsService {
           },
         });
       }
+
+      if (pointsEarned > 0) await tx.loyaltyTransaction.create({ data: { userId: order.userId, orderId: order.id, points: pointsEarned, kind: 'EARN', reference: `earn:${order.id}` } });
 
       const updatedPayment = await tx.payment.updateMany({
         where: {

@@ -11,6 +11,8 @@ const money = (n: number) => n.toLocaleString("vi-VN") + "đ";
 
 export default function Home() {
   const [list, L] = useState<Product[]>([]);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
   const [loading, B] = useState(true);
 
   const [cat, C] = useState("Tất cả");
@@ -21,6 +23,7 @@ export default function Home() {
         L(x.list);
 
       })
+      .catch(e => setError(e instanceof Error ? e.message : "Không thể tải menu."))
       .finally(() => B(false));
   }, []);
 
@@ -86,15 +89,17 @@ export default function Home() {
           </div>
         )}
 
+        <label>Tìm đồ uống <input type="search" aria-label="Tìm đồ uống" value={search} onChange={e => setSearch(e.target.value)} placeholder="Nhập tên món" /></label>
+        {error && <p role="alert" className="error">{error} <button onClick={() => window.location.reload()}>Thử lại</button></p>}
         {loading ? (
           <div className="state">Đang tải thực đơn...</div>
-        ) : list.filter((p) => cat === "Tất cả" || p.category === cat)
+        ) : list.filter((p) => (cat === "Tất cả" || p.category === cat) && p.name.toLocaleLowerCase("vi").includes(search.toLocaleLowerCase("vi")))
           .length === 0 ? (
           <div className="state">Chưa có sản phẩm trong danh mục này.</div>
         ) : (
           <div className="grid">
             {list
-              .filter((p) => cat === "Tất cả" || p.category === cat)
+              .filter((p) => (cat === "Tất cả" || p.category === cat) && p.name.toLocaleLowerCase("vi").includes(search.toLocaleLowerCase("vi")))
               .map((p) => (
                 <article className="card" key={p.id}>
                   <Link href={"/menu/" + p.id}>

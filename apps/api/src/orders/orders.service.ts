@@ -1,4 +1,5 @@
 
+import { reserveIngredients, restoreIngredients } from '../inventory/inventory-reservations';
 import {
   BadRequestException,
   ConflictException,
@@ -18,7 +19,7 @@ import { CreateOrderDto } from './orders.dto';
 import { AuditService } from '../audit/audit.service';
 
 const transitions: Record<OrderStatus, OrderStatus[]> = {
-  PENDING: ['PAID', 'PAYMENT_FAILED'],
+  PENDING: [],
   PAID: ['PREPARING'],
   PREPARING: ['READY'],
   READY: ['COMPLETED'],
@@ -32,6 +33,8 @@ type NormalizedOrderLine = {
   qty: number;
   size: string;
   toppings: string[];
+  sugar: string;
+  ice: string;
 };
 
 function normalizeOrderItems(dto: CreateOrderDto): NormalizedOrderLine[] {
@@ -40,7 +43,7 @@ function normalizeOrderItems(dto: CreateOrderDto): NormalizedOrderLine[] {
   for (const item of dto.items) {
     const size = item.size || 'M';
     const toppings = Array.from(new Set(item.toppings ?? [])).sort();
-    const key = JSON.stringify([item.productId, size, toppings]);
+    const key = JSON.stringify([item.productId, size, toppings, item.sugar ?? "100", item.ice ?? "100"]);
 
     const old = merged.get(key);
 
@@ -49,12 +52,14 @@ function normalizeOrderItems(dto: CreateOrderDto): NormalizedOrderLine[] {
       qty: (old?.qty ?? 0) + item.qty,
       size,
       toppings,
+      sugar: item.sugar ?? "100",
+      ice: item.ice ?? "100",
     });
   }
 
   return Array.from(merged.values()).sort((a, b) =>
-    JSON.stringify([a.productId, a.size, a.toppings]).localeCompare(
-      JSON.stringify([b.productId, b.size, b.toppings]),
+    JSON.stringify([a.productId, a.size, a.toppings, a.sugar, a.ice]).localeCompare(
+      JSON.stringify([b.productId, b.size, b.toppings, b.sugar, b.ice]),
     ),
   );
 }
@@ -74,10 +79,12 @@ function matchesOrderPayload(
       qty: item.qty,
       size: item.size,
       toppings: [...item.toppings].sort(),
+      sugar: item.sugar ?? "100",
+      ice: item.ice ?? "100",
     }))
     .sort((a, b) =>
-      JSON.stringify([a.productId, a.size, a.toppings]).localeCompare(
-        JSON.stringify([b.productId, b.size, b.toppings]),
+      JSON.stringify([a.productId, a.size, a.toppings, a.sugar, a.ice]).localeCompare(
+        JSON.stringify([b.productId, b.size, b.toppings, b.sugar, b.ice]),
       ),
     );
 
@@ -95,13 +102,15 @@ export class OrdersService {
     const requestedItems = normalizeOrderItems(dto);
 
     let subtotal = 0;
+    const required = new Map<string, number>();
+    for (const item of requestedItems) required.set(item.productId, (required.get(item.productId) ?? 0) + item.qty);
 
     for (const item of requestedItems) {
       const product = await this.prisma.product.findFirst({
         where: {
           id: item.productId,
           isActive: true,
-          stock: { gte: item.qty },
+          stock: { gte: required.get(item.productId) },
         },
       });
 
@@ -127,7 +136,7 @@ export class OrdersService {
     const promotionCode = dto.promotionCode?.trim().toUpperCase();
 
     if (!promotionCode) {
-      throw new BadRequestException('Vui lòng nhập mã khuyến mãi');
+      return { valid: true, promotionCode: null, subtotal, discountAmount: 0, total: subtotal };
     }
 
     const promotion = await this.prisma.promotion.findUnique({
@@ -223,6 +232,7 @@ export class OrdersService {
     dto: CreateOrderDto,
     role: UserRole = UserRole.CUSTOMER,
     meta: { ipAddress?: string; userAgent?: string } = {},
+    attempt = 0,
   ) {
     const idempotencyKey = key?.trim();
 
@@ -272,6 +282,8 @@ export class OrdersService {
             qty: number;
             size: string;
             toppings: string[];
+  sugar: string;
+  ice: string;
             unitPrice: number;
             lineTotal: number;
           }[] = [];
@@ -325,6 +337,8 @@ export class OrdersService {
               qty: item.qty,
               size: item.size,
               toppings: item.toppings,
+              sugar: item.sugar,
+              ice: item.ice,
               unitPrice,
               lineTotal,
             });
@@ -429,7 +443,7 @@ export class OrdersService {
             }
           }
 
-          return tx.order.create({
+          const createdOrder = await tx.order.create({
             data: {
               userId,
               idempotencyKey,
@@ -446,6 +460,8 @@ export class OrdersService {
               },
             },
           });
+          await reserveIngredients(tx, createdOrder.id, requestedItems);
+          return createdOrder;
         },
         {
           isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
@@ -464,6 +480,8 @@ export class OrdersService {
 
       return created;
     } catch (error) {
+      const retryable = (error instanceof ConflictException && error.message.includes('vừa thay đổi tồn kho')) || (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034');
+      if (retryable && attempt < 2) return this.create(userId, key, dto, role, meta, attempt + 1);
       if (
         error instanceof BadRequestException ||
         error instanceof ConflictException
@@ -564,6 +582,8 @@ export class OrdersService {
             qty: true,
             size: true,
             toppings: true,
+            sugar: true,
+            ice: true,
             lineTotal: true,
             product: {
               select: { name: true },
@@ -802,7 +822,11 @@ export class OrdersService {
           );
         }
 
-        return tx.order.findUniqueOrThrow({
+        if (order.loyaltyPointsEarned > 0) {
+      await tx.user.update({ where: { id: order.userId }, data: { loyaltyPoints: { decrement: order.loyaltyPointsEarned } } });
+      await tx.loyaltyTransaction.create({ data: { userId: order.userId, orderId: order.id, points: -order.loyaltyPointsEarned, kind: 'REVERSE_EARN', reference: `reverse:${order.id}` } });
+    }
+    return tx.order.findUniqueOrThrow({
           where: { id: orderId },
         });
       }
@@ -943,6 +967,7 @@ export class OrdersService {
     }
 
     if (shouldRestoreInventory) {
+      await restoreIngredients(tx, order.id);
       for (const item of order.items) {
         await tx.product.update({
           where: { id: item.productId },
@@ -972,7 +997,7 @@ export class OrdersService {
           const match = payment.providerRef?.match(/^POINTS-(\d+)$/);
           const pointsToRefund = match ? Number(match[1]) : 0;
 
-          if (!Number.isSafeInteger(pointsToRefund) || pointsToRefund <= 0) {
+          if (!match || !Number.isSafeInteger(pointsToRefund) || pointsToRefund < 0) {
             throw new ConflictException(
               'Không thể hoàn điểm vì dữ liệu thanh toán không hợp lệ',
             );
@@ -994,12 +1019,8 @@ export class OrdersService {
             );
           }
 
-          await tx.user.update({
-            where: { id: order.userId },
-            data: {
-              loyaltyPoints: { increment: pointsToRefund },
-            },
-          });
+          await tx.user.update({ where: { id: order.userId }, data: { loyaltyPoints: { increment: pointsToRefund } } });
+          await tx.loyaltyTransaction.create({ data: { userId: order.userId, orderId: order.id, points: pointsToRefund, kind: 'REFUND', reference: `refund:${payment.id}` } });
         } else {
           await tx.payment.updateMany({
             where: {
@@ -1014,6 +1035,10 @@ export class OrdersService {
       }
     }
 
+    if (order.loyaltyPointsEarned > 0) {
+      await tx.user.update({ where: { id: order.userId }, data: { loyaltyPoints: { decrement: order.loyaltyPointsEarned } } });
+      await tx.loyaltyTransaction.create({ data: { userId: order.userId, orderId: order.id, points: -order.loyaltyPointsEarned, kind: 'REVERSE_EARN', reference: `reverse:${order.id}` } });
+    }
     return tx.order.findUniqueOrThrow({
       where: { id: order.id },
       include: {
@@ -1050,7 +1075,7 @@ export class OrdersService {
       }
 
       if (!transitions[order.status].includes(status)) {
-        throw new BadRequestException(
+        throw new ConflictException(
           `Không thể chuyển trạng thái ${order.status} sang ${status}`,
         );
       }
@@ -1064,7 +1089,7 @@ export class OrdersService {
       });
 
       if (result.count !== 1) {
-        throw new BadRequestException(
+        throw new ConflictException(
           'Đơn hàng đã được cập nhật bởi một thao tác khác',
         );
       }

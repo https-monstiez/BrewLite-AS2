@@ -10,3 +10,5 @@ Mỗi sơ đồ có nguồn PlantUML và SVG xuất từ chính nguồn. Render:
 - deployment: ranh giới local/CI/production và target Vercel/Render/GHCR (Task 3.2).
 
 Các lớp/thuộc tính mới trong mô hình phải được hiện thực và kiểm thử trong Task 5 trước nghiệm thu; theo dõi ở ma trận truy vết. Chưa dùng sơ đồ target làm minh chứng production.
+
+- deployment-vps: phương án VPS bổ sung, HTTPS/Caddy, image SHA, mạng DB nội bộ; chưa có máy chủ thật.

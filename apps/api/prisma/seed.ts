@@ -29,6 +29,8 @@ async function main() {
 
   console.log(`Seeded ${products.length} products`);
 
+  if (process.env.SEED_DEMO_ACCOUNTS !== 'true') return;
+
   const accounts = [
     {
       email: 'khachhang@gmail.com',
@@ -55,11 +57,7 @@ async function main() {
 
     await prisma.user.upsert({
       where: { email: account.email },
-      update: {
-        passwordHash,
-        name: account.name,
-        role: account.role,
-      },
+      update: {},
       create: {
         email: account.email,
         passwordHash,

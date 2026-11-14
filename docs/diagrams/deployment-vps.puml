@@ -1,0 +1,47 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+title VPS deployment target - not yet provisioned
+node "Customer device" {
+ artifact "Browser / PWA" as client
+}
+node "Local" {
+ artifact "Docker Compose + test DB" as local
+}
+node "GitHub Actions" {
+ artifact "Quality gate + SHA images" as ci
+}
+node "GHCR private registry" {
+ artifact "API:SHA + Web:SHA" as registry
+}
+node "Linux VPS (target)" {
+ artifact "SSH verified host key :22" as ssh
+ node "Docker edge network" {
+  artifact "Caddy HTTPS :80/:443" as caddy
+  artifact "Next.js :3000 (internal)" as web
+  artifact "NestJS :3001 (internal)" as api
+ }
+ node "Docker data network (internal)" {
+  database "PostgreSQL :5432" as db
+  artifact "Persistent database volume" as volume
+ }
+ artifact "Private .env / DB roles / JWT" as secrets
+ artifact "Logs + backups + last good SHA" as ops
+}
+client --> caddy : HTTPS 443
+caddy --> web : HTTP pages
+caddy --> api : HTTP /api/*
+api --> db : app role CRUD
+api ..> db : migrator only at startup
+db --> volume
+ci --> registry : push immutable SHA
+ci --> ssh : SSH/SCP config (no .env)
+ssh --> registry : pull exact SHA
+secrets ..> api
+secrets ..> db
+api --> ops
+note right of db
+ No host port exposed.
+ Separate admin / migrator / app roles.
+end note
+@enduml

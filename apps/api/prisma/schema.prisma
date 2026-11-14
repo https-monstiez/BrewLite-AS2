@@ -56,6 +56,7 @@ model User {
   orders        Order[]
   role          UserRole      @default(CUSTOMER)
   activityLogs  ActivityLog[]
+  loyaltyTransactions LoyaltyTransaction[]
 }
 
 model Product {
@@ -70,6 +71,7 @@ model Product {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   orderItems  OrderItem[]
+  recipe RecipeIngredient[]
 
   @@index([isActive, name])
 }
@@ -104,6 +106,8 @@ model Order {
   createdAt                 DateTime                  @default(now())
   updatedAt                 DateTime                  @updatedAt
   user                      User                      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  ingredientReservations IngredientReservation[]
+  loyaltyTransactions       LoyaltyTransaction[]
   items                     OrderItem[]
   payments                  Payment[]
   cancellationRequestStatus CancellationRequestStatus @default(NONE)
@@ -123,6 +127,8 @@ model OrderItem {
   productId String
   size      String   @default("M")
   toppings  String[] @default([])
+  sugar String @default("100")
+  ice String @default("100")
   qty       Int
   unitPrice Int
   lineTotal Int
@@ -163,4 +169,53 @@ model ActivityLog {
   @@index([actorUserId, createdAt])
   @@index([action, createdAt])
   @@index([entity, entityId])
+}
+
+model LoyaltyTransaction {
+  id String @id @default(cuid())
+  userId String
+  orderId String?
+  points Int
+  kind String
+  reference String @unique
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  order Order? @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  @@index([userId, createdAt])
+}
+
+model Ingredient {
+ id String @id @default(cuid())
+ name String @unique
+ unit String
+ stock Int @default(0)
+ recipe RecipeIngredient[]
+ reservations IngredientReservation[]
+ movements StockMovement[]
+}
+model RecipeIngredient {
+ productId String
+ ingredientId String
+ quantity Int
+ product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+ ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+ @@id([productId, ingredientId])
+}
+model IngredientReservation {
+ orderId String
+ ingredientId String
+ quantity Int
+ restored Boolean @default(false)
+ order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+ ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+ @@id([orderId, ingredientId])
+}
+model StockMovement {
+ id String @id @default(cuid())
+ ingredientId String
+ quantity Int
+ reason String
+ reference String @unique
+ createdAt DateTime @default(now())
+ ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
 }

@@ -11,6 +11,9 @@ import {
   pay,
   getMyProfile,
   validatePromotion,
+  quote,
+  getOrder,
+  simulatePayment,
 } from "@/lib/api";
 import type { Method } from "@/lib/types";
 
@@ -21,6 +24,8 @@ const paymentOptions: {
   title: string;
   description: string;
 }[] = [
+  { method: "WALLET_SIM", title: "Ví mô phỏng", description: "Thử nghiệm AS2, không thu tiền thật." },
+  { method: "CARD_SIM", title: "Thẻ mô phỏng", description: "Thử nghiệm AS2, không nhập thông tin thẻ thật." },
   {
     method: "LOYALTY_POINTS",
     title: "Thanh toán bằng điểm",
@@ -34,7 +39,7 @@ const paymentOptions: {
   {
     method: "VNPAY",
     title: "Ví VNPay",
-    description: "Quét mã QR bằng ứng dụng VNPay.",
+    description: "Thanh toán thử nghiệm qua VNPay sandbox.",
   },
   {
     method: "MOMO",
@@ -47,7 +52,8 @@ export default function Checkout() {
   const { cart, total, token, clear } = useApp();
   const router = useRouter();
 
-  const [method, M] = useState<Method>("LOYALTY_POINTS");
+  const [method, M] = useState<Method>("WALLET_SIM");
+  const [simulationOutcome, setSimulationOutcome] = useState<"success" | "failure">("success");
   const [error, E] = useState("");
   const [busy, B] = useState(false);
 
@@ -68,6 +74,7 @@ export default function Checkout() {
   const idempotencyRef = useRef<{
     signature: string;
     key: string;
+    orderId?: string;
   } | null>(null);
 
   const items = cart.map((i) => ({
@@ -75,6 +82,8 @@ export default function Checkout() {
     qty: i.quantity,
     size: i.size,
     toppings: i.toppings,
+    sugar: i.sugar ?? "100",
+    ice: i.ice ?? "100",
   }));
 
   const cartSignature = JSON.stringify(items);
@@ -229,16 +238,22 @@ export default function Checkout() {
     });
 
     if (idempotencyRef.current?.signature !== signature) {
-      idempotencyRef.current = {
-        signature,
-        key: crypto.randomUUID(),
-      };
+      let saved: { signature: string; key: string; orderId?: string } | null = null;
+      try { saved = JSON.parse(sessionStorage.getItem("bl_checkout_attempt") || "null"); } catch {}
+      idempotencyRef.current = saved?.signature === signature ? saved : { signature, key: crypto.randomUUID() };
+      sessionStorage.setItem("bl_checkout_attempt", JSON.stringify(idempotencyRef.current));
     }
 
     B(true);
 
     try {
-      const o = await order(
+      if (!idempotencyRef.current.orderId) {
+        const serverQuote = await quote(items, token, promotionToUse);
+        setFinalTotal(serverQuote.total);
+        setPromotionSubtotal(serverQuote.subtotal);
+        setDiscountAmount(serverQuote.discountAmount);
+      }
+      const o = idempotencyRef.current.orderId ? await getOrder(idempotencyRef.current.orderId, token) : await order(
         items,
         token,
         promotionToUse,
@@ -251,6 +266,8 @@ export default function Checkout() {
         throw Error("API tạo đơn chưa trả về id.");
       }
 
+      idempotencyRef.current.orderId = id;
+      sessionStorage.setItem("bl_checkout_attempt", JSON.stringify(idempotencyRef.current));
       const actualTotal = Number(o.total ?? payableTotal);
       const actualDiscount = Number(o.discountAmount ?? 0);
 
@@ -264,9 +281,15 @@ export default function Checkout() {
         }
       }
 
-      await pay(id, method, token);
-
-      const status = method === "LOYALTY_POINTS" ? "PAID" : "PENDING";
+      const paymentKey = `${idempotencyRef.current.key}:${method}`;
+      const payment = await pay(id, method, token, paymentKey);
+      if (method === "VNPAY") {
+        if (!payment.paymentUrl) throw Error("VNPay chưa trả về đường dẫn thanh toán.");
+        window.location.assign(payment.paymentUrl);
+        return;
+      }
+      const result = method === "WALLET_SIM" || method === "CARD_SIM" ? await simulatePayment(payment.id, token, simulationOutcome) : payment;
+      const status = result.status === "SUCCEEDED" ? "PAID" : result.status === "FAILED" ? "PAYMENT_FAILED" : "PENDING";
 
       localStorage.setItem(
         "bl_last_order",
@@ -282,6 +305,7 @@ export default function Checkout() {
       );
 
       idempotencyRef.current = null;
+      sessionStorage.removeItem("bl_checkout_attempt");
       clear();
 
       router.push(
@@ -427,7 +451,7 @@ export default function Checkout() {
             </div>
           )}
 
-          {method !== "LOYALTY_POINTS" && (
+          {["BANK_TRANSFER", "MOMO"].includes(method) && (
             <div className="qr-panel">
               <h3>Quét mã {selectedPayment.title}</h3>
 
@@ -445,13 +469,14 @@ export default function Checkout() {
               </p>
 
               <p className="payment-instruction">
-                Quét mã bằng ứng dụng {selectedPayment.title}, sau đó xác
-                nhận đã chuyển khoản.
+                Đây là mã minh họa nội bộ, không phải mã chuyển tiền thực. Nhân viên xác nhận riêng.
               </p>
             </div>
           )}
 
-          {error && <p className="error">{error}</p>}
+          {method === "VNPAY" && <p>Bạn sẽ được chuyển sang VNPay sandbox. Không quét mã minh họa để chuyển tiền.</p>}
+          {["WALLET_SIM", "CARD_SIM"].includes(method) && <label>Kết quả mô phỏng <select aria-label="Kết quả mô phỏng" value={simulationOutcome} onChange={e => setSimulationOutcome(e.target.value as "success" | "failure")}><option value="success">Thành công</option><option value="failure">Bị từ chối</option></select></label>}
+          {error && <p role="alert" className="error">{error}</p>}
 
           <button
             type="button"
@@ -469,7 +494,7 @@ export default function Checkout() {
               ? "Đang xử lý..."
               : method === "LOYALTY_POINTS"
                 ? "Đặt hàng, sử dụng điểm ↗"
-                : "Tôi đã thanh toán, gửi yêu cầu xác nhận ↗"}
+                : method === "VNPAY" ? "Tiếp tục với VNPay sandbox ↗" : ["WALLET_SIM", "CARD_SIM"].includes(method) ? "Đặt hàng và thanh toán mô phỏng ↗" : "Gửi yêu cầu xác nhận ↗"}
           </button>
 
           {!token && (

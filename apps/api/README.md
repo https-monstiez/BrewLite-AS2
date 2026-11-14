@@ -1,3 +1,5 @@
+> AS2: hướng dẫn hiện hành nằm ở [README gốc](../../README.md), [kiểm chứng](../../docs/testing.md) và [triển khai](../../docs/deployment.md). Nội dung kế thừa bên dưới mô tả bản nền AS1; ưu tiên tài liệu AS2 khi khác biệt.
+
 # Backend BrewLite
 
 Backend REST API cho dự án BrewLite, sử dụng **NestJS + TypeScript + PostgreSQL + Prisma**. Tiền tố API: `/api`. Nhà cung cấp thanh toán được mô phỏng; đây là phiên bản phục vụ phát triển và đồ án, không phải hệ thống xử lý thanh toán thực tế.

@@ -91,4 +91,26 @@ Order "1" -- "0..*" Payment
 Order "0..*" ..> "0..1" Promotion : code snapshot
 User "1" -- "0..*" LoyaltyTransaction
 Order "0..1" -- "0..*" LoyaltyTransaction
+class Ingredient {
+ name: String
+ unit: String
+ stock: Int
+}
+class RecipeIngredient {
+ quantity: Int
+}
+class IngredientReservation {
+ quantity: Int
+ restored: Boolean
+}
+class StockMovement {
+ quantity: Int
+ reference: String unique
+ reason: String
+}
+Product "1" -- "0..*" RecipeIngredient
+Ingredient "1" -- "0..*" RecipeIngredient
+Order "1" -- "0..*" IngredientReservation
+Ingredient "1" -- "0..*" IngredientReservation
+Ingredient "1" -- "0..*" StockMovement
 @enduml

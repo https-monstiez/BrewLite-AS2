@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { products } from "@/lib/api";
+import { getProduct } from "@/lib/api";
 import { useApp } from "@/context/AppContext";
 import type { Product, Size } from "@/lib/types";
 
@@ -24,6 +24,8 @@ export default function Detail() {
   const [product, setProduct] = useState<Product | null>(null);
   const [size, setSize] = useState<Size>("M");
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
+  const [sugar, setSugar] = useState("100");
+  const [ice, setIce] = useState("100");
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -31,10 +33,10 @@ export default function Detail() {
   useEffect(() => {
     let active = true;
 
-    products()
+    getProduct(id)
       .then((result) => {
         if (active) {
-          setProduct(result.list.find((item) => item.id === id) || null);
+          setProduct(result);
         }
       })
       .catch(() => {
@@ -120,6 +122,8 @@ export default function Detail() {
           <>
             <hr />
 
+            <label>Lượng đường <select aria-label="Lượng đường" value={sugar} onChange={e => setSugar(e.target.value)}>{["0","30","50","70","100"].map(v => <option key={v} value={v}>{v}%</option>)}</select></label>
+            <label>Lượng đá <select aria-label="Lượng đá" value={ice} onChange={e => setIce(e.target.value)}>{["0","50","100"].map(v => <option key={v} value={v}>{v}%</option>)}</select></label>
             <h3>Chọn kích cỡ</h3>
 
             <div className="choices">
@@ -197,7 +201,7 @@ export default function Detail() {
               className="btn wide"
               disabled={product.stock <= 0 || quantity > product.stock}
               onClick={() => {
-                add(product, size, selectedToppings, quantity);
+                add(product, size, selectedToppings, quantity, sugar, ice);
                 setMessage("Đã thêm sản phẩm vào giỏ hàng.");
               }}
             >

@@ -7,6 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
   app.setGlobalPrefix('api');
+  if (config.get<string>('TRUST_PROXY_HOPS') === '1') app.getHttpAdapter().getInstance().set('trust proxy', 1);
   // Basic browser security headers (API-only service; no inline HTML is served).
   app.use((_req, res, next) => {
     res.removeHeader('X-Powered-By');

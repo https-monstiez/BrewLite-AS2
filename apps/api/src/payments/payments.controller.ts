@@ -1,4 +1,6 @@
 
+import { VnpayService } from './vnpay.service';
+import { SimulationDto } from './payments.dto';
 import { UserRole } from '@prisma/client';
 import {
   Body,
@@ -23,15 +25,16 @@ type AuthedRequest = Request & {
 @Controller('payments')
 @UseGuards(JwtAuthGuard)
 export class PaymentsController {
-  constructor(private payments: PaymentsService) {}
+  constructor(private payments: PaymentsService, private vnpay: VnpayService) {}
 
   @Post()
-  create(
+  async create(
     @Req() req: AuthedRequest,
     @Headers('idempotency-key') key: string,
     @Body() dto: CreatePaymentDto,
   ) {
-    return this.payments.create(
+    if (dto.method === 'VNPAY') this.vnpay.assertConfigured();
+    const payment = await this.payments.create(
       req.user.id,
       key,
       dto,
@@ -44,6 +47,12 @@ export class PaymentsController {
             : undefined,
       },
     );
+    return dto.method === 'VNPAY' ? { ...payment, paymentUrl: this.vnpay.url(payment, req.ip) } : payment;
+  }
+
+  @Post(':id/simulate')
+  simulate(@Req() req: AuthedRequest, @Param('id') id: string, @Body() dto: SimulationDto) {
+    return this.vnpay.simulate(req.user.id, id, dto.outcome);
   }
 
   @Post(':orderId/confirm')

@@ -17,6 +17,9 @@ describe('OrdersService - loyalty points', () => {
 
   beforeEach(() => {
     tx = {
+      loyaltyTransaction: { create: jest.fn().mockResolvedValue({}) },
+      recipeIngredient: { findMany: jest.fn().mockResolvedValue([]) },
+      ingredientReservation: { findMany: jest.fn().mockResolvedValue([]) },
       order: {
         findUnique: jest.fn(),
         findFirst: jest.fn(),
@@ -104,7 +107,7 @@ describe('OrdersService - loyalty points', () => {
 
     await expect(
       service.updateStatus('order-1', OrderStatus.COMPLETED),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    ).rejects.toBeInstanceOf(ConflictException);
 
     expect(tx.user.update).not.toHaveBeenCalled();
   });

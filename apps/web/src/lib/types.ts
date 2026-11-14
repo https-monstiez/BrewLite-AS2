@@ -1,5 +1,5 @@
 export type Size = "S" | "M" | "L";
-export type Method = "LOYALTY_POINTS" | "BANK_TRANSFER" | "VNPAY" | "MOMO";
+export type Method = "LOYALTY_POINTS" | "BANK_TRANSFER" | "VNPAY" | "MOMO" | "WALLET_SIM" | "CARD_SIM";
 
 export type Product = {
   id: string;
@@ -18,6 +18,8 @@ export type Item = {
   image?: string;
   size: Size;
   toppings: string[];
+  sugar?: string;
+  ice?: string;
   quantity: number;
   unitPrice: number;
 };
@@ -36,6 +38,8 @@ export type OrderItem = {
   qty: number;
   size: Size;
   toppings: string[];
+  sugar?: string;
+  ice?: string;
   unitPrice: number;
   lineTotal: number;
   product: {

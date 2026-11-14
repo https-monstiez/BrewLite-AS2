@@ -195,7 +195,7 @@ export default function Orders() {
     });
   };
 
-  const closeCancellationForm = (orderId: string) => {
+  const closeCancellationForm = (_orderId: string) => {
     setOpenCancellationId("");
     setActionError("");
   };
@@ -424,7 +424,7 @@ export default function Orders() {
                               {item.product?.name || "Sản phẩm"}
                             </strong>
                             <p>
-                              Size {item.size}
+                              Size {item.size} · Đường {item.sugar ?? "100"}% · Đá {item.ice ?? "100"}%
                               {item.toppings?.length
                                 ? ` · ${item.toppings.join(", ")}`
                                 : ""}

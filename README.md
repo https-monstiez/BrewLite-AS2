@@ -1,53 +1,90 @@
-# BrewLite - bản bổ sung quản trị và bảo mật
+# BrewLite — Assignment 2
 
-Bản này cập nhật cả `backend` và `frontend`.
+Repo AS2: https://github.com/https-monstiez/BrewLite-AS2. Bản nền AS1 thuộc `leehieu36/BrewLite`; mọi thay đổi AS2 chỉ nằm trong repo này.
 
-## Cài đặt / chạy
-1. Giải nén và thay thư mục `backend`, `frontend` hiện tại bằng hai thư mục trong gói này (nên sao lưu bản cũ trước).
-2. Tại `backend`, cấu hình `.env` theo `.env.example`.
-3. Chạy migration và sinh Prisma Client:
+Ứng dụng đặt đồ uống Next.js/PWA + NestJS + PostgreSQL/Prisma. Customer chọn size/topping/đường/đá, giữ giỏ, đăng nhập và thanh toán; Staff xử lý đơn đã trả tiền; Manager dùng role ADMIN quản lý menu, voucher, tài khoản, nguyên liệu/công thức và audit.
 
-```bash
-cd backend
-npm install
-npx prisma migrate deploy
-npx prisma generate
+## Cấu trúc
+```text
+apps/web/                 Next.js App Router, Zustand, PWA, Vitest
+apps/api/                 NestJS, Prisma schema/migrations/seed, Jest
+  src/inventory/          Kho nguyên liệu, công thức và biến động
+  src/payments/           Điểm, Ví/Thẻ mô phỏng, VNPay sandbox
+  test/                   Unit, HTTP authorization, PostgreSQL integration
+docs/requirements/        Task 1: phạm vi, SRS, UC-01
+docs/diagrams/            Task 2: UML nguồn PlantUML và SVG
+docs/architecture/        Task 3: kiến trúc, ADR
+docs/process/             Backlog, review/retro và checklist bàn giao
+tests/e2e/                Playwright: mobile menu → xác nhận
+.github/workflows/        CI và Delivery
+scripts/deploy.mjs        Render deploy + smoke SHA, Vercel hook + smoke SHA
+```
+
+## Chạy local với Docker
+Cần Docker Compose v2. Từ root:
+```sh
+cp .env.example .env
+# Đổi POSTGRES_PASSWORD và JWT_SECRET trong .env
+# Nếu password DB có ký tự đặc biệt, URL-encode trước khi ghép DATABASE_URL.
+docker compose up --build -d
+docker compose exec api npm run db:seed
+```
+Web http://localhost:3000; API http://localhost:3001/api; health http://localhost:3001/api/health. PostgreSQL không publish cổng ra host. Nếu AS1 đang chạy các cổng này, dùng cổng khác cho AS2; ví dụ sửa mapping 3100:3000, 3101:3001 và cập nhật NEXT_PUBLIC_API_URL/FRONTEND_ORIGIN tương ứng trước build.
+
+Seed mặc định chỉ tạo/upsert 5 món, không reset tồn hiện tại. Tài khoản demo chỉ tạo khi `SEED_DEMO_ACCOUNTS=true` và không thay mật khẩu tài khoản đã tồn tại. Không bật seed demo ở production. Đăng ký một tài khoản rồi cấp role ADMIN bằng DB quản trị để quản lý hệ thống, đăng nhập lại để UI nhận role.
+
+## Chạy trực tiếp
+Node.js 22.12+ và PostgreSQL 16. Hai app có lockfile riêng:
+```sh
+npm run install:apps
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env.local
+# Cấu hình DATABASE_URL, JWT_SECRET, PAYMENT_MODE=simulation và URL API.
+npm run prisma:generate --prefix apps/api
+npm run prisma:deploy --prefix apps/api
+npm run db:seed --prefix apps/api
+npm run start:dev --prefix apps/api
+# Terminal khác:
+npm run dev --prefix apps/web
+```
+
+## Kiểm thử và build
+```sh
+npm run lint
+npm test
 npm run build
-npm run start:dev
 ```
-
-4. Ở terminal khác, chạy Frontend:
-
-```bash
-cd frontend
-npm install
-npm run dev
+Unit/HTTP tests backend dùng mocks có kiểm soát; **không** coi đó là test PostgreSQL thực. Test tích hợp dùng DB tách riêng, migration đầy đủ và kiểm tra transaction/idempotency/OCC/callback:
+```sh
+# Chỉ dùng URL của database test, không phải production.
+export TEST_DATABASE_URL='postgresql://as2test:as2_test_only@127.0.0.1:55432/brewlite_as2_test'
+DATABASE_URL="$TEST_DATABASE_URL" npm run prisma:deploy --prefix apps/api
+npm run test:integration --prefix apps/api
+DATABASE_URL="$TEST_DATABASE_URL" npm run db:seed --prefix apps/api
+NEXT_PUBLIC_API_URL=http://127.0.0.1:3101/api npm run build --prefix apps/web
+cd apps/web
+npx playwright install chromium
+npm run test:e2e
 ```
+Playwright tự chạy API :3101 và web :3100, dùng database test được chỉ định. Không dùng server AS1. Browser test tạo user và đơn demo riêng; database test là dữ liệu dùng một lần. CI tự cung cấp PostgreSQL service và upload trace/report khi lỗi.
 
-Frontend mặc định gọi API `http://localhost:3001/api`; có thể đặt `NEXT_PUBLIC_API_URL`.
+## Quy tắc nghiệp vụ
+- Giá gốc size S; M +5.000, L +10.000; mỗi topping +7.000. Server quyết định giá, voucher và tồn.
+- Định lượng nguyên liệu g/ml/cái theo size S; M ×1,25 và L ×1,5, làm tròn lên từng đơn vị/cốc. Món chưa có công thức chỉ kiểm tồn thành phẩm; cấu hình công thức để bật kiểm nguyên liệu.
+- Giữ tồn thành phẩm và nguyên liệu trong transaction tạo đơn. Thanh toán bị từ chối hoặc hủy trước pha trả tồn đúng một lần; đã pha không trả nguyên liệu đã dùng.
+- 500 VND/điểm khi đổi; 10.000 VND chi tiêu nhận 1 điểm. Ledger ghi nhận trừ/nhận/hoàn/thu hồi điểm. Thu hồi điểm đã tiêu có thể tạo số dư âm và ngăn đổi tiếp đến khi bù đủ.
+- Idempotency-Key: cùng key/payload trả cùng kết quả; khác payload/phương thức bị từ chối. UI lưu key checkout qua reload.
+- Chỉ giao dịch thanh toán đổi PENDING→PAID. Nhân viên chỉ PAID→PREPARING→READY→COMPLETED; bước sai trả 409.
+- Ví/Thẻ mô phỏng không thu tiền thật. VNPay là sandbox có HMAC-SHA512/Return/IPN; cần merchant cấu hình. QR nội bộ của phương thức thủ công là minh họa, không phải QR ngân hàng/MoMo thật.
+- PWA có manifest/icons/offline fallback; không cache API riêng tư, không tự replay thanh toán khi có mạng lại.
 
-## Cấp ADMIN đầu tiên
-Đăng ký tài khoản thông thường trước, sau đó dùng PostgreSQL để cấp quyền ADMIN cho đúng email:
+## Triển khai VPS từ đầu
 
-```sql
-UPDATE "User"
-SET "role" = 'ADMIN'
-WHERE "email" = 'email-quan-tri-vien@example.com';
-```
+Nhóm chưa cần có hạ tầng để chạy bản local. Bộ [deploy/vps](deploy/vps) gồm Compose, Caddy HTTPS, DB roles và deploy/rollback theo SHA; xem [hướng dẫn VPS](docs/vps-deployment.md). Cấu hình đã chuẩn bị, chưa có máy chủ production.
 
-Đăng xuất rồi đăng nhập lại để Frontend nhận role mới.
+## CI/CD và production
+[Hướng dẫn triển khai/rollback](docs/deployment.md), [ma trận truy vết](docs/traceability-matrix.md), [checklist](docs/process/handover.md).
 
-## Chức năng mới
-- Trang `/admin` dành cho ADMIN và STAFF.
-- ADMIN quản lý tài khoản, tìm kiếm và cấp CUSTOMER / STAFF / ADMIN.
-- ADMIN và STAFF xem nhật ký hoạt động, danh sách đơn hàng và cập nhật trạng thái.
-- Backend kiểm tra JWT, vai trò và quyền sở hữu đơn hàng; không dựa vào việc ẩn/hiện nút ở Frontend.
-- Ghi nhận đăng ký, đăng nhập thành công/thất bại, tạo đơn, thanh toán demo, truy cập danh sách khách hàng/đơn hàng, thay đổi trạng thái đơn và thay đổi vai trò.
-- Không trả `passwordHash` trong API quản lý tài khoản.
+CI chạy Install→Lint→Test→Build, integration PostgreSQL và browser E2E. Required check cần cấu hình riêng trên main. CD đóng gói API image SHA lên GHCR và chỉ deploy khi `PRODUCTION_DEPLOY_ENABLED=true` cùng đủ secret/URLs.
 
-Chi tiết xem `backend/SECURITY_AND_AUDIT.md`.
-
-## Kiểm thử
-- Frontend TypeScript: `npx tsc --noEmit` đã chạy thành công trong môi trường kiểm tra.
-- Backend TypeScript syntax: đã kiểm tra cú pháp các file mới/sửa.
-- Backend build đầy đủ cần chạy `npx prisma generate` trên máy của bạn vì môi trường kiểm tra không tải được Prisma engine tương ứng. Chạy các lệnh ở trên trước khi build.
+**Production chưa được nghiệm thu:** chưa có URL Vercel/Render và merchant sandbox do nhóm cung cấp. Không coi workflow/config là bằng chứng đã deploy. Release notes bản dự kiến nằm trong docs/release-notes.md.

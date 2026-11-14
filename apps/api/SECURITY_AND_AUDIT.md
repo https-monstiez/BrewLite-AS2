@@ -1,3 +1,5 @@
+> AS2: hướng dẫn hiện hành nằm ở [README gốc](../../README.md), [kiểm chứng](../../docs/testing.md) và [triển khai](../../docs/deployment.md). Nội dung kế thừa bên dưới mô tả bản nền AS1; ưu tiên tài liệu AS2 khi khác biệt.
+
 # BrewLite - phân quyền và nhật ký hoạt động
 
 ## Thay đổi

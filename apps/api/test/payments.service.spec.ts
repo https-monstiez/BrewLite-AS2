@@ -31,6 +31,10 @@ describe('PaymentsService - loyalty points', () => {
 
   beforeEach(() => {
     tx = {
+      recipeIngredient: { findMany: jest.fn().mockResolvedValue([]) },
+      ingredientReservation: { findMany: jest.fn().mockResolvedValue([]) },
+      $queryRaw: jest.fn().mockResolvedValue([]),
+      loyaltyTransaction: { create: jest.fn().mockResolvedValue({}) },
       order: {
         findFirst: jest.fn().mockResolvedValue(order),
         findUnique: jest.fn().mockResolvedValue(order),

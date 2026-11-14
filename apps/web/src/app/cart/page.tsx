@@ -15,7 +15,7 @@ export default function Cart() {
         <div>
           <h3>{i.name}
           </h3>
-          <p>Size {i.size} · {i.toppings.join(", ") || "Không topping"}
+          <p>Size {i.size} · Đường {i.sugar ?? "100"}% · Đá {i.ice ?? "100"}% · {i.toppings.join(", ") || "Không topping"}
           </p>
           <b>{money(i.unitPrice)}
           </b>

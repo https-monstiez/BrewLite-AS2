@@ -23,7 +23,7 @@ describe('Admin API (e2e)', () => {
   const JWT_SECRET = 'test-secret-admin-api-123456789';
   let testUserRole: UserRole = UserRole.CUSTOMER;
 
-  const adminUser = {
+  const _adminUser = {
     id: 'admin-1',
     email: 'admin@example.com',
     name: 'Admin',

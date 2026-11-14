@@ -7,6 +7,6 @@ export class HealthController {
   @Get()
   async health() {
     await this.prisma.$queryRaw`SELECT 1`;
-    return { status: 'ok', service: 'brewlite-api', timestamp: new Date().toISOString() };
+    return { version: process.env.APP_VERSION || 'local', status: 'ok', service: 'brewlite-api', timestamp: new Date().toISOString() };
   }
 }
