@@ -96,3 +96,7 @@ Bộ kiểm tra hiện có: **84 backend + 7 frontend + 12 PostgreSQL + 4 browse
 ## Thay đổi quyền push theo yêu cầu chủ repo — 15/11/2026
 
 GitHub đã tắt enforce_admins trên main, không yêu cầu PR review. Admin được push thẳng và có quyền bypass required checks. Required check `Lint, tests and build`/strict vẫn được cấu hình cho đối tượng chịu branch protection; CI trên main và quality gate trước deploy vẫn giữ. Các ghi nhận enforce_admins phía trên là snapshot trước thay đổi này.
+
+## Đổi phạm vi thanh toán khi hợp nhất nhánh — 15/11/2026
+
+Chủ repo chọn gộp update-payment-methods và chỉ giữ BANK_TRANSFER/LOYALTY_POINTS. Bộ integration được đổi sang kiểm tra đối soát ngân hàng đúng một lần, ledger, tranh chấp payment và hoàn tồn khi hủy đơn pending; các phương thức/endpoint đã bỏ được kiểm tra từ chối. Browser checkout dùng API test và tài khoản nhận giả, xác nhận bởi ADMIN test, không gửi tiền thật. Các kết quả mô phỏng/VNPay và video ở phần lịch sử áp dụng cho release trước; không xem là chức năng còn được bật trên main mới.

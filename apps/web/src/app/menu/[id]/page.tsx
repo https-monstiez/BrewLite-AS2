@@ -122,7 +122,7 @@ export default function Detail() {
           <>
             <hr />
 
-            <div className="option-group">
+            <div className="option-group" role="group" aria-label="Lượng đường">
               <h3>Lượng đường</h3>
               <div className="choices">
                 {["0", "25", "50", "75", "100"].map((v) => (
@@ -138,7 +138,7 @@ export default function Detail() {
               </div>
             </div>
 
-            <div className="option-group">
+            <div className="option-group" role="group" aria-label="Lượng đá">
               <h3>Lượng đá</h3>
               <div className="choices">
                 {["0", "50", "100"].map((v) => (

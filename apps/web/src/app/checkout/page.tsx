@@ -488,27 +488,6 @@ export default function Checkout() {
                 : "Đăng nhập để chọn phương thức thanh toán."}
             </p>
           )}
-          {method === "VNPAY" && (
-            <p>
-              Bạn sẽ được chuyển sang VNPay sandbox. Không quét mã minh họa để
-              chuyển tiền.
-            </p>
-          )}
-          {["WALLET_SIM", "CARD_SIM"].includes(method) && (
-            <label>
-              Kết quả mô phỏng{" "}
-              <select
-                aria-label="Kết quả mô phỏng"
-                value={simulationOutcome}
-                onChange={(e) =>
-                  setSimulationOutcome(e.target.value as "success" | "failure")
-                }
-              >
-                <option value="success">Thành công</option>
-                <option value="failure">Bị từ chối</option>
-              </select>
-            </label>
-          )}
           {error && (
             <p role="alert" className="error">
               {error}

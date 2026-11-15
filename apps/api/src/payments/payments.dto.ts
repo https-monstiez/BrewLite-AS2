@@ -5,7 +5,7 @@ export class CreatePaymentDto {
   @MaxLength(100)
   orderId: string;
 
-  @IsIn(['LOYALTY_POINTS', 'BANK_TRANSFER', 'VNPAY', 'MOMO', 'WALLET_SIM', 'CARD_SIM'])
+  @IsIn(['LOYALTY_POINTS', 'BANK_TRANSFER'])
   method: 'LOYALTY_POINTS' | 'BANK_TRANSFER' | 'VNPAY' | 'MOMO' | 'WALLET_SIM' | 'CARD_SIM';
 }
 export class SimulationDto {

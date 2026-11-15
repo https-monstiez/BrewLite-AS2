@@ -1,5 +1,7 @@
 # BrewLite — Assignment 2
 
+> **Cập nhật main 15/11/2026:** đã gộp `update-payment-methods`, hiện chỉ cung cấp chuyển khoản ngân hàng và điểm tích lũy. Ví/Thẻ mô phỏng và VNPay không còn hoạt động; video/release v0.2.1 mô tả phiên bản trước. Xem [thay đổi phạm vi thanh toán](docs/changes/payment-methods.md).
+
 Hệ thống đặt cà phê trực tuyến cho đồ án kết thúc học phần. Ứng dụng sử dụng Next.js/PWA, NestJS và PostgreSQL/Prisma, hỗ trợ đặt món trên điện thoại và quản lý vận hành cửa hàng.
 
 ## Demo trực tuyến
@@ -29,7 +31,7 @@ AS2 phát triển từ [BrewLite AS1](https://github.com/leehieu36/BrewLite). M�
 - **Khách hàng:** xem và tìm món, chọn size/topping/đường/đá, lưu giỏ hàng, đăng ký/đăng nhập, áp dụng voucher, đổi điểm và theo dõi đơn.
 - **Nhân viên (`STAFF`):** đối soát chuyển khoản và xử lý đơn theo trạng thái pha chế, sẵn sàng, hoàn tất.
 - **Quản lý (`ADMIN`):** quản lý menu, tài khoản, voucher, nguyên liệu, công thức và nhật ký thao tác.
-- **Thanh toán:** Ví/Thẻ mô phỏng; chuyển khoản ngân hàng bằng VietQR và đối soát thủ công; tích hợp VNPay sandbox khi có cấu hình merchant. MoMo chưa được kích hoạt.
+- **Thanh toán hiện tại:** chuyển khoản ngân hàng bằng VietQR, đối soát thủ công; thanh toán bằng điểm tích lũy.
 - **Độ tin cậy:** server tính tiền và kiểm tồn; transaction, idempotency và kiểm soát cập nhật đồng thời bảo vệ thao tác đặt hàng/thanh toán.
 - **PWA:** giao diện di động, manifest và trang dự phòng khi mất mạng.
 

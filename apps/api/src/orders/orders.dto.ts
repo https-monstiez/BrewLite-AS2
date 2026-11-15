@@ -35,7 +35,7 @@ export class OrderLineDto {
   size?: string;
 
   @IsOptional()
-  @IsIn(['0', '30', '50', '70', '100'])
+  @IsIn(['0', '25', '30', '50', '70', '75', '100'])
   sugar?: string;
 
   @IsOptional()

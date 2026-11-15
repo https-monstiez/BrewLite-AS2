@@ -3,8 +3,6 @@ import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/database/prisma.service";
-import { VnpayService } from "../src/payments/vnpay.service";
-import { signature } from "../src/payments/vnpay.service";
 
 if (!process.env.TEST_DATABASE_URL)
   throw new Error("Set TEST_DATABASE_URL to an isolated test database");
@@ -24,6 +22,7 @@ describe("PostgreSQL checkout integration", () => {
     base: string,
     token: string,
     otherToken: string,
+    staffToken: string,
     _userId: string,
     productId: string;
   const prefix = `integration-${Date.now()}`;
@@ -57,7 +56,7 @@ describe("PostgreSQL checkout integration", () => {
   async function makePayment(
     orderId: string,
     key: string,
-    method = "CARD_SIM",
+    method = "BANK_TRANSFER",
   ) {
     const response = await request(
       "/payments",
@@ -102,6 +101,13 @@ describe("PostgreSQL checkout integration", () => {
         _userId = data.user.id;
       } else otherToken = data.accessToken;
     }
+    const staffResponse = await request("/auth/register", "POST", {
+      email: `${prefix}-staff@test.invalid`, password: "StaffIntegration123!", name: "Test staff",
+    }, undefined, "");
+    expect(staffResponse.status).toBe(201);
+    const staff = await staffResponse.json();
+    await prisma.user.update({ where: { id: staff.user.id }, data: { role: "STAFF" } });
+    staffToken = staff.accessToken;
     const product = await prisma.product.create({
       data: { name: prefix, price: 29000, stock: 30 },
     });
@@ -144,6 +150,13 @@ describe("PostgreSQL checkout integration", () => {
     const quote = await request("/orders/quote", "POST", orderBody());
     expect(quote.status).toBe(201);
     expect((await quote.json()).total).toBe(34000);
+    for (const sugar of ["25", "75"]) {
+      const optionQuote = await request("/orders/quote", "POST", {
+        items: [{ ...orderBody().items[0], sugar }],
+      });
+      expect(optionQuote.status).toBe(201);
+      expect((await optionQuote.json()).total).toBe(34000);
+    }
     expect(
       (
         await request(
@@ -190,19 +203,19 @@ describe("PostgreSQL checkout integration", () => {
       ).status,
     ).toBe(404);
   });
-  it("settles simulated payment once, records one ledger entry, and forbids customer status writes", async () => {
+  it("reconciles a bank payment once, records one ledger entry, and forbids customer status writes", async () => {
     const order = await createOrder(prefix + "-sim");
     const paymentResponses = await Promise.all([
       request(
         "/payments",
         "POST",
-        { orderId: order.id, method: "CARD_SIM" },
+        { orderId: order.id, method: "BANK_TRANSFER" },
         prefix + "-sim-pay",
       ),
       request(
         "/payments",
         "POST",
-        { orderId: order.id, method: "CARD_SIM" },
+        { orderId: order.id, method: "BANK_TRANSFER" },
         prefix + "-sim-pay",
       ),
     ]);
@@ -212,14 +225,11 @@ describe("PostgreSQL checkout integration", () => {
     const payment = payments[0];
     const repeated = await makePayment(order.id, prefix + "-sim-pay");
     expect(repeated.id).toBe(payment.id);
-    await Promise.all([
-      request(`/payments/${payment.id}/simulate`, "POST", {
-        outcome: "success",
-      }),
-      request(`/payments/${payment.id}/simulate`, "POST", {
-        outcome: "success",
-      }),
+    const reconciled = await Promise.all([
+      request(`/payments/${order.id}/confirm`, "POST", undefined, undefined, staffToken),
+      request(`/payments/${order.id}/confirm`, "POST", undefined, undefined, staffToken),
     ]);
+    expect(reconciled.map((response) => response.status).sort()).toEqual([201, 409]);
     expect(
       (await prisma.order.findUniqueOrThrow({ where: { id: order.id } }))
         .status,
@@ -243,13 +253,13 @@ describe("PostgreSQL checkout integration", () => {
       request(
         "/payments",
         "POST",
-        { orderId: order.id, method: "WALLET_SIM" },
+        { orderId: order.id, method: "BANK_TRANSFER" },
         prefix + "-race-a",
       ),
       request(
         "/payments",
         "POST",
-        { orderId: order.id, method: "WALLET_SIM" },
+        { orderId: order.id, method: "BANK_TRANSFER" },
         prefix + "-race-b",
       ),
     ]);
@@ -258,7 +268,7 @@ describe("PostgreSQL checkout integration", () => {
       1,
     );
   });
-  it("restores product and ingredient inventory exactly once on declined payment", async () => {
+  it("restores product and ingredient inventory exactly once when canceling a pending bank order", async () => {
     const ingredient = await prisma.ingredient.create({
       data: { name: prefix, unit: "g", stock: 100 },
     });
@@ -277,12 +287,9 @@ describe("PostgreSQL checkout integration", () => {
       ).stock,
     ).toBe(75);
     const payment = await makePayment(order.id, prefix + "-decline-pay");
-    await request(`/payments/${payment.id}/simulate`, "POST", {
-      outcome: "failure",
-    });
-    await request(`/payments/${payment.id}/simulate`, "POST", {
-      outcome: "failure",
-    });
+    expect(payment.method).toBe("BANK_TRANSFER");
+    expect((await request(`/orders/${order.id}/cancel`, "POST", { reason: "Test cancellation" })).status).toBe(201);
+    expect((await request(`/orders/${order.id}/cancel`, "POST", { reason: "Repeated cancellation" })).status).toBe(400);
     expect(
       (await prisma.product.findUniqueOrThrow({ where: { id: productId } }))
         .stock,
@@ -297,47 +304,19 @@ describe("PostgreSQL checkout integration", () => {
     expect(
       (await prisma.order.findUniqueOrThrow({ where: { id: order.id } }))
         .status,
-    ).toBe("PAYMENT_FAILED");
+    ).toBe("CANCELLED");
     await prisma.recipeIngredient.deleteMany({ where: { productId } });
   });
-  it("verifies VNPay signature, amount and duplicate Return/IPN using real transactions", async () => {
-    const order = await createOrder(prefix + "-vnp");
-    const payment = await makePayment(order.id, prefix + "-vnp-pay", "VNPAY");
-    expect(payment.paymentUrl).toContain("vnp_SecureHash=");
-    const params = {
-      vnp_TmnCode: "TESTCODE",
-      vnp_TxnRef: payment.id,
-      vnp_Amount: String(order.total * 100),
-      vnp_ResponseCode: "00",
-      vnp_TransactionStatus: "00",
-      vnp_TransactionNo: "12345",
-    };
-    const vnpay = app.get(VnpayService);
-    expect(
-      (await vnpay.callback({ ...params, vnp_SecureHash: "a".repeat(128) }))
-        .RspCode,
-    ).toBe("97");
-    const wrong = { ...params, vnp_Amount: "100" };
-    expect(
-      (
-        await vnpay.callback({
-          ...wrong,
-          vnp_SecureHash: signature(wrong, process.env.VNPAY_HASH_SECRET!),
-        })
-      ).RspCode,
-    ).toBe("04");
-    const signed = {
-      ...params,
-      vnp_SecureHash: signature(params, process.env.VNPAY_HASH_SECRET!),
-    };
-    const outcomes = await Promise.all([
-      vnpay.callback(signed),
-      vnpay.callback(signed),
-    ]);
-    expect(outcomes.map((o) => o.RspCode).sort()).toEqual(["00", "02"]);
-    expect(
-      await prisma.loyaltyTransaction.count({ where: { orderId: order.id } }),
-    ).toBe(1);
+  it("exposes only bank/points and rejects retired methods without creating payments", async () => {
+    const methods = await request("/payments/methods");
+    expect((await methods.json()).available.sort()).toEqual(["BANK_TRANSFER", "LOYALTY_POINTS"]);
+    const order = await createOrder(prefix + "-retired");
+    for (const method of ["VNPAY", "MOMO", "WALLET_SIM", "CARD_SIM"]) {
+      expect((await request("/payments", "POST", { orderId: order.id, method }, prefix + method)).status).toBe(400);
+    }
+    expect(await prisma.payment.count({ where: { orderId: order.id } })).toBe(0);
+    expect((await request("/payments/retired/simulate", "POST", { outcome: "success" })).status).toBe(404);
+    expect((await request("/payments/vnpay/return")).status).toBe(404);
   });
   it("enforces ADMIN inventory access, idempotent receipts and strict order transitions", async () => {
     expect((await request("/inventory")).status).toBe(403);
@@ -375,10 +354,8 @@ describe("PostgreSQL checkout integration", () => {
       (await request(`/orders/${order.id}/status`, "PATCH", { status: "PAID" }))
         .status,
     ).toBe(409);
-    const payment = await makePayment(order.id, prefix + "-states-pay");
-    await request(`/payments/${payment.id}/simulate`, "POST", {
-      outcome: "success",
-    });
+    await makePayment(order.id, prefix + "-states-pay");
+    expect((await request(`/payments/${order.id}/confirm`, "POST", undefined, undefined, staffToken)).status).toBe(201);
     expect(
       (
         await request(`/orders/${order.id}/status`, "PATCH", {

@@ -1,5 +1,7 @@
 # Video demo mobile trên production
 
+> Video và script này thuộc release v0.2.1 khi Thẻ mô phỏng còn được hỗ trợ. Main mới đã chuyển sang ngân hàng/điểm; xem [thay đổi phạm vi](../changes/payment-methods.md). Để tái lập video này dùng mã nguồn tag v0.2.1, không chạy script trên main mới.
+
 [Video checkout-mobile.webm](checkout-mobile.webm) — khoảng 20 giây, viewport 390 × 844, ghi ngày 15/11/2026 trên website Vercel và API Render thật bằng Playwright.
 
 Luồng đã quan sát: đăng nhập CUSTOMER demo → mở món → chọn size M, đường/đá 50% → thêm giỏ → reload vẫn giữ giỏ → chọn Thẻ mô phỏng → tạo đơn/thanh toán → API xác nhận đã trả 40.000đ. Không mock API và không chuyển tiền ngân hàng thật. Video là ghi hình tự động, không phải biên bản nghiệm thu của giảng viên hay buổi họp nhóm.

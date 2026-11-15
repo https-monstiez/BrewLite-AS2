@@ -183,7 +183,7 @@ describe('PaymentsService - loyalty points', () => {
       service.create(
         'user-1',
         'points-key-005',
-        { orderId: 'order-1', method: 'CASH' as any },
+        { orderId: 'order-1', method: 'BANK_TRANSFER' as any },
       ),
     ).rejects.toBeInstanceOf(ConflictException);
   });
@@ -232,7 +232,7 @@ describe('PaymentsService - loyalty points', () => {
       payments: [
         {
           id: 'payment-1',
-          method: 'CASH',
+          method: 'BANK_TRANSFER',
           status: PaymentStatus.PENDING,
         },
       ],
@@ -289,7 +289,7 @@ describe('PaymentsService - loyalty points', () => {
       payments: [
         {
           id: 'payment-1',
-          method: 'CASH',
+          method: 'BANK_TRANSFER',
           status: PaymentStatus.PENDING,
         },
       ],

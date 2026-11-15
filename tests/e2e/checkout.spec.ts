@@ -1,10 +1,11 @@
 import { test, expect } from "../../apps/web/node_modules/@playwright/test";
-test("FR-01–FR-07: mobile menu → options → persisted cart → registration → card simulation → verified confirmation", async ({
+test("FR-01–FR-07: mobile menu → options → persisted cart → registration → bank reconciliation → verified confirmation", async ({
   page,
 }) => {
   await page.goto("/");
   await page.locator('a[href^="/menu/"]').first().click();
-  await page.getByLabel("Lượng đường").selectOption("50");
+  await page.getByRole("group", { name: "Lượng đường" }).getByRole("button", { name: "25%", exact: true }).click();
+  await page.getByRole("group", { name: "Lượng đá" }).getByRole("button", { name: "50%", exact: true }).click();
   await page
     .getByRole("button", { name: "Thêm vào giỏ hàng", exact: true })
     .click();
@@ -24,11 +25,23 @@ test("FR-01–FR-07: mobile menu → options → persisted cart → registration
     .getByRole("button", { name: "Tạo tài khoản", exact: true })
     .click();
   await expect(page).toHaveURL(/checkout/);
-  await page.getByRole("button", { name: /Thẻ mô phỏng/ }).click();
-  await page
-    .getByRole("button", { name: /Đặt hàng và thanh toán mô phỏng/ })
-    .click();
+  await page.getByRole("button", { name: /Chuyển khoản ngân hàng/ }).click();
+  await page.getByRole("button", { name: /Tạo đơn và xem QR ngân hàng/ }).click();
   await expect(page).toHaveURL(/confirmation\?id=/);
+  await expect(page.getByText("Chờ thanh toán / đối soát", { exact: true })).toBeVisible();
+  const orderId = new URL(page.url()).searchParams.get("id");
+  const api = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3101/api";
+  // Isolated test API and fake receiver only; no bank transfer is performed.
+  const login = await page.request.post(`${api}/auth/login`, {
+    data: { email: "browser-admin@test.invalid", password: "BrowserAdminTest123!" },
+  });
+  expect(login.ok()).toBeTruthy();
+  const manager = await login.json();
+  const confirmed = await page.request.post(`${api}/payments/${orderId}/confirm`, {
+    headers: { Authorization: `Bearer ${manager.accessToken}` },
+  });
+  expect(confirmed.ok()).toBeTruthy();
+  await page.reload();
   await expect(
     page.getByRole("heading", { name: "Đặt hàng thành công!" }),
   ).toBeVisible();
