@@ -14,6 +14,8 @@ RUN npm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
+ARG APP_VERSION=local
+ENV APP_VERSION=$APP_VERSION
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=builder /app ./

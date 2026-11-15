@@ -2,7 +2,7 @@
 !pragma layout smetana
 skinparam shadowing false
 skinparam defaultFontName SansSerif
-title BrewLite AS2 — deployed topology (15 Nov 2026)
+title BrewLite AS2 — production topology and configured CI deploy path (15 Nov 2026)
 
 node "Developer / Local" {
   node "Docker Compose" {
@@ -19,6 +19,7 @@ node "GitHub — BrewLite-AS2" {
   node "GitHub Actions" {
     artifact "CI quality gate\nlint, tests, build, PostgreSQL,\nPlaywright E2E" as ci
     artifact "Delivery\nbuild Docker images\npinned by commit SHA" as delivery
+    artifact "CI deploy + smoke\nconfigured; secrets/run pending" as cideploy
   }
   node "GHCR" {
     artifact "API and web images\ncommit-SHA tags" as images
@@ -36,7 +37,7 @@ node "Production — Vercel + Render" {
   }
   node "Render — Singapore" {
     artifact "Git-backed Docker Web Service\nbrewlite-as2-api\nPORT /api/health" as api
-    database "Render PostgreSQL Free\nprivate inbound rules\nno public IP ranges" as db
+    database "Render PostgreSQL Free\npersistent managed storage\nprivate inbound rules\nno public IP ranges" as db
     artifact "Environment configuration\nDATABASE_URL from database\nJWT and bank settings" as secrets
     artifact "Render service logs" as logs
     api --> db : internal connection string\nPostgreSQL TCP
@@ -44,7 +45,10 @@ node "Production — Vercel + Render" {
     api --> logs
   }
   source --> web : Vercel Git integration\nproduction deployment
-  source --> api : Render Blueprint\nmain / checksPass
+  source --> api : Render Blueprint\nmain / checksPass (current)
+  delivery ..> cideploy : after image / main only
+  cideploy ..> api : configured: Render API commitId\nsecret from GitHub
+  cideploy ..> web : configured: deploy hook main\nthen web/API SHA smoke
 }
 
 node "Customer device" {
@@ -57,6 +61,11 @@ client --> api : HTTPS 443 / REST + JWT
 api --> vnp : signed payment URL (when configured)
 vnp --> api : HTTPS Return / IPN
 
+note right of cideploy
+Dotted CI deploy path awaits repository secrets
+and a successful production deploy/smoke run.
+Current platform Git deployments are separate.
+end note
 note right of images
 GHCR image build/push is verified
 by GitHub Delivery. The current Render
@@ -68,8 +77,8 @@ is empty; Internet traffic to PostgreSQL is blocked.
 Free database deletion notice: 15 Dec 2026.
 end note
 note bottom of web
-Production smoke checked 15 Nov 2026:
-web and API report commit
-ab5af1728c75be75c6b5c7d150fcd6ed6028d409.
+Historical smoke 03:55 ICT: web/API ab5af172...
+Later check 12:34 ICT: web e9b3949..., API ab5af172...
+Both respond; versions are not yet synchronized.
 end note
 @enduml

@@ -11,7 +11,7 @@
 | US-05 Đặt/thanh toán | FR-04/05/06/12 | 2 | JWT, quote, idempotency/OCC, simulation/sandbox | Đã kiểm thử local + CI; xem docs/testing.md |
 | US-06 Theo dõi và pha chế | FR-07/08 | 2 | owner-only history, queue/state machine | Đã kiểm thử local + CI; xem docs/testing.md |
 | US-07 Quản trị/loyalty | FR-09/10/11/13 | 2 | menu/voucher/users/audit/ledger | Đã kiểm thử local + CI; xem docs/testing.md |
-| US-08 Delivery | NFR-07 | 2 | image SHA, deploy/smoke, URL thật, rollback | Bị phụ thuộc cloud |
+| US-08 Delivery | NFR-07 | 2 | image SHA, deploy/smoke, URL thật, rollback | Production có URL; CI deploy/smoke còn thiếu secrets và minh chứng chạy, xem docs/cd-setup.md |
 | US-09 Nguyên liệu | FR-14 | mở rộng | công thức, nhập/trừ kho transaction | Đã hiện thực kho/công thức; integration CI đạt |
 
 ## Branch và PR

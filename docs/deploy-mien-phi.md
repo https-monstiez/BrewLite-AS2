@@ -67,4 +67,4 @@ Nguồn: [Render Free](https://render.com/docs/free), [Blueprint spec](https://r
 ## CI/CD ở phương án miễn phí
 Render service này build từ Git và dùng `autoDeployTrigger: checksPass`; cần GitHub integration để kiểm tra CI trên nhánh main. Lần deploy đầu được xác nhận trong dashboard. Vercel Git integration build web từ main; không merge PR khi required CI chưa xanh.
 
-Không bật job deploy **image-backed Render** trong workflow CD cho service Git-backed này. Giữ PRODUCTION_DEPLOY_ENABLED chưa bật; GHCR vẫn đóng gói để đáp ứng tạo phẩm và để dùng khi chuyển VPS/image service sau. Deploy hooks/custom CD chỉ cấu hình khi đã có đúng loại service và URL thực tế.
+Workflow CD hiện hỗ trợ đúng service Git-backed bằng `commitId`. Để hoàn tất Task 5.3, làm theo [cd-setup.md](cd-setup.md): thêm secrets/variables, bật `PRODUCTION_DEPLOY_ENABLED=true` sau khi đủ cấu hình và chạy Delivery trên main. GHCR vẫn lưu image SHA làm tạo phẩm. Chưa có run deploy/smoke thành công thì không đánh dấu CD hoàn tất.

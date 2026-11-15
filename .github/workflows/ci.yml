@@ -38,6 +38,8 @@ jobs:
             apps/web/package-lock.json
       - name: Install
         run: npm run install:apps
+      - name: Delivery orchestration tests
+        run: npm run test:delivery
       - name: Generate Prisma Client
         run: npm run prisma:generate --prefix apps/api
       - name: Lint
