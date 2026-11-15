@@ -22,6 +22,8 @@ AS2 phát triển từ [BrewLite AS1](https://github.com/leehieu36/BrewLite). M�
 | Lê Ngọc Hiếu | 3124410095 |
 | Nguyễn Tiến Đạt | 3124410060 |
 
+**Giảng viên:** Từ Lãng Phiêu.
+
 ## Chức năng chính
 
 - **Khách hàng:** xem và tìm món, chọn size/topping/đường/đá, lưu giỏ hàng, đăng ký/đăng nhập, áp dụng voucher, đổi điểm và theo dõi đơn.
@@ -144,7 +146,7 @@ Production hiện dùng Vercel + Render. Bộ [deploy/vps](deploy/vps) là phư�
 
 Task 5.3 còn cần cấu hình secrets và chạy deploy/smoke qua CI. Xem [hướng dẫn bật CD](docs/cd-setup.md); job đóng gói màu xanh không chứng minh production đã được workflow triển khai.
 [Hướng dẫn triển khai/rollback](docs/deployment.md), [ma trận truy vết](docs/traceability-matrix.md), [checklist](docs/process/handover.md).
-[Báo cáo Assignment 2](docs/report-as2.md). Nhóm cần bổ sung thông tin lớp/giảng viên, video demo và biên bản Review/Retrospective thực tế trước khi nộp.
+[Báo cáo Assignment 2](docs/report-as2.md). Nhóm cần bổ sung thông tin lớp nếu mẫu yêu cầu, video demo và biên bản Review/Retrospective thực tế trước khi nộp.
 
 CI chạy Install→Lint→Test→Build, integration PostgreSQL và browser E2E. Nhánh `main` có required check `Lint, tests and build`. CD đóng gói API image SHA lên GHCR và chỉ chạy job deploy khi `PRODUCTION_DEPLOY_ENABLED=true` cùng đủ secret/URLs.
 

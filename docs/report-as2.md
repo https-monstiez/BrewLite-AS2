@@ -6,15 +6,16 @@
 **Trường Đại học Sài Gòn — Khoa Công nghệ Thông tin**<br>
 **Năm học 2026–2027**
 
-> **Nhóm cần hoàn thiện trước khi nộp:** điền thông tin giảng viên và ngày nộp theo yêu cầu; bổ sung link video demo; ghi nhận Sprint Review và Sprint Retrospective thực tế. Các thông tin này không được giả định trong báo cáo.
+> **Nhóm cần hoàn thiện trước khi nộp:** bổ sung lớp/nhóm nếu mẫu yêu cầu; bổ sung link video demo; ghi nhận Sprint Review và Sprint Retrospective thực tế. Các thông tin này không được giả định trong báo cáo.
 
 | Thành viên | MSSV |
 |---|---|
 | Lê Ngọc Hiếu | 3124410095 |
 | Nguyễn Tiến Đạt | 3124410060 |
 
-**Giảng viên hướng dẫn:** [Điền nếu mẫu yêu cầu]<br>
-**Ngày nộp:** [Điền ngày nộp]
+**Giảng viên hướng dẫn:** Từ Lãng Phiêu<br>
+**Ngày nộp sản phẩm:** 16/11/2026<br>
+**Ngày bảo vệ dự kiến:** 18/11/2026
 
 ---
 
@@ -326,7 +327,7 @@ Trạng thái hiện tại: code, sơ đồ, kiểm thử, production URL và re
 
 **Nhóm tự hoàn thiện trước khi nộp:**
 
-1. Điền thông tin giảng viên/ngày nộp nếu mẫu yêu cầu.
+1. Bổ sung lớp/nhóm nếu mẫu yêu cầu.
 2. Quay và bổ sung link video demo thực tế luồng end-to-end.
 3. Tổ chức/ghi nhận Sprint Review và Sprint Retrospective với người tham dự, phản hồi và hành động thật.
 4. Hoàn tất Task 5.3: cấu hình secrets trong GitHub settings theo [cd-setup.md](cd-setup.md), chạy workflow deploy/smoke và lưu bằng chứng thành công; không đưa secrets vào repo hoặc báo cáo.

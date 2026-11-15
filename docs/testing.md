@@ -63,3 +63,9 @@ Kết quả local bổ sung đã đạt: 84 backend unit/HTTP + 5 frontend + 11 
 - [Delivery run 43644852017](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43644852017): quality/image thành công; deploy và deploy-vps bị skipped. Task 5.3 chưa được nghiệm thu.
 - Đã kiểm tra danh sách tên cấu hình GitHub: repository chưa có Actions secrets hoặc variables. Không đọc giá trị secret.
 - `npm run test:delivery`: 12/12 test orchestration đạt ở local; mô phỏng HTTP, không phải bằng chứng deploy production. Bao gồm Git commit pinning, cold start, lỗi Render/Vercel, SHA không khớp và che secret khi lỗi mạng. Các test này tách riêng với 104 test ứng dụng đã ghi nhận trước đó.
+
+## Lần chạy CD có deploy thật đầu tiên
+
+[Run 43682676783](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43682676783) đã qua quality/image và gọi Render deploy thành công commit `9d858115b8b272b6540047838a19562687b61082`. API health công khai báo đúng SHA lúc khoảng 12:56 ICT. Tuy nhiên job deploy thất bại ở bước smoke menu vì script chờ mảng, trong khi `ProductsService.list` trả `{ items, pagination }`. Chưa chạy tới Vercel hook; không đánh dấu CD hoàn thành.
+
+Đã sửa smoke theo contract phân trang thực tế, cập nhật fixture từ cấu trúc API và thêm test hồi quy từ chối response mảng không đúng contract. Bộ test orchestration hiện có **13 test**, tách riêng với 104 test ứng dụng. Tên giảng viên và mốc nộp/bảo vệ đã được điền từ thông tin nhóm.
