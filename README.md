@@ -156,18 +156,19 @@ Production hiện dùng Vercel + Render. Bộ [deploy/vps](deploy/vps) là phư�
 
 ## CI/CD và production
 
-Task 5.3 còn cần cấu hình secrets và chạy deploy/smoke qua CI. Xem [hướng dẫn bật CD](docs/cd-setup.md); job đóng gói màu xanh không chứng minh production đã được workflow triển khai.
+Task 5.3 đã có cấu hình secrets; còn chốt một run deploy/smoke qua CI thành công. Xem [hướng dẫn bật CD](docs/cd-setup.md); job đóng gói màu xanh không chứng minh production đã được workflow triển khai.
 [Hướng dẫn triển khai/rollback](docs/deployment.md), [ma trận truy vết](docs/traceability-matrix.md), [checklist](docs/process/handover.md).
 [Báo cáo Assignment 2](docs/report-as2.md). Nhóm cần bổ sung thông tin lớp nếu mẫu yêu cầu, video demo và biên bản Review/Retrospective thực tế trước khi nộp.
 
 CI chạy Install→Lint→Test→Build, integration PostgreSQL và browser E2E. Nhánh `main` có required check `Lint, tests and build`. CD đóng gói API image SHA lên GHCR và chỉ chạy job deploy khi `PRODUCTION_DEPLOY_ENABLED=true` cùng đủ secret/URLs.
 
-**Production đã triển khai và smoke công khai:** [website](https://brew-lite-as-2.vercel.app/), [API health](https://brewlite-as2-api.onrender.com/api/health), [API menu](https://brewlite-as2-api.onrender.com/api/products). Ở lần kiểm tra lúc khoảng 12:34 ICT ngày 15/11/2026, web báo `e9b3949` và API báo `ab5af17`; cả hai phản hồi nhưng chưa đồng bộ SHA. Chi tiết và giới hạn xác minh xem [deployment.md](docs/deployment.md). Trạng thái release và các minh chứng bàn giao được theo dõi trong báo cáo và checklist; deployment không thay thế video demo hoặc biên bản làm việc nhóm.
+**Production đã triển khai và smoke công khai:** [website](https://brew-lite-as-2.vercel.app/), [API health](https://brewlite-as2-api.onrender.com/api/health), [API menu](https://brewlite-as2-api.onrender.com/api/products). Kết quả phiên bản theo từng lần kiểm tra được ghi trong hồ sơ deployment; ba tài khoản demo online đã đăng nhập đúng quyền. Chi tiết và giới hạn xác minh xem [deployment.md](docs/deployment.md). Trạng thái release và các minh chứng bàn giao được theo dõi trong báo cáo và checklist; deployment không thay thế video demo hoặc biên bản làm việc nhóm.
 
 ## Tài liệu đồ án
 
 | Nội dung | Tài liệu |
 | --- | --- |
+| Đối chiếu yêu cầu và việc còn lại | [Rà soát AS2](docs/as2-audit.md) |
 | Báo cáo tổng hợp AS2 | [Báo cáo](docs/report-as2.md) |
 | Phạm vi và yêu cầu | [Phạm vi](docs/requirements/context-and-scope.md), [SRS](docs/requirements/srs.md), [Use case checkout](docs/requirements/checkout-use-case.md) |
 | UML và kiến trúc | [Sơ đồ](docs/diagrams/README.md), [Kiến trúc](docs/architecture/overview.md) |
