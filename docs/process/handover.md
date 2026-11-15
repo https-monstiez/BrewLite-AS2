@@ -14,7 +14,7 @@
 - [x] Environment có `DATABASE_URL`; Blueprint ánh xạ tới `brewlite-as2-db` internal connection string (giá trị secret không được mở/chia sẻ).
 - [x] GitHub Release/tag `v0.2.0` trên commit production — [Release](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.0).
 - [x] README có họ tên/MSSV; báo cáo đã điền Lê Ngọc Hiếu và Nguyễn Tiến Đạt.
-- [ ] Điền giảng viên/ngày nộp và xuất bản báo cáo theo định dạng yêu cầu.
+- [x] Báo cáo có giảng viên Từ Lãng Phiêu và mốc nộp sản phẩm/bảo vệ do nhóm cung cấp.
 - [ ] Tạo ADMIN trên Render, đăng nhập và thử xử lý đơn bằng tài khoản quản lý/nhân viên.
 - [ ] Video/demo trực tiếp có người nghiệm thu.
 - [ ] Sprint Review/Retrospective có thành viên, thời điểm và phản hồi thật.

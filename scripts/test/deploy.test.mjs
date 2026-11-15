@@ -20,7 +20,7 @@ function harness(overrides = {}) {
     if (url.endsWith("/deploys")) return json({ id: "dep-test" }, 201);
     if (url.endsWith("/deploys/dep-test")) return json({ status: "live" });
     if (url === env.API_HEALTH_URL) return json({ status: "ok", version: sha });
-    if (url.endsWith("/api/products")) return json([{ id: "p1" }]);
+    if (url.endsWith("/api/products")) return json({ items: [{ id: "p1", name: "Coffee", price: 35000 }], pagination: { page: 1, limit: 20, total: 1, totalPages: 1 } });
     if (url === env.VERCEL_DEPLOY_HOOK) return json({ job: { id: "test" } });
     if (url.endsWith("/version")) return json({ version: sha });
     if (url === env.WEB_URL) return new Response("<html>BrewLite</html>");
@@ -73,6 +73,11 @@ test("stale API SHA prevents frontend deployment", async () => {
 test("menu failure prevents frontend deployment", async () => {
   const h = harness({ "https://api.example.test/api/products": () => json({}, 500) });
   await assert.rejects(deploy(env, h.options), /menu smoke/);
+  assert.ok(!h.calls.some((c) => c.url === env.VERCEL_DEPLOY_HOOK));
+});
+test("rejects a bare array because products API returns a paginated envelope", async () => {
+  const h = harness({ "https://api.example.test/api/products": () => json([{ id: "p1" }]) });
+  await assert.rejects(deploy(env, h.options), /expected items and pagination/);
   assert.ok(!h.calls.some((c) => c.url === env.VERCEL_DEPLOY_HOOK));
 });
 test("Vercel hook rejection fails delivery", async () => {

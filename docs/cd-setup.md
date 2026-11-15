@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Script và workflow hỗ trợ đúng service Render **Git-backed** hiện tại. GitHub chưa có Actions secrets/variables ở lần kiểm tra 15/11/2026; chưa có run deploy/smoke production thành công. Không đánh dấu Task 5.3 hoàn thành chỉ vì job image đạt.
+Script và workflow hỗ trợ đúng service Render **Git-backed** hiện tại. Nhóm đã lưu đủ ba Actions secrets và các variables; `PRODUCTION_DEPLOY_ENABLED=true`. Run 43682676783 đã deploy API thật nhưng lỗi smoke menu; đã sửa contract và cần run mới hoàn tất smoke cả API/web. Không đánh dấu Task 5.3 hoàn thành chỉ vì job image đạt.
 
 Luồng sau khi bật: quality gate → image SHA/GHCR → Render deploy đúng `commitId` → startup migration → API health/SHA/menu → Vercel hook của `main` → web version/trang chủ → kiểm tra lại API SHA. Lỗi dừng job và dẫn tới runbook rollback; không tự reset database. Image GHCR là tạo phẩm đóng gói, service Render hiện build Docker từ Git.
 

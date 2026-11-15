@@ -77,7 +77,11 @@ export async function deploy(env, {
     status.status === "ok" && status.version === env.EXPECTED_VERSION),
   "API smoke/version check timed out");
   const menu = await fetchSafe(new URL("products", env.API_HEALTH_URL));
-  if (!menu.ok || !Array.isArray(await menu.json())) throw new Error("API menu smoke test failed");
+  if (!menu.ok) throw new Error("API menu smoke test failed");
+  const catalog = await menu.json();
+  if (!Array.isArray(catalog.items) || !Number.isInteger(catalog.pagination?.total)) {
+    throw new Error("API menu smoke test failed: expected items and pagination");
+  }
 
   // Hook must track production main. Hooks deploy the branch head; the SHA check
   // below rejects a concurrent newer commit instead of reporting false success.
