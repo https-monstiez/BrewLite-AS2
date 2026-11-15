@@ -1,5 +1,9 @@
 # Task 5 — Triển khai và rollback
 
+## Cập nhật sau khi bật demo — 15/11/2026
+
+API/web đã lên SHA `ebff7514ffa1f576889bf7aa61bfa49ec23e3c8d`; ba tài khoản demo đăng nhập thành công với đúng role. Các snapshot SHA bên dưới là lịch sử kiểm tra. CD vẫn chưa được nghiệm thu: [run 43684074987](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43684074987) lỗi khi parse response deploy rỗng. Script được bổ sung xử lý 202 Queued và theo dõi deployment mới đúng commit; xem [testing.md](testing.md) và [cd-setup.md](cd-setup.md).
+
 ## Cập nhật sau kiểm tra — 15/11/2026 khoảng 12:34 ICT
 
 Web `/version` hiện trả `e9b394940009688ac0ec8e46a30ed3c5f018f1a6`; API health trả `ab5af1728c75be75c6b5c7d150fcd6ed6028d409`, `status: ok`. Hai endpoint trả 200 nhưng chưa cùng SHA. Bảng dưới là kết quả **lần kiểm tra trước lúc 03:55**, không phải phiên bản mới nhất.

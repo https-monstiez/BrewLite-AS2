@@ -19,7 +19,9 @@
 
 ---
 
-> **Cập nhật kiểm tra 15/11/2026 khoảng 12:34 ICT:** web đã lên SHA `e9b3949`, API vẫn ở `ab5af17`; cả hai trả 200. Các đoạn ghi cùng SHA dưới đây mô tả lần kiểm tra trước. Task 5.3 còn thiếu run CI deploy/smoke thật; xem [cd-setup.md](cd-setup.md).
+> **Cập nhật mới:** ba tài khoản demo online đã đăng nhập được, đúng quyền ADMIN/STAFF/CUSTOMER; web/API đã lên SHA `ebff751`. Task 5.3 còn chờ run deploy/smoke xanh sau bản sửa phản hồi queued.
+
+> **Lịch sử kiểm tra 15/11/2026 khoảng 12:34 ICT:** web đã lên SHA `e9b3949`, API vẫn ở `ab5af17`; cả hai trả 200. Các đoạn ghi cùng SHA dưới đây mô tả lần kiểm tra trước. Task 5.3 còn thiếu run CI deploy/smoke thật; xem [cd-setup.md](cd-setup.md).
 
 ## Tóm tắt
 
