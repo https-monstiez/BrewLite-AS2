@@ -37,3 +37,5 @@ Ngày; thành viên; Sprint Goal; câu chuyện Done kèm test/PR; phản hồi 
 
 ## Sprint Retrospective — mẫu cần điền sau buổi thật
 Điều làm tốt; khó khăn có bằng chứng; nguyên nhân; 1–3 hành động cải tiến, người phụ trách và hạn kiểm tra. Không ghi mẫu này thành biên bản đã họp.
+
+Nội dung chuẩn bị chi tiết: [dự thảo Sprint Review/Retrospective](sprint-review-retrospective.md). Bản dự thảo chưa được tính là biên bản đã xác nhận.
