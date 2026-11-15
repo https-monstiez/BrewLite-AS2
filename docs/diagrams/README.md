@@ -12,3 +12,5 @@ Mỗi sơ đồ có nguồn PlantUML và SVG xuất từ chính nguồn. Render:
 Các lớp/thuộc tính mới trong mô hình phải được hiện thực và kiểm thử trong Task 5 trước nghiệm thu; theo dõi ở ma trận truy vết. Chưa dùng sơ đồ target làm minh chứng production.
 
 - deployment-vps: phương án VPS bổ sung, HTTPS/Caddy, image SHA, mạng DB nội bộ; chưa có máy chủ thật.
+
+- class-inventory: mô hình kho tách riêng để sơ đồ domain chính đọc rõ khi in báo cáo; source và SVG được cập nhật cùng report-as2.md. Các sơ đồ main hiện chỉ thể hiện ngân hàng/điểm; các trạng thái cũ được giữ cho dữ liệu lịch sử.

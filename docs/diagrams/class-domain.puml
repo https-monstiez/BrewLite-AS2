@@ -3,6 +3,9 @@
 skinparam shadowing false
 skinparam defaultFontName SansSerif
 hide methods
+top to bottom direction
+skinparam nodesep 25
+skinparam ranksep 35
 class User {
  id: String
  email: String
@@ -36,6 +39,7 @@ class OrderItem {
  unitPrice: Int
  lineTotal: Int
 }
+note "New payments: BANK_TRANSFER or LOYALTY_POINTS.\nLegacy status/method data is retained for historical orders." as paymentScope
 class Payment {
  id: String
  idempotencyKey: String unique
@@ -44,6 +48,7 @@ class Payment {
  status: PaymentStatus
  providerRef: String?
 }
+paymentScope .. Payment
 class Promotion {
  code: String unique
  discountType: DiscountType
@@ -84,33 +89,14 @@ enum DiscountType {
  PERCENTAGE
  FIXED_AMOUNT
 }
-User "1" -- "0..*" Order
-Order "1" *-- "1..*" OrderItem
+User "1" -down- "0..*" Order
+Order "1" *-down- "1..*" OrderItem
 Product "1" -- "0..*" OrderItem
-Order "1" -- "0..*" Payment
+Order "1" -right- "0..*" Payment
 Order "0..*" ..> "0..1" Promotion : code snapshot
 User "1" -- "0..*" LoyaltyTransaction
 Order "0..1" -- "0..*" LoyaltyTransaction
-class Ingredient {
- name: String
- unit: String
- stock: Int
-}
-class RecipeIngredient {
- quantity: Int
-}
-class IngredientReservation {
- quantity: Int
- restored: Boolean
-}
-class StockMovement {
- quantity: Int
- reference: String unique
- reason: String
-}
-Product "1" -- "0..*" RecipeIngredient
-Ingredient "1" -- "0..*" RecipeIngredient
-Order "1" -- "0..*" IngredientReservation
-Ingredient "1" -- "0..*" IngredientReservation
-Ingredient "1" -- "0..*" StockMovement
+UserRole -[hidden]down-> OrderStatus
+OrderStatus -[hidden]down-> PaymentStatus
+PaymentStatus -[hidden]down-> DiscountType
 @enduml

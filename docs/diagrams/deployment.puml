@@ -19,7 +19,7 @@ node "GitHub — BrewLite-AS2" {
   node "GitHub Actions" {
     artifact "CI quality gate\nlint, tests, build, PostgreSQL,\nPlaywright E2E" as ci
     artifact "Delivery\nbuild Docker images\npinned by commit SHA" as delivery
-    artifact "CI deploy + smoke\nverified run 43685179367" as cideploy
+    artifact "CI deploy + smoke\nverified run 43710893938" as cideploy
   }
   node "GHCR" {
     artifact "API and web images\ncommit-SHA tags" as images
@@ -55,14 +55,19 @@ node "Customer device" {
   artifact "Browser / installed PWA" as client
 }
 
-cloud "VNPay Sandbox\noptional; requires merchant config" as vnp
+cloud "VietQR image service\nQR rendering only" as qr
+node "External bank application\ncustomer transfer / staff reconciliation" as bankapp
 client --> web : HTTPS 443
 client --> api : HTTPS 443 / REST + JWT
-api --> vnp : signed payment URL (when configured)
-vnp --> api : HTTPS Return / IPN
+client --> qr : HTTPS QR image request
+client --> bankapp : transfer outside BrewLite
+note right of bankapp
+No automatic bank receipt callback is configured.
+Staff verifies receipt before confirming payment.
+end note
 
 note right of cideploy
-CI deploy path verified by run 43685179367.
+CI deploy path verified by run 43710893938.
 Quality, image, deploy and smoke succeeded.
 Platform Git deployments remain separate mechanisms.
 end note
@@ -78,7 +83,7 @@ Free database deletion notice: 15 Dec 2026.
 end note
 note bottom of web
 Verified deployment snapshot, 15 Nov 2026:
-web/API SHA 2af63a27619e7062e94bc6163643448e08a1b7f8
+web/API SHA 55c02e4a4b4c63f1abd5554c6d22647e968a45b4
 See docs/deployment.md for run evidence and later versions.
 end note
 @enduml

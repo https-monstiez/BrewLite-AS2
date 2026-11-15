@@ -4,48 +4,58 @@ skinparam shadowing false
 skinparam defaultFontName SansSerif
 |Customer|
 start
-:Browse menu and choose options;
-:Add to cart;
+:Browse, choose options, add to cart;
 if (Logged in?) then (no)
  :Register / log in;
 endif
-:Request quote;
+:Request quote and submit order with stable key;
 |NestJS API|
-:Validate JWT and payload;
-:Read current prices, voucher, inventory;
-if (Available and valid?) then (no)
+:Validate JWT / DTO, price, voucher, inventory;
+if (Valid and in stock?) then (no)
  |Customer|
- :Show out-of-stock / validation error;
+ :Display validation / out-of-stock error;
  stop
-else (yes)
- :Transaction: reserve stock and create PENDING;
 endif
+|NestJS API|
+:Transaction: reserve stock, create PENDING;
 |Customer|
-:Choose payment and confirm;
-|Payment Service|
-if (Bank transfer?) then (yes)
+:Choose bank transfer or loyalty points;
+|PaymentsService|
+if (Loyalty points?) then (yes)
+ :Transaction: check balance;
+ if (Enough points?) then (no)
+  |Customer|
+  :Show insufficient balance; order stays PENDING;
+  if (Cancel pending order?) then (yes)
+   |NestJS API|
+   :CANCELLED; restore reserved stock once;
+  endif
+  stop
+ endif
+ |PaymentsService|
+ :Deduct points; record payment / ledger once;
+else (bank transfer)
+ :Create pending bank payment and instructions;
  |Customer|
- :Open VietQR, verify recipient and transfer in bank app;
- |Barista|
- :Reconcile received funds in bank statement;
- |Payment Service|
-else (no)
- :Simulate or sandbox authorization;
-endif
-if (Success?) then (yes)
+ :View VietQR / transfer in external bank app;
+ |Staff|
+ :Check bank statement and received amount/reference;
+ if (Receipt verified?) then (no)
+  |Customer|
+  :Order stays PENDING; track or cancel;
+  stop
+ endif
  |NestJS API|
- :Verify signature / owner, amount, reference;
- :Transaction: claim PENDING -> PAID;
- :Record payment and loyalty ledger once;
- |Customer|
- :View confirmed order from API;
- |Barista|
- :PAID -> PREPARING -> READY -> COMPLETED;
-else (no)
- |NestJS API|
- :PAYMENT_FAILED; restore stock once;
- |Customer|
- :Display failure and retry as new order;
+ :Check STAFF / ADMIN role;
+ |PaymentsService|
+ :Atomically claim pending payment;
+ :Record receipt and earned points once;
 endif
+|NestJS API|
+:Order PAID;
+|Customer|
+:Read order status from API;
+|Staff|
+:PAID -> PREPARING -> READY -> COMPLETED;
 stop
 @enduml

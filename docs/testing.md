@@ -100,3 +100,7 @@ GitHub đã tắt enforce_admins trên main, không yêu cầu PR review. Admin 
 ## Đổi phạm vi thanh toán khi hợp nhất nhánh — 15/11/2026
 
 Chủ repo chọn gộp update-payment-methods và chỉ giữ BANK_TRANSFER/LOYALTY_POINTS. Bộ integration được đổi sang kiểm tra đối soát ngân hàng đúng một lần, ledger, tranh chấp payment và hoàn tồn khi hủy đơn pending; các phương thức/endpoint đã bỏ được kiểm tra từ chối. Browser checkout dùng API test và tài khoản nhận giả, xác nhận bởi ADMIN test, không gửi tiền thật. Các kết quả mô phỏng/VNPay và video ở phần lịch sử áp dụng cho release trước; không xem là chức năng còn được bật trên main mới.
+
+## Báo cáo và video thay thế — 15/11/2026
+
+Run Delivery 43710893938 hoàn tất quality/image/deploy trên 55c02e4. Báo cáo và UML main được cập nhật đúng phạm vi ngân hàng/điểm, ghi rõ FR-06 không còn được cung cấp và admin có quyền bypass. File video checkout-mobile.webm được ghi đè bằng luồng tạo đơn chuyển khoản PENDING và lịch sử, QR/tài khoản được che trong bản ghi; không gửi hoặc xác nhận tiền. Các file PDF/DOCX được xuất từ report-as2.md và kiểm tra nội dung/chèn hình; không dùng video mới để tuyên bố một khoản chuyển đã được nhận.

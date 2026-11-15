@@ -4,18 +4,20 @@ skinparam shadowing false
 skinparam defaultFontName SansSerif
 left to right direction
 actor Customer
-actor Barista
-actor Manager
-actor "Payment Service" as PSP
+actor "Staff / Barista" as Staff
+actor "Manager (ADMIN)" as Manager
+actor "Bank application" as Bank
 rectangle BrewLite {
  usecase "UC-02 Browse menu / details" as browse
  usecase "UC-03 Manage cart" as cart
  usecase "UC-04 Register / log in" as auth
  usecase "UC-01 Order and pay" as checkout
- usecase "Bank transfer via VietQR" as bank
+ usecase "Transfer via bank / VietQR" as transfer
+ usecase "Redeem loyalty points" as points
+ usecase "Reconcile received transfer" as reconcile
  usecase "UC-05 Track own orders" as history
  usecase "UC-06 Prepare paid orders" as queue
- usecase "UC-07 Manage menu / stock" as menu
+ usecase "UC-07 Manage menu / inventory" as menu
  usecase "UC-08 Manage vouchers / users" as manage
  usecase "UC-09 Reports / audit" as report
 }
@@ -24,12 +26,19 @@ Customer --> cart
 Customer --> auth
 Customer --> checkout
 Customer --> history
-Customer --> bank
-bank --> PSP
-Barista --> bank : reconcile payment
-Barista --> queue
+Customer --> transfer
+Customer --> points
+Bank --> transfer
+Staff --> reconcile
+Staff --> queue
+Manager --> reconcile
 Manager --> menu
 Manager --> manage
 Manager --> report
-checkout --> PSP
+transfer ..> checkout : <<extend>>
+points ..> checkout : <<extend>>
+note bottom of reconcile
+Only staff-confirmed receipts mark bank orders PAID.
+Opening a QR does not confirm received funds.
+end note
 @enduml

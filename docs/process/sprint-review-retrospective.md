@@ -20,7 +20,7 @@
 | Nhóm công việc | Kết quả kỹ thuật có minh chứng | Cách trình diễn đề xuất |
 | --- | --- | --- |
 | Nền tảng Sprint 1 | Monorepo, API menu/chi tiết, Next.js mobile-first, seed, Docker Compose, CI PR | Mở menu và API; trình bày cấu trúc repo, một run CI đạt và một run phát hiện lỗi |
-| Checkout Sprint 2 | Tùy chọn món, giỏ qua reload, JWT, báo giá server, đặt đơn, Ví/Thẻ mô phỏng, xác nhận/lịch sử | Dùng CUSTOMER demo thực hiện một đơn; mở video mobile đã ghi |
+| Checkout Sprint 2 | Tùy chọn món, giỏ qua reload, JWT, báo giá server, đặt đơn, chuyển khoản/điểm, xác nhận/lịch sử | Dùng CUSTOMER demo thực hiện một đơn; mở video mobile đã ghi |
 | Xử lý đơn | Phân quyền STAFF/ADMIN và kiểm soát thứ tự trạng thái | Chuyển PAID → PREPARING → READY → COMPLETED; kiểm tra không bỏ qua bước |
 | Chất lượng | 107 test ứng dụng và 16 test orchestration CD; test tranh chấp tồn và yêu cầu lặp | Trình bày kết quả và giải thích một tình huống idempotency |
 | Delivery | CI deploy/smoke thành công; web/API cùng SHA trong run được ghi nhận; release/video | Mở [run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367), web và health |
@@ -30,7 +30,7 @@
 - Luồng checkout đã nối xuyên suốt giao diện, API và database; có xử lý lỗi và kiểm thử thay vì chỉ trình bày giao diện tĩnh.
 - Dữ liệu tiền, tồn kho và trạng thái do server kiểm soát; cần giải thích rõ khi trình bày chống gửi lặp hoặc cập nhật đồng thời.
 - Video đã ghi là thao tác tự động trên production; nhóm nên bổ sung phần thuyết minh về yêu cầu, UML và quyết định kiến trúc.
-- Ví/Thẻ là mô phỏng; VietQR chờ đối soát; VNPay phụ thuộc cấu hình sandbox. Cách giới thiệu phương thức thanh toán cần thống nhất với chức năng đang bật.
+- Bản main hiện tại chỉ giữ ngân hàng/điểm; VietQR chờ đối soát, Ví/Thẻ mô phỏng và VNPay đã bị bỏ khỏi luồng hoạt động. Cách giới thiệu phương thức thanh toán cần thống nhất với chức năng đang bật.
 - Hosting Free cần được kiểm tra trước buổi bảo vệ để tránh cold start hoặc sự cố cấu hình ảnh hưởng phần trình diễn.
 
 ### 1.4 Kết luận cần xác nhận sau buổi thật

@@ -1,6 +1,6 @@
 # BrewLite — Assignment 2
 
-> **Cập nhật main 15/11/2026:** đã gộp `update-payment-methods`, hiện chỉ cung cấp chuyển khoản ngân hàng và điểm tích lũy. Ví/Thẻ mô phỏng và VNPay không còn hoạt động; video/release v0.2.1 mô tả phiên bản trước. Xem [thay đổi phạm vi thanh toán](docs/changes/payment-methods.md).
+> **Cập nhật main 15/11/2026:** đã gộp `update-payment-methods`, hiện chỉ cung cấp chuyển khoản ngân hàng và điểm tích lũy. Ví/Thẻ mô phỏng và VNPay không còn hoạt động; release v0.2.1 mô tả phiên bản trước; video trên main đã được thay bằng demo chuyển khoản chờ đối soát. Xem [thay đổi phạm vi thanh toán](docs/changes/payment-methods.md).
 
 Hệ thống đặt cà phê trực tuyến cho đồ án kết thúc học phần. Ứng dụng sử dụng Next.js/PWA, NestJS và PostgreSQL/Prisma, hỗ trợ đặt món trên điện thoại và quản lý vận hành cửa hàng.
 
@@ -172,7 +172,7 @@ CI chạy Install→Lint→Test→Build, integration PostgreSQL và browser E2E.
 | --- | --- |
 | Video demo mobile | [Xem/tải video](docs/demo/README.md) |
 | Đối chiếu yêu cầu và việc còn lại | [Rà soát AS2](docs/as2-audit.md) |
-| Báo cáo tổng hợp AS2 | [Báo cáo](docs/report-as2.md) |
+| Báo cáo tổng hợp AS2 | [Nguồn Markdown](docs/report-as2.md), [PDF](docs/exports/BrewLite-AS2-Bao-cao.pdf), [Word](docs/exports/BrewLite-AS2-Bao-cao.docx) |
 | Phạm vi và yêu cầu | [Phạm vi](docs/requirements/context-and-scope.md), [SRS](docs/requirements/srs.md), [Use case checkout](docs/requirements/checkout-use-case.md) |
 | UML và kiến trúc | [Sơ đồ](docs/diagrams/README.md), [Kiến trúc](docs/architecture/overview.md) |
 | Truy vết và kiểm thử | [Ma trận truy vết](docs/traceability-matrix.md), [Hướng dẫn kiểm thử](docs/testing.md) |

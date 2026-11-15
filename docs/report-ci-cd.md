@@ -2,7 +2,7 @@
 
 ## Kết quả đã kiểm chứng
 
-[Delivery run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367) thành công trên `2af63a27619e7062e94bc6163643448e08a1b7f8`: quality, image, **deploy** và delivery-status đều success. Web `/version` và API `/api/health` cùng SHA khi smoke sau run; menu trả 5 sản phẩm. Xem [deployment.md](deployment.md) để phân biệt snapshot với phiên bản sau các commit tiếp theo.
+[Delivery run 43710893938](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43710893938) thành công trên `55c02e4a4b4c63f1abd5554c6d22647e968a45b4`: quality, image, **deploy** và delivery-status đều success. Web `/version` và API `/api/health` cùng SHA khi smoke sau run; menu trả 5 sản phẩm. Xem [deployment.md](deployment.md) để phân biệt snapshot với phiên bản sau các commit tiếp theo.
 
 ## CI
 
@@ -20,4 +20,4 @@ Các run trước đã phát hiện sai contract menu và response deploy rỗng
 
 ## Demo
 
-[Video mobile production](demo/README.md) ghi checkout bằng Playwright trên API thật, thanh toán mô phỏng. Ba tài khoản demo đã đăng nhập online đúng quyền. Không có tiền thật được chuyển trong kiểm thử; VNPay sandbox phụ thuộc merchant, VietQR cần nhân viên đối soát. Video không phải biên bản Sprint Review/Retrospective.
+[Video mobile production](demo/README.md) ghi checkout chuyển khoản bằng Playwright trên API thật, kết thúc ở PENDING và lịch sử; QR/tài khoản nhận được che trong bản ghi. Ba tài khoản demo đã đăng nhập online đúng quyền. Không có tiền thật được chuyển hoặc xác nhận trong video; VNPay/mô phỏng không còn hoạt động trên main, VietQR cần nhân viên đối soát. Video không phải biên bản Sprint Review/Retrospective.

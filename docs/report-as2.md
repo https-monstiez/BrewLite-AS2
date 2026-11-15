@@ -2,344 +2,298 @@
 
 ## BREWLITE — HỆ THỐNG ĐẶT THỨC UỐNG TRỰC TUYẾN
 
-**Assignment 2 — Requirements to Deployment**<br>
 **Trường Đại học Sài Gòn — Khoa Công nghệ Thông tin**<br>
-**Năm học 2026–2027**
+**Assignment 2 — Requirements to Deployment**<br>
+**Học kỳ I — Năm học 2026–2027**
 
-| Thành viên | MSSV |
+| Họ và tên | Mã số sinh viên |
 |---|---|
 | Lê Ngọc Hiếu | 3124410095 |
 | Nguyễn Tiến Đạt | 3124410060 |
 
 **Giảng viên hướng dẫn:** Từ Lãng Phiêu<br>
 **Ngày nộp sản phẩm:** 16/11/2026<br>
-**Ngày bảo vệ dự kiến:** 18/11/2026
+**Ngày bảo vệ dự kiến:** 18/11/2026<br>
+**Ngày cập nhật báo cáo:** 15/11/2026<br>
+**Mã nguồn đối chiếu:** `main`, commit `55c02e4`<br>
+**Phiên bản hồ sơ bàn giao:** v0.2.2
 
 ---
-
-**Phiên bản bàn giao:** v0.2.1 · **Ngày cập nhật:** 15/11/2026
 
 ## Tóm tắt
 
-BrewLite là hệ thống đặt thức uống trực tuyến. Báo cáo tập trung mô tả cách phân rã yêu cầu thành các luồng nghiệp vụ và cách biểu diễn các luồng đó bằng use-case, activity, sequence, class và deployment diagram theo Assignment 2. Luồng nghiệp vụ trọng tâm là đặt và thanh toán đơn: khách chọn món, hệ thống báo giá từ dữ liệu server, kiểm tra và giữ tồn kho, ghi nhận thanh toán, rồi cho phép nhân viên xử lý đơn đã thanh toán.
+BrewLite hỗ trợ khách hàng xem thực đơn, tùy chỉnh đồ uống, quản lý giỏ hàng, đặt đơn và theo dõi quá trình phục vụ. Nhân viên đối soát chuyển khoản và cập nhật tiến độ pha chế; quản lý vận hành thực đơn, tài khoản, ưu đãi và kho nguyên liệu. Hệ thống sử dụng Next.js theo hướng mobile-first/PWA, NestJS cho REST API và PostgreSQL/Prisma cho dữ liệu.
 
-Hệ thống dùng Next.js/PWA cho giao diện, NestJS cho REST API và PostgreSQL/Prisma cho dữ liệu. Bên cạnh ví/thẻ mô phỏng, hệ thống có VietQR cần nhân viên đối soát; VNPay chỉ được mô tả là Sandbox khi đã cấu hình merchant. Các sơ đồ trong báo cáo được liên kết với yêu cầu, mô hình dữ liệu và kiểm thử để người đọc có thể lần theo cùng một nghiệp vụ từ yêu cầu đến triển khai.
+Báo cáo trình bày chuỗi yêu cầu → mô hình hóa → thiết kế kiến trúc → triển khai → kiểm thử và bàn giao theo năm task của Assignment 2. Các quyết định trọng tâm gồm tính giá trên server, transaction đặt đơn và giữ tồn, khóa idempotency, kiểm soát cập nhật đồng thời và phân quyền theo dữ liệu tài khoản trong database.
 
-Tại lần kiểm tra sau [Delivery run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367), website và API production hoạt động tại Vercel/Render, trả cùng SHA `2af63a27619e7062e94bc6163643448e08a1b7f8`. CI đóng gói image SHA lên GHCR, điều khiển Render Git-backed deploy đúng source commit và gọi hook Vercel, rồi smoke cả API/web. Image GHCR là tạo phẩm đóng gói; Render build Docker từ Git commit, không khẳng định production đã pull chính image đó. Bản bàn giao `v0.2.1` tập hợp mã nguồn, báo cáo, hướng dẫn vận hành và video minh họa.
+Bản main được đối chiếu hiện cung cấp **chuyển khoản ngân hàng qua VietQR** và **thanh toán bằng điểm tích lũy**. Ví/Thẻ mô phỏng và VNPay đã được bỏ khỏi luồng đang hoạt động sau khi hợp nhất thay đổi thanh toán. Đây là khác biệt so với yêu cầu Ví/Thẻ mô phỏng trong PDF AS2; báo cáo phân biệt rõ yêu cầu gốc, chức năng hiện tại và minh chứng của phiên bản cũ.
 
-**Từ khóa:** yêu cầu phần mềm, phân luồng nghiệp vụ, UML, Activity diagram, Sequence diagram, Next.js, NestJS, PostgreSQL, CI/CD.
+Website và API được triển khai trên Vercel/Render. [Delivery run 43710893938](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43710893938) đã hoàn tất quality gate, đóng gói, deploy và smoke test trên commit `55c02e4`. Video mới ghi thao tác thật trên production tới bước chờ đối soát và lịch sử đơn, không chuyển tiền hoặc xác nhận đã nhận tiền. Hồ sơ Sprint Review/Retrospective hiện là dự thảo chuẩn bị trao đổi, chưa phải biên bản cuộc họp đã xác nhận.
+
+**Từ khóa:** đặc tả yêu cầu, UML, Next.js, NestJS, PostgreSQL, tính toàn vẹn dữ liệu, CI/CD.
 
 ## Mục lục
 
-1. [Tổng quan và quy trình thực hiện](#1-tổng-quan-và-quy-trình-thực-hiện)
+1. [Tổng quan bài toán và phạm vi](#1-tổng-quan-bài-toán-và-phạm-vi)
 2. [Task 1 — Khai thác và đặc tả yêu cầu](#2-task-1--khai-thác-và-đặc-tả-yêu-cầu)
 3. [Task 2 — Mô hình hóa hệ thống](#3-task-2--mô-hình-hóa-hệ-thống)
 4. [Task 3 — Thiết kế kiến trúc](#4-task-3--thiết-kế-kiến-trúc)
-5. [Task 4 — Sprint 1: MVP xem menu và CI](#5-task-4--sprint-1-mvp-xem-menu-và-ci)
-6. [Task 5 — Sprint 2, kiểm thử và bàn giao](#6-task-5--sprint-2-kiểm-thử-và-bàn-giao)
-7. [Truy vết yêu cầu](#7-truy-vết-yêu-cầu)
+5. [Task 4 — Nền tảng Sprint 1 và CI](#5-task-4--nền-tảng-sprint-1-và-ci)
+6. [Task 5 — Tích hợp, triển khai và bàn giao](#6-task-5--tích-hợp-triển-khai-và-bàn-giao)
+7. [Truy vết và đánh giá mức đáp ứng](#7-truy-vết-và-đánh-giá-mức-đáp-ứng)
 8. [Kết luận và hướng phát triển](#8-kết-luận-và-hướng-phát-triển)
+9. [Tài liệu tham khảo](#9-tài-liệu-tham-khảo)
 
----
+## 1. Tổng quan bài toán và phạm vi
 
-## 1. Tổng quan và quy trình thực hiện
+### 1.1 Vấn đề nghiệp vụ
 
-### 1.1 Bài toán
+Khi cửa hàng ghi nhận đơn thủ công, tùy chọn đồ uống, tổng tiền, tồn kho và tình trạng thanh toán có thể bị cập nhật không thống nhất. Khách khó theo dõi tiến độ, còn nhân viên phải đối chiếu thông tin ở nhiều nơi. BrewLite tập trung dữ liệu đơn và tách trách nhiệm: khách chọn món; server kiểm tra giá, tồn và quyền; nhân viên xác minh khoản chuyển; quản lý vận hành cấu hình cửa hàng.
 
-Khi đặt thức uống qua trao đổi thủ công, tùy chọn món, tổng tiền, tình trạng thanh toán và lượng hàng có thể bị ghi nhận không thống nhất. BrewLite số hóa luồng đặt hàng và tách rõ trách nhiệm: khách hàng chọn món, hệ thống xác nhận giá/tồn/thanh toán, nhân viên chỉ xử lý đơn đã trả tiền, còn quản lý chịu trách nhiệm cấu hình menu và nghiệp vụ quản trị.
+Luồng nghiệp vụ chính là **xem menu → tùy chọn món → giỏ hàng → đăng nhập → báo giá/đặt đơn → chọn phương thức thanh toán → theo dõi đơn → phục vụ**. Đơn chuyển khoản chưa được xác nhận vẫn ở trạng thái `PENDING`; chỉ đơn `PAID` mới được chuyển sang pha chế.
 
-### 1.2 Luồng nghiệp vụ tổng quát
+### 1.2 Phạm vi hiện tại
 
-**Xem menu → chọn tùy chỉnh → giỏ hàng → đăng nhập → báo giá và đặt đơn → thanh toán → theo dõi đơn → nhân viên pha chế và hoàn tất.**
+| Nhóm | Nội dung |
+|---|---|
+| Chức năng cốt lõi | Menu/chi tiết, size/topping/đường/đá, giỏ qua reload, đăng ký/đăng nhập, báo giá, tạo đơn, chuyển khoản/điểm, xác nhận và lịch sử |
+| Chức năng mở rộng | Voucher, loyalty ledger, quản lý menu/tài khoản, audit, nguyên liệu/công thức và nhập kho |
+| Không cung cấp trong bản hiện tại | Ví/Thẻ mô phỏng, VNPay/MoMo đang hoạt động, giao hàng, tự động đối soát ngân hàng |
+| Giới hạn xác minh | Chưa có giao dịch chuyển tiền thật được kiểm chứng; chưa diễn tập rollback production; chưa kiểm chứng hai DB role riêng trên Render |
 
-Các nhánh lỗi cần được mô hình hóa thay vì chỉ mô tả đường thành công:
+Bản cập nhật giữ dữ liệu và các trạng thái cũ để đọc lịch sử đơn. Việc còn mã xử lý hoặc enum cũ trong repository không đồng nghĩa endpoint thanh toán đó đang hoạt động. [Thay đổi phạm vi thanh toán](changes/payment-methods.md) ghi lại quyết định hợp nhất nhánh và ảnh hưởng tới yêu cầu AS2.
 
-- Chưa đăng nhập: yêu cầu đăng nhập trước khi đặt đơn.
-- Món hết hàng hoặc dữ liệu/voucher không hợp lệ: từ chối yêu cầu, không tạo đơn dở dang.
-- Thanh toán thất bại: đánh dấu thất bại và hoàn tồn kho đúng một lần.
-- Gửi lại cùng yêu cầu: idempotency trả kết quả của đơn/giao dịch cũ, không trừ tồn hoặc ghi nhận điểm lần hai.
-- Chuyển khoản: đơn chờ đối soát; khách không tự xác nhận tiền đã nhận.
-- Đơn chưa thanh toán: không được đưa vào hàng đợi pha chế.
+### 1.3 Tổ chức tạo phẩm
 
-### 1.3 Quy trình năm task theo đề
-
-| Task | Mục tiêu | Tạo phẩm chính | Trạng thái |
-|---|---|---|---|
-| 1. Yêu cầu | Xác định stakeholder, phạm vi, yêu cầu và use-case trọng tâm | Context/scope, SRS, use-case, đặc tả UC-01 | Đã có tài liệu trong `docs/requirements` |
-| 2. Mô hình hóa | Biểu diễn luồng nghiệp vụ và dữ liệu | Activity, Sequence, Class diagram; nguồn `.puml` và ảnh `.svg` | Đã có trong `docs/diagrams` |
-| 3. Kiến trúc | Chọn thành phần, ranh giới và cách triển khai | Tổng quan, ADR, deployment diagram | Đã có; sơ đồ deployment mô tả nền tảng thực tế |
-| 4. Sprint 1 | Xây nền tảng và MVP xem menu | Repo, tài liệu, menu/API, CI cơ bản | Đã hiện thực |
-| 5. Sprint 2 | Hoàn thiện luồng, kiểm thử và delivery | Checkout, test, CI/Delivery, production, release, bàn giao | Code, kiểm thử, CI/CD, production và video đã có; biên bản Sprint đang ở dạng dự thảo |
-
----
+Tài liệu yêu cầu được lưu trong `docs/requirements`; sơ đồ có nguồn PlantUML và SVG trong `docs/diagrams`; quyết định kiến trúc nằm trong `docs/architecture/adr`. Code được tổ chức ở `apps/web` và `apps/api`; migration/seed thuộc `apps/api/prisma`. Báo cáo liên kết tới các tạo phẩm để có thể đối chiếu thiết kế với hiện thực và kiểm thử.
 
 ## 2. Task 1 — Khai thác và đặc tả yêu cầu
 
-### 2.1 Stakeholder và phạm vi
+### 2.1 Stakeholder
 
-| Stakeholder | Kỳ vọng |
+| Stakeholder | Nhu cầu và kỳ vọng |
 |---|---|
-| Khách hàng | Xem món, tùy chỉnh, biết tổng tiền, thanh toán và theo dõi đơn của mình |
-| Nhân viên quầy/barista (STAFF) | Chỉ nhận đơn đã thanh toán; cập nhật trạng thái theo thứ tự |
-| Quản lý cửa hàng (ADMIN) | Quản lý món, giá, voucher, tài khoản, kho và hoạt động quản trị |
-| Giảng viên/người nghiệm thu | Theo dõi được yêu cầu, sơ đồ, kiểm thử và hệ thống chạy thực tế |
-| Nhóm phát triển | Làm việc có kiểm soát phiên bản, kiểm thử và tái lập môi trường |
-| Đơn vị thanh toán | Nhận yêu cầu hợp lệ; xác nhận giao dịch đúng số tiền và không lặp |
+| Khách hàng | Biết món đang bán, tùy chỉnh hợp lệ, biết tổng tiền và theo dõi đơn của mình |
+| Nhân viên quầy | Đối soát đúng khoản chuyển, chỉ pha chế đơn đã thanh toán, cập nhật tiến độ |
+| Quản lý | Quản lý thực đơn, ưu đãi, tài khoản, kho và truy vết hoạt động |
+| Nhóm phát triển | Quản lý phiên bản, kiểm thử, tái lập môi trường và khôi phục khi có lỗi |
+| Giảng viên/người nghiệm thu | Đối chiếu được yêu cầu, sơ đồ, code, kiểm thử và hệ thống chạy thực tế |
+| Ngân hàng/dịch vụ QR | Cung cấp ứng dụng chuyển khoản hoặc ảnh QR; BrewLite không mặc nhiên nhận được xác nhận giao dịch từ các bên này |
 
-**Trong MVP:** menu, chi tiết món, tùy chỉnh size/topping/đường/đá, giỏ hàng, xác thực, tạo đơn, thanh toán mô phỏng, xác nhận/lịch sử đơn và hàng đợi nhân viên.
+Ràng buộc chính là công nghệ Next.js/NestJS/PostgreSQL, thời gian nộp đồ án và hạ tầng miễn phí. Backend Free có cold start; database có thời hạn dịch vụ. Các giả định và rủi ro ban đầu được lưu trong [context-and-scope.md](requirements/context-and-scope.md).
 
-**Mở rộng:** voucher, điểm thành viên, VNPay Sandbox có cấu hình merchant, quản lý kho nguyên liệu và VietQR cần nhân viên đối soát.
+### 2.2 Yêu cầu chức năng và mức ưu tiên
 
-**Ngoài phạm vi:** xử lý thanh toán production khi chưa có merchant, giao hàng và tự động xác nhận tiền ngân hàng chỉ dựa vào việc khách quét QR. Chi tiết giả định/ràng buộc được lưu tại [context-and-scope.md](requirements/context-and-scope.md).
+[SRS](requirements/srs.md) lưu mã yêu cầu, MoSCoW và tiêu chí chấp nhận gốc. Bảng dưới bổ sung trạng thái bản main đang đối chiếu; không thay đổi tiêu chí gốc để hợp thức hóa thay đổi sản phẩm.
 
-### 2.2 Yêu cầu chức năng và phi chức năng
+| Mã | Yêu cầu gốc | Ưu tiên | Đối chiếu bản hiện tại |
+|---|---|---|---|
+| FR-01–03 | Menu, chi tiết/tùy chọn, giỏ hàng | Must | Đã hiện thực; giỏ được lưu qua reload |
+| FR-04 | Xác thực và phân quyền | Must | JWT, hash mật khẩu, kiểm tra role từ DB |
+| FR-05 | Báo giá và tạo đơn | Must | Server tính giá; transaction, idempotency và kiểm tồn |
+| FR-06 | Ví/Thẻ mô phỏng | Must theo PDF | Có ở v0.2.1, **đã bỏ khỏi main hiện tại**; chưa đáp ứng tiêu chí này ở bản mới |
+| FR-07–08 | Lịch sử, theo dõi và xử lý đơn | Must | Quyền sở hữu đơn; kiểm soát thứ tự trạng thái |
+| FR-09–11 | Menu/tồn, voucher, loyalty | Should | Có module quản trị, kiểm ưu đãi và ledger |
+| FR-12 | VNPay sandbox | Should | Không còn được nối vào luồng hoạt động của bản hiện tại |
+| FR-13–14 | Quản trị/audit, nguyên liệu/công thức | Should/Could | Có hiện thực và kiểm thử quyền/biến động kho |
+| FR-16 | VietQR và đối soát | Bổ sung theo phạm vi nhóm | Chỉ chủ đơn xem chỉ dẫn; STAFF/ADMIN xác nhận sau đối soát |
 
-Các yêu cầu chi tiết, mã định danh, mức ưu tiên MoSCoW và tiêu chí nghiệm thu nằm trong [SRS](requirements/srs.md). Nhóm yêu cầu liên quan trực tiếp đến các sơ đồ:
+Ví dụ tiêu chí chấp nhận: cùng idempotency key và cùng nội dung phải trả cùng đơn; thay nội dung với cùng key bị từ chối; khách không đọc đơn người khác; quét QR không tự chuyển `PENDING` thành `PAID`; số dư điểm không đủ phải bị từ chối mà không tạo thanh toán thành công.
 
-| Mã | Yêu cầu | Liên quan đến luồng/sơ đồ |
-|---|---|---|
-| FR-01–03 | Xem món, tùy chỉnh và quản lý giỏ | Use-case tổng quát, Activity |
-| FR-04 | Đăng nhập và phân quyền | Use-case, Activity, Sequence |
-| FR-05 | Báo giá server-side và tạo đơn | UC-01, Activity, Sequence, Class |
-| FR-06 | Thanh toán và chống xử lý lặp | UC-01, Sequence, Class |
-| FR-07–08 | Lịch sử, theo dõi và xử lý trạng thái | Activity, Sequence, Class |
-| FR-09–14 | Quản trị, voucher, loyalty và kho | Use-case tổng quát, Class |
-| FR-16 | VietQR và nhân viên đối soát | Activity, Sequence |
-| NFR-02/05 | Bảo mật và toàn vẹn dữ liệu | Sequence, Class, deployment |
-| NFR-06/07 | CI, delivery và triển khai | Deployment diagram |
+### 2.3 Yêu cầu phi chức năng
 
-NFR chính gồm bảo mật JWT/RBAC và validation, giao diện responsive/PWA, triển khai tái lập bằng Docker, tính toàn vẹn qua transaction/idempotency/OCC, kiểm thử PostgreSQL, pipeline CI và health check sau triển khai. Tiêu chí đo cụ thể được ghi trong SRS; số đo local không được xem là SLA production.
+Các yêu cầu chính gồm bảo mật JWT/RBAC và validation; mobile-first/PWA; triển khai tái lập bằng Docker/migration; transaction và kiểm soát đồng thời; CI và health check sau deploy. Mục tiêu hiệu năng menu được đo trên môi trường test riêng, không được diễn giải thành SLA cloud.
 
-### 2.3 Use-case toàn hệ thống
+NFR-06 yêu cầu CI lỗi thì không được merge. Repo có required check, nhưng theo lựa chọn quản trị mới, admin được bypass để push trực tiếp vào main. Vì vậy cấu hình hiện tại không cưỡng chế tiêu chí này đối với admin, dù pipeline deploy vẫn phụ thuộc quality gate. Đây là khác biệt cần được tính khi đánh giá mức đáp ứng.
 
-![Use-case toàn hệ thống BrewLite](diagrams/use-cases.svg)
+### 2.4 Use-case toàn hệ thống
 
-**Hình 1. Use-case tổng quát.** Nguồn: [use-cases.puml](diagrams/use-cases.puml).
+![Use-case toàn hệ thống](diagrams/use-cases.svg)
 
-Sơ đồ phân vai theo nghiệp vụ:
+**Hình 1. Use-case tổng quát của bản hiện tại.** [Nguồn PlantUML](diagrams/use-cases.puml).
 
-- **Customer:** xem menu, thao tác giỏ, đăng nhập, đặt/thanh toán và theo dõi đơn.
-- **Barista/STAFF:** xử lý đơn đã thanh toán; đối soát chuyển khoản.
-- **Manager/ADMIN:** quản lý menu/tồn, voucher/người dùng và báo cáo/audit.
-- **Payment Service:** tham gia nhánh thanh toán mô phỏng hoặc Sandbox.
+Customer thực hiện menu, giỏ, xác thực, đặt/thanh toán và theo dõi đơn. STAFF đối soát và phục vụ đơn đã trả; ADMIN thực hiện nghiệp vụ quản trị và có quyền đối soát. Ứng dụng ngân hàng là môi trường chuyển tiền bên ngoài; liên kết với ngân hàng trong sơ đồ không biểu thị một API callback tự động đã được tích hợp.
 
-Ranh giới hệ thống giúp phân biệt hành động người dùng với trách nhiệm nội bộ. Ví dụ, khách gửi yêu cầu thanh toán nhưng server mới là nơi xác nhận trạng thái; khách không có use-case tự chuyển đơn sang “đã thanh toán”.
+### 2.5 UC-01 — Đặt và thanh toán đơn hàng
 
-### 2.4 Đặc tả UC-01 — Đặt và thanh toán đơn hàng
-
-**Actor chính:** Customer. **Actor hỗ trợ:** Payment Service, STAFF khi đối soát chuyển khoản.<br>
-**Kích hoạt:** khách xác nhận giỏ hàng và chọn phương thức thanh toán.<br>
-**Tiền điều kiện:** menu hoạt động; giỏ có ít nhất một món; khách đã đăng nhập; tùy chọn món hợp lệ.<br>
-**Hậu điều kiện thành công:** đơn được ghi nhận với tổng do server tính; tồn/điểm/giao dịch được cập nhật tối đa một lần; đơn chỉ vào hàng đợi nhân viên sau khi thanh toán được xác nhận.
-**Hậu điều kiện thất bại:** đơn/giao dịch không ở trạng thái thành công; tồn được hoàn nếu đã giữ trước đó; lỗi được hiển thị rõ.
+| Thành phần đặc tả | Nội dung |
+|---|---|
+| Actor chính | Customer |
+| Actor hỗ trợ | STAFF/ADMIN khi đối soát; ứng dụng ngân hàng bên ngoài |
+| Trigger | Khách xác nhận giỏ và chọn phương thức thanh toán |
+| Tiền điều kiện | Giỏ có món, tùy chọn hợp lệ, khách đăng nhập khi gửi quote/order |
+| Thành công | Server lưu tổng tiền và giao dịch; điểm/tồn cập nhật đúng một lần; đơn thành PAID sau khi có căn cứ hợp lệ |
+| Chưa hoàn thành | Chuyển khoản giữ PENDING khi chưa đối soát; thiếu điểm từ chối payment, đơn vẫn PENDING |
+| Hủy đơn pending | Khách gửi lý do; hệ thống hủy và hoàn lượng giữ tồn một lần |
 
 **Luồng chính:**
 
-1. Khách chọn sản phẩm và tùy chỉnh, thêm vào giỏ.
-2. Giao diện gửi danh sách sản phẩm/lựa chọn để lấy báo giá.
-3. API xác thực JWT, kiểm tra dữ liệu và đọc giá, voucher, tồn kho hiện tại từ database.
-4. Khách gửi yêu cầu tạo đơn kèm `Idempotency-Key`.
-5. API transaction kiểm tra khóa, cập nhật tồn có điều kiện và tạo đơn `PENDING`.
-6. Khách chọn phương thức; API khởi tạo giao dịch với khóa idempotency riêng.
-7. Adapter xử lý mô phỏng, Sandbox đã cấu hình hoặc hướng dẫn chuyển khoản.
-8. Khi kết quả hợp lệ, API cập nhật thanh toán/đơn/điểm một lần.
-9. Giao diện tải lại trạng thái đơn từ API; STAFF tiếp tục xử lý đơn đã trả.
+1. Khách xem món, chọn size, topping, đường/đá và thêm giỏ.
+2. UI gửi quote; API xác thực JWT/DTO, đọc giá, ưu đãi và tồn hiện tại.
+3. Khách gửi tạo đơn với `Idempotency-Key`; transaction kiểm tra, giữ tồn và tạo đơn `PENDING`.
+4. API tạo giao dịch theo phương thức được hỗ trợ và idempotency key riêng.
+5. Với chuyển khoản, API trả VietQR với số tiền/reference từ DB; khách dùng ứng dụng ngân hàng, nhân viên kiểm tra tiền đã nhận rồi xác nhận.
+6. Với điểm, transaction kiểm số dư, trừ điểm và ghi ledger/đơn/thanh toán theo quy tắc nghiệp vụ.
+7. UI đọc lại đơn từ API. STAFF xử lý `PAID → PREPARING → READY → COMPLETED`.
 
-**Luồng thay thế/ngoại lệ:** chưa đăng nhập thì chuyển qua đăng nhập; hết hàng/OCC xung đột thì rollback và yêu cầu khách cập nhật giỏ; voucher không hợp lệ bị từ chối; cùng khóa nhưng payload khác trả xung đột; thanh toán thất bại hoàn tồn đúng một lần; callback lặp không cộng điểm/trừ tồn thêm; chuyển khoản giữ đơn ở trạng thái chờ đến khi nhân viên đối soát. Luồng chi tiết và các liên kết yêu cầu được lưu trong [SRS](requirements/srs.md) và [traceability matrix](traceability-matrix.md).
+**Ngoại lệ:** chưa đăng nhập yêu cầu đăng nhập; hết hàng/DTO sai/voucher sai bị từ chối; tranh chấp cập nhật được kiểm tra và retry có giới hạn; key lặp khác payload trả xung đột; thiếu điểm không đánh dấu đã trả; yêu cầu xác nhận chuyển khoản lặp chỉ có một lần được claim thành công. Khi khách hủy đơn đang chờ, tồn được hoàn đúng một lần. Từ chối thanh toán điểm không tự động đồng nghĩa đơn đã được hủy hoặc hoàn tồn.
 
-![Use-case đặt và thanh toán](diagrams/checkout-use-case.svg)
+![Use-case UC-01](diagrams/checkout-use-case.svg)
 
-**Hình 2. Use-case UC-01.** Nguồn: [checkout-use-case.puml](diagrams/checkout-use-case.puml).
-
----
+**Hình 2. Phạm vi use-case đặt và thanh toán.** [Nguồn PlantUML](diagrams/checkout-use-case.puml).
 
 ## 3. Task 2 — Mô hình hóa hệ thống
 
-Activity, Sequence và Class diagram mô tả UC-01 theo ba góc nhìn bổ sung: luồng hoạt động và quyết định; trình tự tương tác giữa các thành phần; cấu trúc dữ liệu và quan hệ nghiệp vụ.
+### 3.1 Activity diagram
 
-### 3.1 Activity diagram — các bước và nhánh quyết định
+![Activity checkout](diagrams/activity-checkout.svg)
 
-![Activity diagram checkout](diagrams/activity-checkout.svg)
+**Hình 3. Luồng hoạt động và các nhánh xử lý.** [Nguồn PlantUML](diagrams/activity-checkout.puml).
 
-**Hình 3. Luồng hoạt động end-to-end.** Nguồn: [activity-checkout.puml](diagrams/activity-checkout.puml).
+Sơ đồ chia trách nhiệm Customer, API, PaymentsService và Staff. Nhánh lỗi bao gồm chưa đăng nhập, hết hàng/validation không hợp lệ, thiếu điểm và chưa xác minh khoản chuyển. Điểm kiểm soát quan trọng là không cho đơn pending vào pha chế. Nhánh hủy đơn thể hiện riêng để tránh hiểu rằng mọi lỗi thanh toán đều tự động hoàn tồn.
 
-Sơ đồ chia swimlane theo Customer, NestJS API, Payment Service và Barista:
+### 3.2 Sequence diagram
 
-1. **Khởi tạo:** Customer duyệt menu, chọn tùy chọn và thêm vào giỏ. Nếu chưa đăng nhập, luồng đi qua đăng ký/đăng nhập trước khi yêu cầu báo giá.
-2. **Kiểm tra trước khi đặt:** API xác thực JWT/payload, lấy giá, voucher và tồn hiện tại từ database. Nhánh không hợp lệ/hết hàng kết thúc bằng thông báo lỗi; không tạo đơn thành công.
-3. **Tạo đơn:** nếu dữ liệu hợp lệ, API transaction giữ tồn và tạo đơn `PENDING`.
-4. **Rẽ nhánh thanh toán:** chuyển khoản tạo VietQR; người dùng chuyển tiền trong ứng dụng ngân hàng; Barista đối chiếu sao kê. Phương thức khác đi qua mô phỏng hoặc Sandbox đã cấu hình.
-5. **Kết quả:** thành công chỉ khi hệ thống xác nhận đúng giao dịch; API cập nhật trạng thái/ledger một lần. Thất bại đánh dấu giao dịch thất bại và hoàn tồn một lần.
-6. **Xử lý tại quầy:** Barista chuyển đơn đã thanh toán theo `PAID → PREPARING → READY → COMPLETED`. Đơn `PENDING` không được đưa vào pha chế.
+![Sequence checkout](diagrams/sequence-checkout.svg)
 
-Activity diagram tập trung vào thứ tự nghiệp vụ và kết quả mỗi nhánh; nó không thay thế sequence diagram, nơi thể hiện API/lifeline và thông điệp.
+**Hình 4. Tương tác Customer–Next.js UI–NestJS API–Database–PaymentsService.** [Nguồn PlantUML](diagrams/sequence-checkout.puml).
 
-### 3.2 Sequence diagram — trao đổi giữa các thành phần
+Các thông điệp chính là quote, tạo đơn với khóa ổn định, tạo payment, đọc chỉ dẫn chuyển khoản hoặc thanh toán điểm, rồi đọc lại trạng thái. Nhánh `alt` phân biệt đơn cũ/yêu cầu mới, xung đột/hết hàng và chuyển khoản/điểm. PaymentsService là thành phần nghiệp vụ nội bộ, không phải cổng ngân hàng đã tự động xác nhận giao dịch.
 
-![Sequence diagram checkout](diagrams/sequence-checkout.svg)
+API kiểm JWT và role trước khi thực hiện nghiệp vụ; transaction giữ tồn/ghi đơn và các cập nhật có điều kiện bảo vệ dữ liệu khi hai yêu cầu đồng thời. Với chuyển khoản, bước xác nhận phải xuất phát từ STAFF/ADMIN sau thao tác đối soát thực tế. Không sử dụng status hoặc tổng tiền từ query string làm căn cứ thanh toán.
 
-**Hình 4. Tương tác Customer–UI–API–Database–Payment Service.** Nguồn: [sequence-checkout.puml](diagrams/sequence-checkout.puml).
+### 3.3 Class diagram
 
-Sequence diagram làm rõ các request/response chính:
+![Class domain](diagrams/class-domain.svg)
 
-1. UI gọi API quote cùng JWT; API validate JWT/DTO, đọc giá và tồn từ PostgreSQL, rồi trả báo giá. Client không được quyền quyết định giá cuối.
-2. UI gửi `POST /api/orders` với `Idempotency-Key`. Nếu khóa đã tồn tại và payload giống nhau, API trả lại đơn cũ; nếu là yêu cầu mới, API mở transaction.
-3. API giữ tồn bằng cập nhật có điều kiện theo version và số lượng còn. Xung đột/hết hàng dẫn đến rollback; thành công mới tạo Order/OrderItem và commit.
-4. UI khởi tạo payment với khóa riêng. Nhánh `BANK_TRANSFER` trả thông tin VietQR/reference từ server; trạng thái giữ chờ nhân viên xác nhận. Nhánh khác gọi adapter mô phỏng hoặc cổng Sandbox.
-5. Với callback, API kiểm tra chữ ký/amount/reference và chỉ claim chuyển trạng thái khi đơn còn phù hợp. Callback trùng không gây thêm mutation; thanh toán lỗi hoàn tồn.
-6. UI gọi API đọc đơn; API chỉ trả dữ liệu thuộc quyền khách. Trạng thái hiển thị là dữ liệu API, không lấy từ URL hay local storage làm căn cứ thanh toán.
+**Hình 5. Mô hình domain và quan hệ dữ liệu.** [Nguồn PlantUML](diagrams/class-domain.puml).
 
-Những cơ chế transaction, idempotency, kiểm tra điều kiện cập nhật và kiểm soát quyền được thể hiện ở đây vì chúng quyết định tính đúng đắn khi có retry, hai khách tranh món cuối hoặc callback lặp.
+Các lớp bắt buộc gồm User, Product, Order, OrderItem, Payment, Promotion và LoyaltyTransaction. User sở hữu nhiều đơn; Order có ít nhất một OrderItem và có thể lưu nhiều lần thử thanh toán; OrderItem chụp lại giá/tùy chọn để lịch sử không đổi khi menu đổi. Unique key/reference và trường version hỗ trợ chống lặp và kiểm soát tranh chấp.
 
-### 3.3 Class diagram — mô hình domain và trạng thái
+Ingredient, RecipeIngredient, IngredientReservation và StockMovement mở rộng cho định lượng và kho; xem [sơ đồ kho riêng](diagrams/class-inventory.svg). Enum vẫn giữ `PAYMENT_FAILED` cùng các trạng thái cũ để đọc dữ liệu lịch sử; payment mới chỉ chấp nhận `BANK_TRANSFER` hoặc `LOYALTY_POINTS`.
 
-![Class diagram domain](diagrams/class-domain.svg)
+### 3.4 Nhất quán mô hình
 
-**Hình 5. Các lớp domain, quan hệ và trạng thái chính.** Nguồn: [class-domain.puml](diagrams/class-domain.puml).
-
-Các lớp bắt buộc trong đề được nối thành mô hình nghiệp vụ:
-
-- `User` sở hữu nhiều `Order` và `LoyaltyTransaction`.
-- `Order` gồm ít nhất một `OrderItem`, có thể có nhiều `Payment`; đơn lưu tổng tiền và trạng thái để truy vết.
-- `OrderItem` giữ snapshot lựa chọn/số lượng/đơn giá để đơn không đổi khi giá menu thay đổi về sau.
-- `Product` liên kết với các dòng đơn và có `stock`/`version` cho kiểm soát cập nhật tồn.
-- `Promotion` gắn với đơn dưới dạng mã/chiết khấu đã áp dụng; `LoyaltyTransaction` lưu biến động điểm theo reference duy nhất.
-- Mở rộng kho gồm `Ingredient`, `RecipeIngredient`, `IngredientReservation` và `StockMovement`.
-
-Các enum `OrderStatus`, `PaymentStatus`, `UserRole` biểu diễn trạng thái/role có giới hạn. Luồng đơn bình thường là `PENDING → PAID → PREPARING → READY → COMPLETED`; thanh toán lỗi có nhánh `PAYMENT_FAILED`. Sơ đồ domain không có nghĩa mọi cổng thanh toán đã được bật ở production: VNPay phụ thuộc merchant/configuration và VietQR cần đối soát.
-
-### 3.4 Nhất quán giữa yêu cầu và sơ đồ
-
-| Ý nghiệp vụ | Use-case | Activity | Sequence | Class/test |
-|---|---|---|---|---|
-| Khách cần đăng nhập trước khi đặt | Actor Customer thực hiện UC-01 | Nhánh chưa đăng nhập | JWT trước quote/order | User/role; kiểm thử authorization |
-| Giá lấy từ server | UC-01 có bước quote | API kiểm tra trước tạo đơn | API đọc DB rồi trả quote | Order/OrderItem lưu tổng/snapshot; test quote |
-| Không bán vượt tồn | UC-01 yêu cầu đặt hàng | Nhánh hết hàng/xung đột | Transaction + cập nhật tồn có điều kiện | Product.version; PostgreSQL integration test |
-| Không thanh toán/ghi điểm lặp | UC-01 qua Payment Service | Thành công/thất bại | Key riêng, claim trạng thái, callback lặp | Payment/LoyaltyTransaction unique ref; test concurrency |
-| Chỉ xử lý đơn đã trả | UC-06 của Barista | Lane Barista sau thành công | API trả trạng thái có thẩm quyền | OrderStatus; test chuyển trạng thái |
-
----
+| Quy tắc | Mô hình thể hiện | Hiện thực/kiểm chứng |
+|---|---|---|
+| Giá do server quyết định | Activity kiểm tra, sequence quote, snapshot OrderItem | Quote bỏ qua giá từ client; test chống sửa payload |
+| Không bán vượt tồn | Nhánh hết hàng, transaction/cập nhật version | PostgreSQL concurrent integration |
+| Không thanh toán lặp | Key payment, claim trạng thái, ledger unique reference | Hai xác nhận đồng thời chỉ một lần thành công |
+| Chỉ chủ đơn đọc dữ liệu riêng | Actor Customer, API đọc owned order | Test truy cập chéo tài khoản bị từ chối |
+| Chỉ pha đơn đã trả | Lane Staff sau PAID, enum OrderStatus | Test chặn chuyển sai bước và bỏ qua thanh toán |
 
 ## 4. Task 3 — Thiết kế kiến trúc
 
-### 4.1 Thành phần và quyết định kiến trúc
+### 4.1 Kiến trúc phân lớp
 
-Frontend Next.js/PWA gọi REST API NestJS; NestJS chia module nghiệp vụ và dùng Prisma truy cập PostgreSQL. Migration quản lý thay đổi schema. Payment adapter tách mô phỏng, Sandbox có cấu hình và chuyển khoản cần đối soát. Health endpoint `GET /api/health` kiểm tra khả năng phục vụ của API.
+| Thành phần | Trách nhiệm |
+|---|---|
+| Next.js/PWA | Menu mobile-first, giỏ, xác thực, checkout, lịch sử và quản trị |
+| NestJS controllers/guards | REST API, validate DTO, JWT và RBAC |
+| Domain services | Giá/ưu đãi, đơn, điểm, đối soát, tồn và audit |
+| Prisma/PostgreSQL | Transaction, ràng buộc unique, lưu dữ liệu, migration/seed |
+| Health/configuration/log | Kiểm kết nối DB, cấu hình theo môi trường, ghi hoạt động |
 
-Nhóm chọn monolith module thay vì microservices để giữ transaction checkout/inventory đơn giản, giảm chi phí vận hành và phù hợp phạm vi đồ án. PostgreSQL cung cấp transaction/unique constraint; server giữ thẩm quyền về giá, role và trạng thái. Các quyết định và đánh đổi được ghi trong [architecture overview](architecture/overview.md) và các [ADR](architecture/adr/).
+Nhóm chọn modular monolith để phù hợp quy mô hai thành viên và giữ transaction checkout–inventory trong một database. Ưu điểm là ít thành phần vận hành, dễ tái lập và truy vết; hạn chế là các module chưa được scale độc lập. Ghép Vercel và Render giảm chi phí triển khai nhưng cần quản lý CORS, URL build-time và đồng bộ phiên bản hai nền tảng. [Tổng quan và ADR](architecture/overview.md) lưu các đánh đổi cụ thể.
 
-### 4.2 Deployment diagram — topology production
+### 4.2 Deployment diagram
 
-![Deployment diagram production](diagrams/deployment.svg)
+![Deployment production](diagrams/deployment.svg)
 
-**Hình 6. Môi trường local, CI/registry và production đã triển khai.** Nguồn: [deployment.puml](diagrams/deployment.puml).
+**Hình 6. Ranh giới local, CI/registry và production.** [Nguồn PlantUML](diagrams/deployment.puml).
 
-Sơ đồ thể hiện:
+Local chạy Docker Compose gồm web/API/DB; PostgreSQL không publish trực tiếp cổng host. Production dùng Vercel Hobby cho Next.js và Render Free cho Docker API/PostgreSQL. Dashboard đã xác nhận inbound rules DB trống và URL kết nối nội bộ trong Blueprint; giá trị secret không được ghi trong báo cáo.
 
-- **Local:** Docker Compose chạy Next.js, NestJS và PostgreSQL qua mạng nội bộ.
-- **CI:** GitHub Actions chạy kiểm tra và build; Delivery tạo image gắn commit SHA và đẩy GHCR.
-- **Production:** Vercel phục vụ frontend; Render chạy Docker Web Service API và PostgreSQL private. Dashboard Render cho thấy PostgreSQL inbound IP rules trống, nghĩa là traffic Internet trực tiếp bị chặn.
-- **Cấu hình:** API nhận connection string database và secrets qua biến môi trường; secret không được đưa vào repository.
-- **Ranh giới triển khai:** GitHub Actions gọi Render API để triển khai đúng source commit và gọi deploy hook của Vercel. Render build Docker từ Git; image GHCR được lưu làm tạo phẩm đóng gói. Các tích hợp Git của nền tảng là cơ chế riêng, không thay thế minh chứng job deploy/smoke của CI.
+CI build images tag SHA và push GHCR; Render hiện build Docker từ Git commit được chỉ định qua API, không pull chính GHCR image. Hook Vercel triển khai đầu nhánh main; smoke kiểm phiên bản cả web/API. VietQR cung cấp ảnh QR cho browser; chuyển tiền diễn ra ở ứng dụng ngân hàng bên ngoài. Không có bank receipt callback tự động được cấu hình.
 
-Sau Delivery run 43685179367 ngày 15/11/2026, website, API health và menu được kiểm tra công khai; web/API cùng báo SHA `2af63a27619e7062e94bc6163643448e08a1b7f8`. Database Render Free có cảnh báo sẽ bị xóa ngày 15/12/2026 nếu không nâng cấp. Cấu hình hai database role trên production chưa được xác minh.
+Database Free có thông báo hết hạn/xóa 15/12/2026. Health `SELECT 1` không chứng minh được mọi quyền DB hoặc cấu hình backup. Hai role migrator/app đã có mô hình và kiểm thử local ở phương án VPS; chưa dùng kết quả đó để khẳng định Render đã cấu hình tương tự.
 
----
+## 5. Task 4 — Nền tảng Sprint 1 và CI
 
-## 5. Task 4 — Sprint 1: MVP xem menu và CI
+Sprint Goal là tạo nền tảng kỹ thuật, tài liệu có kiểm soát phiên bản và MVP xem menu chạy được. Repository tách riêng AS2, giữ lịch sử nền AS1 và tổ chức `apps/web`, `apps/api`, `docs`, `tests`, workflow, env mẫu và Docker Compose. [Product Backlog/Definition of Done](process/backlog.md) mô tả các nhóm công việc và tiêu chí hoàn thành; đây là backlog tái lập, không phải biên bản lịch sử các cuộc họp.
 
-**Sprint Goal theo đề:** tạo nền tảng kỹ thuật, tài liệu có kiểm soát phiên bản và MVP chạy được cho luồng xem menu.
+MVP cung cấp `GET /api/products` và `GET /api/products/:id`; UI có loading/empty/error, dữ liệu seed và test menu/luồng chính. Task 1–3 có file nguồn và kết xuất theo thứ tự commit đã lưu trong repo. Các PR trước đây cung cấp minh chứng CI đạt và CI phát hiện lỗi cấu hình PostgreSQL service health.
 
-- Repository AS2 có `apps/web`, `apps/api`, `docs`, test và workflow; README, env mẫu, Docker Compose và hướng dẫn phát triển được duy trì.
-- API cung cấp `GET /api/products` và `GET /api/products/:id` (tiền tố chung `/api`); giao diện menu mobile-first có loading/empty/error và dữ liệu seed.
-- Tài liệu Task 1–3 được đưa vào repo; sơ đồ có source PlantUML và bản SVG.
-- GitHub Actions chạy lint, test và build cho các nhánh/PR cấu hình. PR và các lần chạy CI lưu trong [testing.md](testing.md).
+CI chạy Install → Lint → Test → Build, sau đó kiểm thử integration/browser theo workflow. Hiện nhóm làm trực tiếp trên main; required check còn được cấu hình nhưng admin có quyền bypass theo yêu cầu vận hành. Pipeline CD vẫn chỉ deploy sau khi job quality thành công. Cần phân biệt gate trước deploy với việc ngăn mọi admin ghi code lên main.
 
-MVP ở Task 4 xác nhận luồng menu chạy được; đây là nền tảng trước khi mở rộng sang checkout hoàn chỉnh ở Sprint 2.
+## 6. Task 5 — Tích hợp, triển khai và bàn giao
 
----
+### 6.1 Chức năng tích hợp
 
-## 6. Task 5 — Sprint 2, kiểm thử và bàn giao
+Luồng hiện tại nối tùy chọn món, giỏ, JWT, quote server, transaction tạo đơn, chuyển khoản/điểm và lịch sử/trạng thái. UI mới dùng nút chọn mức đường 0/25/50/75/100%; API cũng nhận 25/75 và vẫn nhận 30/70 từ client cũ. Chỉ giao dịch BANK_TRANSFER được xác nhận thủ công; các phương thức đã bỏ bị từ chối ngay khi validate request.
 
-### 6.1 Hoàn thiện luồng end-to-end
+So với PDF AS2, bản main này chưa đáp ứng Ví/Thẻ mô phỏng của Task 5.1/FR-06. Video mô phỏng cũ và source tag v0.2.1 chứng minh phiên bản trước, không thay thế việc nghiệm thu chức năng đang hoạt động của bản mới. Báo cáo không kết luận toàn bộ Task 5 đã hoàn thành khi còn ngoại lệ chức năng và hồ sơ quy trình.
 
-Sprint 2 bổ sung chi tiết/tùy chỉnh món, giỏ hàng, xác thực JWT, quote server-side, tạo đơn, ví/thẻ mô phỏng, lịch sử, trạng thái và hàng đợi nhân viên. Luồng thành công và thất bại được kiểm tra tại nhiều tầng. Ví/Thẻ mô phỏng không trích tiền thật. VietQR cung cấp hướng dẫn chuyển khoản; việc quét QR chưa đủ để xác nhận đã nhận tiền, nên trạng thái chờ chỉ kết thúc sau khi nhân viên đối soát.
+### 6.2 Kiểm thử
 
-### 6.2 Kiểm thử và CI
-
-Kết quả kiểm thử được tổng hợp trong [testing.md](testing.md):
-
-| Loại kiểm thử | Kết quả đã ghi nhận |
+| Loại kiểm thử | Số lượng trong bộ test |
 |---|---:|
-| Backend Jest unit/HTTP authorization | 84 |
+| Backend unit/HTTP authorization | 84 |
 | Frontend Vitest | 7 |
 | PostgreSQL integration | 12 |
-| Playwright browser E2E | 4 |
-| CD orchestration (HTTP mô phỏng, không phải deploy thật) | 16 |
-| **Tổng cộng** | **123** |
+| Playwright mobile browser | 4 |
+| Orchestration CD với HTTP mô phỏng | 16 |
+| **Tổng** | **123** |
 
-Các test bao gồm quote, quyền truy cập, chống lặp, tranh chấp tồn, callback/ledger, hoàn tồn và luồng browser. Unit test dùng mock được phân biệt với PostgreSQL integration. Các lần CI/Delivery GitHub được ghi trong [testing.md](testing.md); release notes và hướng dẫn rollback ở [deployment.md](deployment.md).
+Bộ integration hiện kiểm chuyển khoản, tranh chấp payment, ledger, hoàn tồn khi hủy pending, quyền truy cập và từ chối phương thức đã bỏ. Nghiệp vụ trừ/nhận điểm còn có kiểm thử unit riêng. Browser kiểm checkout tới pending, xác nhận bằng ADMIN trên API test, QR chờ đối soát, PWA offline và trang quản trị. Tài khoản nhận trong test là dữ liệu giả; không gửi tiền ngân hàng thật. Unit test dùng mock được phân biệt với transaction PostgreSQL thực và deploy production thực. Chi tiết và log nằm trong [testing.md](testing.md).
 
-### 6.3 Delivery và bằng chứng production
+### 6.3 CI/CD và minh chứng production
 
-| Hạng mục | Kết quả/giới hạn |
+[Delivery run 43710893938](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43710893938) có quality/image/deploy success trên commit `55c02e4a4b4c63f1abd5554c6d22647e968a45b4`. Sau lần triển khai này web và API đã báo đúng commit nguồn được đối chiếu. Đây là snapshot có thời điểm; commit tài liệu tiếp theo có thể làm SHA đang phục vụ thay đổi.
+
+| Tạo phẩm | Đường dẫn/minh chứng |
 |---|---|
-| Frontend | [brew-lite-as-2.vercel.app](https://brew-lite-as-2.vercel.app/) |
-| API menu | [GET /api/products](https://brewlite-as2-api.onrender.com/api/products), trả năm sản phẩm khi kiểm tra |
-| Health | [GET /api/health](https://brewlite-as2-api.onrender.com/api/health), `status: ok` |
-| Phiên bản | Web `/version` và API cùng SHA `2af63a27619e7062e94bc6163643448e08a1b7f8` trong run đã kiểm chứng |
-| Release | [GitHub Release v0.2.1](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.1), gồm mã nguồn bàn giao và video demo |
-| Database | Render PostgreSQL private inbound; `DATABASE_URL` có cấu hình nhưng secret không được đưa vào báo cáo |
-| CI/CD | [Run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367) quality/image/deploy/smoke success; CI triển khai source commit vào Render và gọi hook Vercel |
-| Video | [Checkout mobile production](demo/README.md), thanh toán mô phỏng, ghi bằng Playwright |
+| Source AS2 | [github.com/https-monstiez/BrewLite-AS2](https://github.com/https-monstiez/BrewLite-AS2) |
+| Frontend HTTPS | [brew-lite-as-2.vercel.app](https://brew-lite-as-2.vercel.app/) |
+| API menu/health | [GET products](https://brewlite-as2-api.onrender.com/api/products), [GET health](https://brewlite-as2-api.onrender.com/api/health) |
+| Version web | [GET /version](https://brew-lite-as-2.vercel.app/version) |
+| Video hiện tại | [Checkout chuyển khoản và lịch sử](demo/README.md) |
+| Hồ sơ cập nhật | [v0.2.2](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.2): PDF, Word và video chuyển khoản thay thế |
+| Release trước | [v0.2.1](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.1), có phương thức mô phỏng của phiên bản cũ |
+| Runbook | [Deploy/rollback](deployment.md), [cấu hình CI deploy](cd-setup.md) |
 
-**Đối chiếu với tiêu chí CD của PDF:** pipeline đã chạy quality gate, build Docker images theo SHA, push GHCR, deploy bằng GitHub secrets, migration trong startup, post-deploy health/menu/version smoke và dừng khi lỗi. [Run thành công](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367) có job deploy success; các run lỗi và cách sửa được lưu trong [testing.md](testing.md). Render hiện là service Git-backed nên CI dùng `commitId`, không phải `imageUrl`; cách triển khai này được mô tả đúng trong deployment diagram. Runbook rollback giữ dữ liệu/schema, chưa có diễn tập rollback production nên không ghi là đã diễn tập. Cấu hình tái lập ở [cd-setup.md](cd-setup.md).
+Pipeline quality → image SHA/GHCR → deploy bằng secrets → migration startup → API health/menu/version → Vercel hook → kiểm web/API SHA. Response Render 202 Queued được xử lý bằng tìm deployment mới đúng SHA, không chấp nhận deployment cũ làm bằng chứng. Lỗi dừng pipeline và dẫn tới runbook rollback.
 
-### 6.4 Handover
+Rollback dùng source commit tốt trên Render và deployment web tương thích trên Vercel, rồi kiểm lại health/menu/version. Không reset/drop database; migration không tương thích ngược cần fix-forward hoặc kế hoạch phục hồi. Chưa có diễn tập rollback production được ghi nhận.
 
-README hướng dẫn chạy local/test/build; deployment guide mô tả URL, kiểm tra health/version và rollback. Đã có [video checkout mobile](demo/README.md) ghi thao tác thật trên production bằng Playwright và thanh toán mô phỏng. Sprint Review/Retrospective cần nhóm ghi nhận từ buổi thực tế; video tự động không thay thế hoạt động này. Xem checklist tại [handover.md](process/handover.md).
+### 6.4 Video và hướng dẫn bàn giao
+
+Video mobile mới ghi trên production: đăng nhập CUSTOMER demo → chọn size M, đường 25%, đá 50% → giỏ qua reload → tạo đơn chuyển khoản → trạng thái chờ đối soát → lịch sử đơn. Ảnh QR và thông tin tài khoản nhận được che trong bản ghi; API và trạng thái đơn vẫn là dữ liệu thực. Video không thực hiện chuyển tiền, không gọi endpoint xác nhận của nhân viên và không hiển thị đơn đó như đã thanh toán.
+
+README hướng dẫn cài đặt, chạy local/test/build; deployment guide cung cấp URL, cấu hình môi trường và rollback. Ba tài khoản demo đã đăng nhập đúng quyền trong lần kiểm chứng. [Checklist bàn giao](process/handover.md) ghi việc có minh chứng và việc còn cần nhóm thực hiện.
 
 ### 6.5 Sprint Review và Sprint Retrospective
 
-Sprint Review đánh giá chức năng theo Sprint Goal và tiêu chí chấp nhận; Sprint Retrospective xem xét cách làm việc, khó khăn và hành động cải tiến. Hai hoạt động này bổ sung bằng chứng về quy trình, khác với kiểm thử phần mềm hoặc review mã nguồn.
+Sprint Review đánh giá sản phẩm theo Sprint Goal và tiêu chí chấp nhận; Sprint Retrospective đánh giá cách làm việc và thống nhất cải tiến. [Tài liệu dự thảo](process/sprint-review-retrospective.md) chuẩn bị nội dung từ các lỗi và kết quả có minh chứng. Nhóm cần ghi thời gian, người tham dự, phản hồi và quyết định thực tế; tài liệu dự thảo không được tính là cuộc họp đã diễn ra.
 
-[Dự thảo nội dung Review/Retrospective](process/sprint-review-retrospective.md) tổng hợp các kết quả có minh chứng, các lỗi triển khai đã gặp và kế hoạch cải tiến đề xuất. Tài liệu hiện là nội dung chuẩn bị thảo luận; thời gian, người tham dự, phản hồi và phân công cần được nhóm xác nhận sau buổi trao đổi thực tế. Báo cáo không xem bản dự thảo là minh chứng cuộc họp đã diễn ra.
+## 7. Truy vết và đánh giá mức đáp ứng
 
----
-
-## 7. Truy vết yêu cầu
-
-Ma trận đầy đủ ở [traceability-matrix.md](traceability-matrix.md). Một số đường truy vết tiêu biểu:
-
-| Yêu cầu | Use-case | Sơ đồ | Hiện thực/kiểm thử |
+| Yêu cầu/nhóm task | Thiết kế | Hiện thực/kiểm thử | Kết quả đánh giá |
 |---|---|---|---|
-| FR-01 menu | US-01 | Use-case, Activity | Products API/UI, menu tests, production menu |
-| FR-02/03 tùy chỉnh và giỏ | UC-01/US-04 | Activity, Class | Cart/product detail, checkout tests |
-| FR-04 xác thực/RBAC | UC-01 | Use-case, Sequence | JWT/roles, authorization tests |
-| FR-05 báo giá/tạo đơn | UC-01 | Activity, Sequence, Class | Orders API, transaction/OCC/integration |
-| FR-06 thanh toán | UC-01 | Sequence, Class | Payment adapter, idempotency/callback tests |
-| FR-07/08 lịch sử/trạng thái | US-06 | Activity, Sequence, Class | Orders API/queue, ownership/state tests |
-| FR-09–14 quản trị/kho | US-07/US-09 | Use-case, Class | Admin/inventory modules, integration tests |
-| FR-16 VietQR | UC-01 | Activity, Sequence | QR/reference, staff reconciliation tests |
-| NFR-06 CI | US-02 | Deployment | GitHub Actions run evidence |
-| NFR-07 deployment | US-08 | Deployment | Production health/version, Release v0.2.1 |
+| FR-01–05 | Use-case, activity, sequence, class | Menu/auth/quote/orders và unit/integration/browser | Có code và minh chứng kiểm thử |
+| FR-06 | Phạm vi gốc và thay đổi thanh toán | Ví/Thẻ mô phỏng đã bỏ khỏi main | Chưa đáp ứng bản hiện tại |
+| FR-07–08 | State machine, quyền sở hữu | History/queue/transition tests | Có hiện thực và kiểm thử |
+| FR-09–14 | Domain/admin/inventory | Menu/voucher/ledger/kho; VNPay không hoạt động | Nhóm mở rộng có phần đã làm, không tính FR-12 là đang bật |
+| FR-16 | Nhánh bank, Staff reconciliation | Private instructions, role guard, atomic confirm | Có code/test; chưa xác minh nhận tiền thật |
+| Task 2–3 | UML nguồn/SVG, ADR, deployment | Sơ đồ cập nhật theo ngân hàng/điểm | Có tạo phẩm đối chiếu |
+| NFR-06 | Workflow và branch policy | CI chạy; admin bypass push main | Chưa cưỡng chế hoàn toàn tiêu chí không merge khi CI lỗi |
+| Task 5.3 | CI/deploy topology | Run 43710893938 deploy/smoke success | Có minh chứng pipeline thực |
+| Task 5.4 | URL, README, video, process | Source/hosting/video có; Review/Retro dự thảo | Hồ sơ quy trình còn cần xác nhận |
 
----
+[Ma trận truy vết](traceability-matrix.md) lưu đường dẫn chi tiết; trạng thái được đọc cùng [thay đổi thanh toán](changes/payment-methods.md) để không suy diễn kết quả của phiên bản trước thành chức năng còn được bật.
 
 ## 8. Kết luận và hướng phát triển
 
-Assignment 2 được triển khai theo đúng chuỗi yêu cầu → mô hình hóa → kiến trúc → Sprint 1 → Sprint 2/Delivery. Trọng tâm báo cáo là phân luồng UC-01 và sự thống nhất giữa use-case, activity, sequence, class và deployment diagram. Bộ sơ đồ có cả file nguồn PlantUML lẫn SVG; các nhánh chưa đăng nhập, hết hàng, thanh toán thất bại, retry/callback trùng và chuyển khoản cần đối soát được mô tả thay vì chỉ trình bày luồng thành công.
+BrewLite đã xây dựng được hệ thống đặt thức uống có quản lý dữ liệu tập trung, transaction, phân quyền và kiểm thử nhiều tầng. Nhóm có code tái lập, bộ UML, tài liệu kiến trúc, URL production và pipeline CI deploy/smoke được kiểm chứng. Bản cập nhật tập trung chuyển khoản/điểm; video mới minh họa đúng trạng thái chờ xác minh khoản chuyển.
 
-Trạng thái hiện tại: code, sơ đồ, kiểm thử, production URL, release, CI deploy/smoke và video demo đã có. Cần trình bày trung thực các giới hạn: VNPay phụ thuộc Sandbox/merchant; không có giao dịch tiền thật được xác nhận; CI deploy source commit qua Render API và Vercel hook, không phải Render pull image GHCR; cấu hình database hai role chưa xác minh.
+Mức đáp ứng được đánh giá theo tạo phẩm và hành vi thực tế. Các ngoại lệ còn lại là Ví/Thẻ mô phỏng theo yêu cầu PDF đã bị bỏ ở main mới, admin được bypass required checks, và biên bản Sprint chưa được xác nhận. Nếu cần đáp ứng đầy đủ rubric gốc, nhóm phải thống nhất lại các ngoại lệ này trước nghiệm thu; không sử dụng tài liệu để thay thế chức năng hoặc hoạt động chưa có.
 
-Hướng phát triển tiếp theo gồm hoàn thiện nội dung thuyết minh, nghiệm thu trực tiếp các chức năng quản trị và đánh giá vận hành trên thiết bị di động. Các cổng thanh toán production chỉ được kích hoạt khi có merchant và thông tin cấu hình hợp lệ. Hồ sơ quy trình Sprint được hoàn thiện dựa trên buổi trao đổi thực tế của nhóm, sử dụng bản dự thảo ở mục 6.5.
+Hướng phát triển gồm hoàn thiện hồ sơ Sprint, kiểm thử trên thiết bị vật lý, diễn tập khôi phục, quản lý quyền DB tách biệt và triển khai đối soát/cổng thanh toán tự động khi có merchant, thông tin cấu hình và nhu cầu thực tế. Trước buổi bảo vệ, kiểm tra lại URL, trạng thái API, tài khoản demo, dữ liệu mẫu và khả năng khởi động của hosting Free.
 
-Trước buổi bảo vệ, nhóm kiểm tra lại URL frontend, API health, trạng thái đăng nhập và dữ liệu demo. Kết quả phiên bản trong báo cáo là snapshot của lần chạy CI được dẫn chứng; các commit tài liệu tiếp theo có thể làm thay đổi SHA đang phục vụ.
+## 9. Tài liệu tham khảo
 
-### Tài liệu tham khảo
-
-1. *BrewLite — Assignment 2: Requirements to Deployment*, phiên bản 1.0, Khoa Công nghệ Thông tin, Trường Đại học Sài Gòn, năm học 2026–2027.
-2. Kho mã nguồn: [github.com/https-monstiez/BrewLite-AS2](https://github.com/https-monstiez/BrewLite-AS2).
-3. [GitHub Actions Delivery run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367): quality gate, đóng gói, deploy và smoke thành công.
-4. [GitHub Release v0.2.1](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.1).
-5. Website production: [Vercel](https://brew-lite-as-2.vercel.app/); API health: [Render](https://brewlite-as2-api.onrender.com/api/health), kiểm tra ngày 15/11/2026.
+1. *BrewLite — Assignment 2: Requirements to Deployment*, phiên bản 1.0, Khoa Công nghệ Thông tin, Trường Đại học Sài Gòn, năm học 2026–2027; tài liệu đề bài do nhóm cung cấp.
+2. [Repository BrewLite-AS2](https://github.com/https-monstiez/BrewLite-AS2), code đối chiếu commit `55c02e4`.
+3. [GitHub Actions Delivery run 43710893938](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43710893938), commit `55c02e4`, kiểm chứng 15/11/2026.
+4. [Release v0.2.1](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.1), phiên bản trước thay đổi phạm vi thanh toán.
+5. [Tài liệu deployment](deployment.md), [kiểm thử](testing.md), [thay đổi phạm vi](changes/payment-methods.md), [video mới](demo/README.md).

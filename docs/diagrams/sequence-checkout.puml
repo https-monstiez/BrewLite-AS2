@@ -7,59 +7,58 @@ actor Staff
 participant "Next.js UI" as UI
 participant "NestJS API" as API
 database PostgreSQL as DB
-participant "Payment Service" as PSP
-Customer -> UI : Select options, checkout
+participant "PaymentsService" as Payment
+Customer -> UI : Options, cart, checkout
 UI -> API : POST /api/orders/quote + JWT
-API -> API : Validate JWT, DTO
-API -> DB : Read prices, stock, voucher
-DB --> API : Current values
+API -> API : Validate JWT / DTO
+API -> DB : Read prices, voucher, stock
 API --> UI : Server quote
-UI -> API : POST /api/orders + JWT + Idempotency-Key
-API -> DB : Lookup key + compare payload
-alt existing identical request
- DB --> API : Existing order
- API --> UI : Same order ID (no stock deduction)
+UI -> API : POST /api/orders + stable Idempotency-Key
+API -> DB : Check key and payload
+alt same key and payload
+ API --> UI : Existing order (no duplicate reservation)
 else new request
- API -> DB : BEGIN transaction
- API -> DB : UPDATE product WHERE version and stock >= qty
- alt conflict or out of stock
+ API -> DB : BEGIN; conditional stock/version update
+ alt out of stock / update conflict
   API -> DB : ROLLBACK
-  API --> UI : Retry OCC with limit / reject unavailable
- else reserve successful
-  API -> DB : INSERT Order + OrderItem; COMMIT
-  API --> UI : PENDING order, server total
+  API --> UI : Reject or bounded retry
+ else reserved
+  API -> DB : INSERT Order/OrderItem; COMMIT
+  API --> UI : PENDING order and server total
  end
 end
-UI -> API : POST /api/payments + JWT + stable key
-API -> DB : Claim unique payment request
-API --> UI : Simulated payment or signed sandbox URL
+UI -> API : POST /api/payments + stable key
+API -> Payment : Create payment for owned order
 alt BANK_TRANSFER
- UI -> API : GET /api/payments/bank-transfer/:orderId + JWT
- API -> DB : Read owned PENDING bank payment and server amount
- API --> UI : VietQR URL + recipient config + unique reference
- UI -> PSP : GET VietQR image (no funds moved)
- Customer -> PSP : Transfer in bank application
- note over UI,API : Order stays PENDING until staff verifies received funds
+ Payment -> DB : Unique pending payment / lock order
+ Payment --> API : Pending bank payment
+ UI -> API : GET /api/payments/bank-transfer/:orderId
+ API --> UI : VietQR instructions (DB amount/reference)
+ note over Customer,UI : External bank app transfers funds; QR display alone is not proof.
  Staff -> API : POST /api/payments/:orderId/confirm + JWT
  API -> API : Verify STAFF / ADMIN role
- API -> DB : Atomic claim PENDING -> PAID, payment SUCCEEDED, loyalty ledger
- API --> Staff : Confirmed (duplicate claim rejected)
-else sandbox gateway or simulation
-UI -> PSP : Authorize payment
-PSP -> API : Signed Return / IPN, or simulation outcome
-API -> API : Verify owner/signature, merchant, amount, reference
-API -> DB : BEGIN; conditional claim PENDING order/payment
-alt success and first confirmation
- API -> DB : PAID + SUCCEEDED + points + ledger; COMMIT
-else failed authorization
- API -> DB : PAYMENT_FAILED + FAILED + restore stock; COMMIT
-else duplicate callback
- API -> DB : No mutation
+ API -> Payment : Confirm verified receipt
+ Payment -> DB : Conditional PENDING -> PAID;
+ Payment -> DB : Payment SUCCEEDED + earned points / ledger
+ Payment --> API : Success; duplicate confirmation -> 409
+else LOYALTY_POINTS
+ Payment -> DB : BEGIN; check and deduct sufficient points
+ alt insufficient balance
+  Payment -> DB : ROLLBACK payment transaction
+  Payment --> API : 400; order remains PENDING
+ else sufficient balance
+  Payment -> DB : PAID + SUCCEEDED + points ledger; COMMIT
+  Payment --> API : Success; idempotent retry returns same result
+ end
 end
-API --> PSP : Result / already confirmed
-end
+API --> UI : Current payment result
 UI -> API : GET /api/orders/:id + JWT
 API -> DB : Read owned order
-API --> UI : Authoritative status and total
-UI --> Customer : Confirmation or failure
+API --> UI : Authoritative total/status
+UI --> Customer : Confirmation or pending/error
+opt customer cancels a pending order
+ UI -> API : POST /api/orders/:id/cancel
+ API -> DB : Conditional cancel; restore reserved stock once
+ API --> UI : CANCELLED
+end
 @enduml

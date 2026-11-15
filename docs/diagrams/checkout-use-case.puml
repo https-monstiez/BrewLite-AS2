@@ -4,29 +4,32 @@ skinparam shadowing false
 skinparam defaultFontName SansSerif
 left to right direction
 actor Customer
-actor "Payment Service" as PSP
+actor "Staff / ADMIN" as Staff
 rectangle "UC-01 Order and pay" {
- usecase "Submit order" as order
- usecase "Authenticate and validate" as validate
+ usecase "Create order" as order
+ usecase "Authenticate / validate" as validate
  usecase "Server quote" as quote
- usecase "Reserve inventory atomically" as reserve
- usecase "Pay simulated wallet/card" as sim
- usecase "Pay VNPay sandbox" as vnp
- usecase "Bank app transfer / staff reconciliation" as bank
+ usecase "Reserve stock atomically" as reserve
+ usecase "Bank transfer (VietQR)" as bank
  usecase "Redeem loyalty points" as points
- usecase "Confirm result" as result
+ usecase "Verify received transfer" as reconcile
+ usecase "Read authoritative order status" as status
+ usecase "Cancel pending order / restore stock" as cancel
 }
 Customer --> order
+Customer --> bank
+Customer --> points
+Customer --> status
+Customer --> cancel
+Staff --> reconcile
 order ..> validate : <<include>>
 order ..> quote : <<include>>
 order ..> reserve : <<include>>
-Customer --> sim
-Customer --> vnp
-Customer --> points
-Customer --> bank
-bank --> result
-PSP --> result
-vnp --> PSP
-sim --> result
-points --> result
+bank ..> order : <<extend>>
+points ..> order : <<extend>>
+reconcile ..> status : updates after verification
+note bottom of bank
+Bank transfer stays PENDING until staff reconciliation.
+Insufficient points reject payment without marking PAID.
+end note
 @enduml
