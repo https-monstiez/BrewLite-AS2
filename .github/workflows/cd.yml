@@ -2,7 +2,6 @@ name: Delivery
 on:
   push:
     branches: [main]
-    tags: ["v*"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -45,21 +44,24 @@ jobs:
           context: apps/web
           push: true
           tags: ${{ steps.image.outputs.web }}
-          build-args: NEXT_PUBLIC_API_URL=/api
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.API_PUBLIC_URL || 'https://brewlite-as2-api.onrender.com/api' }}
+            APP_VERSION=${{ github.sha }}
   deploy:
     needs: image
-    if: vars.PRODUCTION_DEPLOY_ENABLED == 'true' && vars.DEPLOY_TARGET != 'vps'
+    if: github.ref == 'refs/heads/main' && vars.PRODUCTION_DEPLOY_ENABLED == 'true' && vars.DEPLOY_TARGET != 'vps'
     runs-on: ubuntu-latest
     environment: production
-    timeout-minutes: 20
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Reject a superseded main commit
+        run: test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$GITHUB_SHA"
       - name: Deploy and verify pinned version
         env:
-          IMAGE_URL: ${{ needs.image.outputs.image }}
           EXPECTED_VERSION: ${{ github.sha }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
@@ -69,11 +71,11 @@ jobs:
         run: node scripts/deploy.mjs
       - name: Rollback instructions
         if: failure()
-        run: echo 'Deployment failed. Follow docs/deployment.md to restore the previous verified image SHA and web deployment. Do not reset the database.'
+        run: echo 'Deployment failed. Follow docs/deployment.md to redeploy the previous verified Git commit and restore the web deployment. Do not reset the database.'
 
   deploy-vps:
     needs: image
-    if: vars.PRODUCTION_DEPLOY_ENABLED == 'true' && vars.DEPLOY_TARGET == 'vps'
+    if: github.ref == 'refs/heads/main' && vars.PRODUCTION_DEPLOY_ENABLED == 'true' && vars.DEPLOY_TARGET == 'vps'
     runs-on: ubuntu-latest
     environment: production
     timeout-minutes: 15
@@ -101,3 +103,26 @@ jobs:
           trap 'rm -f ~/.ssh/deploy_key' EXIT
           scp -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes deploy/vps/compose.yml deploy/vps/Caddyfile deploy/vps/db-init.sql deploy/vps/deploy.sh "$VPS_USER@$VPS_HOST:$VPS_PATH/"
           ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" "cd '$VPS_PATH' && bash deploy.sh '$GITHUB_SHA'"
+
+  delivery-status:
+    needs: [image, deploy, deploy-vps]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Record actual delivery status
+        env:
+          ENABLED: ${{ vars.PRODUCTION_DEPLOY_ENABLED }}
+          IMAGE_RESULT: ${{ needs.image.result }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+          VPS_RESULT: ${{ needs.deploy-vps.result }}
+        run: |
+          {
+            echo '## Delivery evidence'
+            echo "Commit: $GITHUB_SHA"
+            echo "Image: $IMAGE_RESULT"
+            echo "Render/Vercel deploy and smoke: $DEPLOY_RESULT"
+            echo "VPS deploy: $VPS_RESULT"
+            if [ "$ENABLED" != 'true' ]; then
+              echo 'Production deploy is disabled. This run is packaging evidence only; Task 5.3 is incomplete.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

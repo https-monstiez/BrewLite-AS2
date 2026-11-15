@@ -16,8 +16,12 @@ Hệ thống production sử dụng Vercel cho frontend Next.js và Render cho A
 
 Ngày 15/11/2026, smoke check công khai xác nhận API health trả `status: ok`, API menu trả năm sản phẩm, và endpoint phiên bản của web cùng API báo SHA `ab5af1728c75be75c6b5c7d150fcd6ed6028d409`.
 
-Workflow GitHub Actions có job triển khai image-backed/VPS tùy cấu hình, nhưng các job này chỉ chạy khi bật biến `PRODUCTION_DEPLOY_ENABLED` và khai báo secrets/URLs phù hợp. Môi trường production đang mô tả ở trên được triển khai qua tích hợp Git của Render và Vercel; không đồng nhất cơ chế này với việc GitHub Actions trực tiếp triển khai image production.
+Workflow GitHub Actions đã được sửa để job Render triển khai service Git-backed bằng `commitId`; VPS là phương án thay thế. Các job deploy chỉ chạy trên main khi bật biến `PRODUCTION_DEPLOY_ENABLED` và khai báo secrets/URLs phù hợp. Hướng dẫn cấu hình ở [cd-setup.md](cd-setup.md); Task 5.3 vẫn chờ run deploy/smoke thật. Môi trường production đang mô tả ở trên được triển khai qua tích hợp Git của Render và Vercel; không đồng nhất cơ chế này với việc GitHub Actions trực tiếp triển khai image production.
 
 ## Kiểm tra sau triển khai và giới hạn
 
 Render kiểm tra health tại `/api/health`. Các endpoint production đã được gọi để xác nhận khả năng phản hồi và phiên bản đang chạy. Những kiểm tra này không thay thế kiểm thử end-to-end giao dịch trên dữ liệu production. Không thực hiện thanh toán thật trong kiểm thử; VNPay chỉ là sandbox khi merchant được cấu hình, còn phương thức chuyển khoản cần nhân viên đối soát theo quy trình nghiệp vụ.
+
+## Cập nhật kiểm chứng 15/11/2026 khoảng 12:34 ICT
+
+Web báo SHA `e9b3949`, API báo `ab5af17`; hai endpoint hoạt động nhưng chưa đồng bộ phiên bản. [Delivery run 43644852017](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43644852017) có quality/image thành công, deploy bị skipped. Các kết quả cùng SHA ở phần trên là lịch sử lần kiểm tra trước, không đại diện trạng thái mới nhất.

@@ -6,17 +6,19 @@
 **Trường Đại học Sài Gòn — Khoa Công nghệ Thông tin**<br>
 **Năm học 2026–2027**
 
-> **Nhóm cần hoàn thiện trước khi nộp:** điền họ tên/MSSV, giảng viên và ngày nộp theo yêu cầu; bổ sung link video demo; ghi nhận Sprint Review và Sprint Retrospective thực tế. Các thông tin này không được giả định trong báo cáo.
+> **Nhóm cần hoàn thiện trước khi nộp:** điền thông tin giảng viên và ngày nộp theo yêu cầu; bổ sung link video demo; ghi nhận Sprint Review và Sprint Retrospective thực tế. Các thông tin này không được giả định trong báo cáo.
 
 | Thành viên | MSSV |
 |---|---|
-| [Điền họ tên thành viên 1] | [Điền MSSV] |
-| [Thêm/bớt dòng theo danh sách thực tế] | |
+| Lê Ngọc Hiếu | 3124410095 |
+| Nguyễn Tiến Đạt | 3124410060 |
 
 **Giảng viên hướng dẫn:** [Điền nếu mẫu yêu cầu]<br>
 **Ngày nộp:** [Điền ngày nộp]
 
 ---
+
+> **Cập nhật kiểm tra 15/11/2026 khoảng 12:34 ICT:** web đã lên SHA `e9b3949`, API vẫn ở `ab5af17`; cả hai trả 200. Các đoạn ghi cùng SHA dưới đây mô tả lần kiểm tra trước. Task 5.3 còn thiếu run CI deploy/smoke thật; xem [cd-setup.md](cd-setup.md).
 
 ## Tóm tắt
 
@@ -289,7 +291,7 @@ Các test bao gồm quote, quyền truy cập, chống lặp, tranh chấp tồn
 | Database | Render PostgreSQL private inbound; `DATABASE_URL` có cấu hình nhưng secret không được đưa vào báo cáo |
 | CI/CD | GitHub Actions build/push image lên GHCR; production hiện deploy qua Render/Vercel Git integration |
 
-**Đối chiếu với tiêu chí CD của PDF:** đề yêu cầu pipeline thể hiện quality gate, image theo SHA, registry, deploy bằng secrets, migration an toàn, post-deploy smoke test và rollback. Repo có workflow build/đóng gói; hệ thống production hoạt động và có runbook. Tuy nhiên, bằng chứng hiện có không cho thấy GitHub Actions đã trực tiếp triển khai image GHCR lên production và chạy post-deploy smoke. Vì vậy không khẳng định pipeline GitHub đã hoàn tất toàn bộ chuỗi CD trên production. Nếu giảng viên yêu cầu pipeline tự deploy theo đúng sơ đồ đề, nhóm cần cấu hình và chạy workflow đó an toàn trước khi nộp.
+**Đối chiếu với tiêu chí CD của PDF:** đề yêu cầu pipeline thể hiện quality gate, image theo SHA, registry, deploy bằng secrets, migration an toàn, post-deploy smoke test và rollback. Repo có workflow build/đóng gói; hệ thống production hoạt động và có runbook. Tuy nhiên, bằng chứng hiện có không cho thấy GitHub Actions đã trực tiếp triển khai image GHCR lên production và chạy post-deploy smoke. Vì vậy không khẳng định pipeline GitHub đã hoàn tất toàn bộ chuỗi CD trên production. Task 5.3 bắt buộc chuỗi này: nhóm cần cấu hình secrets và chạy workflow deploy/smoke thành công trước khi đánh dấu hoàn thành. Script đã được sửa để Render Git-backed nhận `commitId` và kiểm tra SHA của cả API/web; xem [hướng dẫn bật CD](cd-setup.md).
 
 ### 6.4 Handover
 
@@ -324,10 +326,10 @@ Trạng thái hiện tại: code, sơ đồ, kiểm thử, production URL và re
 
 **Nhóm tự hoàn thiện trước khi nộp:**
 
-1. Điền thành viên/MSSV và thông tin giảng viên/ngày nộp nếu mẫu yêu cầu.
+1. Điền thông tin giảng viên/ngày nộp nếu mẫu yêu cầu.
 2. Quay và bổ sung link video demo thực tế luồng end-to-end.
 3. Tổ chức/ghi nhận Sprint Review và Sprint Retrospective với người tham dự, phản hồi và hành động thật.
-4. Nếu rubric yêu cầu GitHub Actions tự triển khai production, cấu hình secrets trong GitHub settings và lưu bằng chứng workflow deploy/smoke thành công; không đưa secrets vào repo hoặc báo cáo.
+4. Hoàn tất Task 5.3: cấu hình secrets trong GitHub settings theo [cd-setup.md](cd-setup.md), chạy workflow deploy/smoke và lưu bằng chứng thành công; không đưa secrets vào repo hoặc báo cáo.
 
 ### Tài liệu tham khảo
 

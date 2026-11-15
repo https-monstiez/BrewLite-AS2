@@ -56,3 +56,10 @@ PR thực tế: [AS2 #1](https://github.com/https-monstiez/BrewLite-AS2/pull/1).
 - Thông tin tài khoản nhận của nhóm chỉ được lưu trong env riêng. Dữ liệu CI/browser dùng tài khoản giả và không chuyển tiền thật.
 
 Kết quả local bổ sung đã đạt: 84 backend unit/HTTP + 5 frontend + 11 PostgreSQL integration + 4 browser = **104 test**. Browser gồm chuyển khoản chờ đối soát và đăng nhập/refresh trang quản trị. Các lần CI trước vẫn là minh chứng của bản nền; bản bổ sung được kiểm tra qua PR triển khai Free/VietQR.
+
+## Kiểm tra sau cập nhật hồ sơ và CD — 15/11/2026
+
+- Public smoke lúc khoảng 12:34 ICT: web `/version` trả `e9b394940009688ac0ec8e46a30ed3c5f018f1a6`, API health trả `ab5af1728c75be75c6b5c7d150fcd6ed6028d409` và `status: ok`. Hai bản chưa cùng SHA; kết quả kiểm tra trước đó là ảnh chụp lịch sử.
+- [Delivery run 43644852017](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43644852017): quality/image thành công; deploy và deploy-vps bị skipped. Task 5.3 chưa được nghiệm thu.
+- Đã kiểm tra danh sách tên cấu hình GitHub: repository chưa có Actions secrets hoặc variables. Không đọc giá trị secret.
+- `npm run test:delivery`: 12/12 test orchestration đạt ở local; mô phỏng HTTP, không phải bằng chứng deploy production. Bao gồm Git commit pinning, cold start, lỗi Render/Vercel, SHA không khớp và che secret khi lỗi mạng. Các test này tách riêng với 104 test ứng dụng đã ghi nhận trước đó.
