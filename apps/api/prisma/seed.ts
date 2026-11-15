@@ -4,14 +4,10 @@ import * as bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 async function main() {
-  if (
-    process.env.SEED_IF_EMPTY === "true" &&
-    (await prisma.product.count()) > 0
-  ) {
-    console.log(
-      "Catalog already exists; keeping products, prices and stock unchanged",
-    );
-    return;
+  const skipCatalog = process.env.SEED_IF_EMPTY === "true" &&
+    (await prisma.product.count()) > 0;
+  if (skipCatalog) {
+    console.log("Catalog already exists; keeping products, prices and stock unchanged");
   }
   const products = [
     {
@@ -51,23 +47,25 @@ async function main() {
     },
   ];
 
-  await prisma.$transaction(
-    products.map((p) => {
-      const id = `seed-${p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+  if (!skipCatalog) {
+    await prisma.$transaction(
+      products.map((p) => {
+        const id = `seed-${p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
-      return prisma.product.upsert({
-        where: { id },
-        update: {
-          name: p.name,
-          description: p.description,
-          price: p.price,
-        },
-        create: { ...p, id },
-      });
-    }),
-  );
+        return prisma.product.upsert({
+          where: { id },
+          update: {
+            name: p.name,
+            description: p.description,
+            price: p.price,
+          },
+          create: { ...p, id },
+        });
+      }),
+    );
 
-  console.log(`Seeded ${products.length} products`);
+    console.log(`Seeded ${products.length} products`);
+  }
 
   if (process.env.SEED_DEMO_ACCOUNTS !== "true") return;
 

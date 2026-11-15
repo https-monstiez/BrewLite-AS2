@@ -65,7 +65,7 @@ docker compose exec api npm run db:seed
 ```
 Web http://localhost:3000; API http://localhost:3001/api; health http://localhost:3001/api/health. PostgreSQL không publish cổng ra host. Nếu AS1 đang chạy các cổng này, dùng cổng khác cho AS2; ví dụ đặt `WEB_PORT=3200`, `API_PORT=3201`, `NEXT_PUBLIC_API_URL=http://localhost:3201/api` và `FRONTEND_ORIGIN=http://localhost:3200` trong `.env` trước khi build.
 
-Seed mặc định chỉ tạo/upsert 5 món, không reset tồn hiện tại. Tài khoản demo chỉ tạo khi `SEED_DEMO_ACCOUNTS=true` và không thay mật khẩu tài khoản đã tồn tại. Không bật seed demo ở production. Cách tạo tài khoản quản lý trên Render được hướng dẫn bên dưới.
+Seed mặc định chỉ tạo/upsert 5 món, không reset tồn hiện tại. Tài khoản demo chỉ tạo khi `SEED_DEMO_ACCOUNTS=true` và không thay mật khẩu tài khoản đã tồn tại. Chỉ bật tài khoản demo trên bản đồ án dùng dữ liệu mẫu theo hướng dẫn bên dưới. Cách tạo tài khoản quản lý trên Render được hướng dẫn bên dưới.
 
 ## Chạy trực tiếp
 Node.js 22.12+ và PostgreSQL 16. Hai app có lockfile riêng:
@@ -81,6 +81,18 @@ npm run start:dev --prefix apps/api
 # Terminal khác:
 npm run dev --prefix apps/web
 ```
+
+## Tài khoản demo cho bản đồ án
+
+Theo lựa chọn của nhóm, Render có thể tạo các tài khoản mẫu khi đặt `SEED_DEMO_ACCOUNTS=true` trong Environment và redeploy sau khi code mới đã merge. Startup mặc định vẫn tắt tài khoản demo; catalog có sẵn được giữ nguyên. Seed không đổi mật khẩu hoặc nâng quyền tài khoản đã tồn tại.
+
+| Vai trò | Email | Mật khẩu demo |
+| --- | --- | --- |
+| Khách hàng | `khachhang@gmail.com` | `khach123456` |
+| Nhân viên | `nhanvien@gmail.com` | `nhanvien123456` |
+| Quản lý | `admin@gmail.com` | `admin123456` |
+
+Đây là tài khoản công khai cho dữ liệu đồ án. Sau khi tạo có thể xóa biến `SEED_DEMO_ACCOUNTS` và redeploy; các tài khoản vẫn lưu trong database. Nếu email đã tồn tại với mật khẩu khác, dùng tài khoản hiện có hoặc bootstrap một ADMIN mới như hướng dẫn tiếp theo.
 
 ## Tạo tài khoản quản lý trên Render
 

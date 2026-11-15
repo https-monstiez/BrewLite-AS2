@@ -69,3 +69,9 @@ Kết quả local bổ sung đã đạt: 84 backend unit/HTTP + 5 frontend + 11 
 [Run 43682676783](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43682676783) đã qua quality/image và gọi Render deploy thành công commit `9d858115b8b272b6540047838a19562687b61082`. API health công khai báo đúng SHA lúc khoảng 12:56 ICT. Tuy nhiên job deploy thất bại ở bước smoke menu vì script chờ mảng, trong khi `ProductsService.list` trả `{ items, pagination }`. Chưa chạy tới Vercel hook; không đánh dấu CD hoàn thành.
 
 Đã sửa smoke theo contract phân trang thực tế, cập nhật fixture từ cấu trúc API và thêm test hồi quy từ chối response mảng không đúng contract. Bộ test orchestration hiện có **13 test**, tách riêng với 104 test ứng dụng. Tên giảng viên và mốc nộp/bảo vệ đã được điền từ thông tin nhóm.
+
+## Tài khoản demo online theo lựa chọn của nhóm
+
+Nhóm yêu cầu dùng tài khoản demo trong seed cho bản đồ án online. Startup được sửa để chỉ tạo demo accounts khi `SEED_DEMO_ACCOUNTS=true`, kể cả khi catalog đã tồn tại. Mặc định tắt; không ghi đè mật khẩu/role tài khoản đã có hoặc reset giá/tồn catalog. Test PostgreSQL dùng schema riêng để kiểm tra bật/tắt, login hash và không reset/nâng quyền.
+
+Thông báo 401 khi login được sửa thành lỗi email/mật khẩu; request đã có token vẫn báo phiên hết hạn. Hai test frontend mới kiểm tra hai trường hợp riêng. Trước khi bật opt-in, tài khoản ADMIN mặc định trả 401 trên Render; không suy ra từ đó rằng database hoàn toàn không có ADMIN.

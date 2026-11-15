@@ -13,10 +13,14 @@ const migration = spawnSync(
 );
 if (migration.status !== 0) process.exit(migration.status || 1);
 delete process.env.MIGRATION_DATABASE_URL;
-if (process.env.SEED_CATALOG_ON_STARTUP === "true") {
+if (process.env.SEED_CATALOG_ON_STARTUP === "true" || process.env.SEED_DEMO_ACCOUNTS === "true") {
   const seed = spawnSync("node", ["--import", "tsx", "prisma/seed.ts"], {
     stdio: "inherit",
-    env: { ...process.env, SEED_IF_EMPTY: "true", SEED_DEMO_ACCOUNTS: "false" },
+    env: {
+      ...process.env,
+      SEED_IF_EMPTY: "true",
+      SEED_DEMO_ACCOUNTS: process.env.SEED_DEMO_ACCOUNTS === "true" ? "true" : "false",
+    },
   });
   if (seed.status !== 0) process.exit(seed.status || 1);
 }
