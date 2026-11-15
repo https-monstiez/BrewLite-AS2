@@ -6,8 +6,6 @@
 **Trường Đại học Sài Gòn — Khoa Công nghệ Thông tin**<br>
 **Năm học 2026–2027**
 
-> **Nhóm cần hoàn thiện trước khi nộp:** bổ sung lớp/nhóm nếu mẫu yêu cầu; xem video demo và chuẩn bị thuyết minh; ghi nhận Sprint Review và Sprint Retrospective thực tế. Các thông tin này không được giả định trong báo cáo.
-
 | Thành viên | MSSV |
 |---|---|
 | Lê Ngọc Hiếu | 3124410095 |
@@ -19,7 +17,7 @@
 
 ---
 
-> **Minh chứng cuối:** [CI deploy/smoke thành công](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367) trên SHA `2af63a27619e7062e94bc6163643448e08a1b7f8`; web/API cùng phiên bản trong lần kiểm tra. Ba tài khoản demo online đăng nhập đúng quyền; [video checkout mobile](demo/README.md) đã ghi trên production. Review/Retrospective vẫn cần nhóm thực hiện thật.
+**Phiên bản bàn giao:** v0.2.1 · **Ngày cập nhật:** 15/11/2026
 
 ## Tóm tắt
 
@@ -27,7 +25,7 @@ BrewLite là hệ thống đặt thức uống trực tuyến. Báo cáo tập t
 
 Hệ thống dùng Next.js/PWA cho giao diện, NestJS cho REST API và PostgreSQL/Prisma cho dữ liệu. Bên cạnh ví/thẻ mô phỏng, hệ thống có VietQR cần nhân viên đối soát; VNPay chỉ được mô tả là Sandbox khi đã cấu hình merchant. Các sơ đồ trong báo cáo được liên kết với yêu cầu, mô hình dữ liệu và kiểm thử để người đọc có thể lần theo cùng một nghiệp vụ từ yêu cầu đến triển khai.
 
-Tại lần kiểm tra sau [Delivery run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367), website và API production hoạt động tại Vercel/Render, trả cùng SHA `2af63a27619e7062e94bc6163643448e08a1b7f8`. CI đóng gói image SHA lên GHCR, điều khiển Render Git-backed deploy đúng source commit và gọi hook Vercel, rồi smoke cả API/web. Image GHCR là tạo phẩm đóng gói; Render build Docker từ Git commit, không khẳng định production đã pull chính image đó. Release nền `v0.2.0` vẫn lưu mốc phát hành trước và có release notes.
+Tại lần kiểm tra sau [Delivery run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367), website và API production hoạt động tại Vercel/Render, trả cùng SHA `2af63a27619e7062e94bc6163643448e08a1b7f8`. CI đóng gói image SHA lên GHCR, điều khiển Render Git-backed deploy đúng source commit và gọi hook Vercel, rồi smoke cả API/web. Image GHCR là tạo phẩm đóng gói; Render build Docker từ Git commit, không khẳng định production đã pull chính image đó. Bản bàn giao `v0.2.1` tập hợp mã nguồn, báo cáo, hướng dẫn vận hành và video minh họa.
 
 **Từ khóa:** yêu cầu phần mềm, phân luồng nghiệp vụ, UML, Activity diagram, Sequence diagram, Next.js, NestJS, PostgreSQL, CI/CD.
 
@@ -35,12 +33,12 @@ Tại lần kiểm tra sau [Delivery run 43685179367](https://github.com/https-m
 
 1. [Tổng quan và quy trình thực hiện](#1-tổng-quan-và-quy-trình-thực-hiện)
 2. [Task 1 — Khai thác và đặc tả yêu cầu](#2-task-1--khai-thác-và-đặc-tả-yêu-cầu)
-3. [Task 2 — Phân luồng và mô hình hóa](#3-task-2--phân-luồng-và-mô-hình-hóa)
+3. [Task 2 — Mô hình hóa hệ thống](#3-task-2--mô-hình-hóa-hệ-thống)
 4. [Task 3 — Thiết kế kiến trúc](#4-task-3--thiết-kế-kiến-trúc)
 5. [Task 4 — Sprint 1: MVP xem menu và CI](#5-task-4--sprint-1-mvp-xem-menu-và-ci)
 6. [Task 5 — Sprint 2, kiểm thử và bàn giao](#6-task-5--sprint-2-kiểm-thử-và-bàn-giao)
 7. [Truy vết yêu cầu](#7-truy-vết-yêu-cầu)
-8. [Kết luận và nội dung nhóm cần bổ sung](#8-kết-luận-và-nội-dung-nhóm-cần-bổ-sung)
+8. [Kết luận và hướng phát triển](#8-kết-luận-và-hướng-phát-triển)
 
 ---
 
@@ -71,7 +69,7 @@ Các nhánh lỗi cần được mô hình hóa thay vì chỉ mô tả đườn
 | 2. Mô hình hóa | Biểu diễn luồng nghiệp vụ và dữ liệu | Activity, Sequence, Class diagram; nguồn `.puml` và ảnh `.svg` | Đã có trong `docs/diagrams` |
 | 3. Kiến trúc | Chọn thành phần, ranh giới và cách triển khai | Tổng quan, ADR, deployment diagram | Đã có; sơ đồ deployment mô tả nền tảng thực tế |
 | 4. Sprint 1 | Xây nền tảng và MVP xem menu | Repo, tài liệu, menu/API, CI cơ bản | Đã hiện thực |
-| 5. Sprint 2 | Hoàn thiện luồng, kiểm thử và delivery | Checkout, test, CI/Delivery, production, release, bàn giao | Phần lớn đã có; video và biên bản thật nhóm cần bổ sung |
+| 5. Sprint 2 | Hoàn thiện luồng, kiểm thử và delivery | Checkout, test, CI/Delivery, production, release, bàn giao | Code, kiểm thử, CI/CD, production và video đã có; biên bản Sprint đang ở dạng dự thảo |
 
 ---
 
@@ -136,6 +134,7 @@ Ranh giới hệ thống giúp phân biệt hành động người dùng với t
 **Hậu điều kiện thất bại:** đơn/giao dịch không ở trạng thái thành công; tồn được hoàn nếu đã giữ trước đó; lỗi được hiển thị rõ.
 
 **Luồng chính:**
+
 1. Khách chọn sản phẩm và tùy chỉnh, thêm vào giỏ.
 2. Giao diện gửi danh sách sản phẩm/lựa chọn để lấy báo giá.
 3. API xác thực JWT, kiểm tra dữ liệu và đọc giá, voucher, tồn kho hiện tại từ database.
@@ -154,9 +153,9 @@ Ranh giới hệ thống giúp phân biệt hành động người dùng với t
 
 ---
 
-## 3. Task 2 — Phân luồng và mô hình hóa
+## 3. Task 2 — Mô hình hóa hệ thống
 
-Task 2 là trọng tâm mô hình hóa. Ba sơ đồ Activity, Sequence và Class nhìn cùng một UC-01 ở ba góc khác nhau: **ai làm gì và rẽ nhánh ra sao; các thành phần gọi nhau theo thứ tự nào; dữ liệu nào giữ trạng thái và quan hệ nghiệp vụ**.
+Activity, Sequence và Class diagram mô tả UC-01 theo ba góc nhìn bổ sung: luồng hoạt động và quyết định; trình tự tương tác giữa các thành phần; cấu trúc dữ liệu và quan hệ nghiệp vụ.
 
 ### 3.1 Activity diagram — các bước và nhánh quyết định
 
@@ -241,7 +240,7 @@ Sơ đồ thể hiện:
 - **CI:** GitHub Actions chạy kiểm tra và build; Delivery tạo image gắn commit SHA và đẩy GHCR.
 - **Production:** Vercel phục vụ frontend; Render chạy Docker Web Service API và PostgreSQL private. Dashboard Render cho thấy PostgreSQL inbound IP rules trống, nghĩa là traffic Internet trực tiếp bị chặn.
 - **Cấu hình:** API nhận connection string database và secrets qua biến môi trường; secret không được đưa vào repository.
-- **Ranh giới triển khai:** Render hiện dùng Git-backed deploy từ `main`/`checksPass`, không lấy image GHCR do workflow tạo. Vercel cũng được ghi là triển khai từ Git integration.
+- **Ranh giới triển khai:** GitHub Actions gọi Render API để triển khai đúng source commit và gọi deploy hook của Vercel. Render build Docker từ Git; image GHCR được lưu làm tạo phẩm đóng gói. Các tích hợp Git của nền tảng là cơ chế riêng, không thay thế minh chứng job deploy/smoke của CI.
 
 Sau Delivery run 43685179367 ngày 15/11/2026, website, API health và menu được kiểm tra công khai; web/API cùng báo SHA `2af63a27619e7062e94bc6163643448e08a1b7f8`. Database Render Free có cảnh báo sẽ bị xóa ngày 15/12/2026 nếu không nâng cấp. Cấu hình hai database role trên production chưa được xác minh.
 
@@ -252,7 +251,7 @@ Sau Delivery run 43685179367 ngày 15/11/2026, website, API health và menu đư
 **Sprint Goal theo đề:** tạo nền tảng kỹ thuật, tài liệu có kiểm soát phiên bản và MVP chạy được cho luồng xem menu.
 
 - Repository AS2 có `apps/web`, `apps/api`, `docs`, test và workflow; README, env mẫu, Docker Compose và hướng dẫn phát triển được duy trì.
-- API cung cấp `GET /products` và `GET /products/:id`; giao diện menu mobile-first có loading/empty/error và dữ liệu seed.
+- API cung cấp `GET /api/products` và `GET /api/products/:id` (tiền tố chung `/api`); giao diện menu mobile-first có loading/empty/error và dữ liệu seed.
 - Tài liệu Task 1–3 được đưa vào repo; sơ đồ có source PlantUML và bản SVG.
 - GitHub Actions chạy lint, test và build cho các nhánh/PR cấu hình. PR và các lần chạy CI lưu trong [testing.md](testing.md).
 
@@ -264,7 +263,7 @@ MVP ở Task 4 xác nhận luồng menu chạy được; đây là nền tảng 
 
 ### 6.1 Hoàn thiện luồng end-to-end
 
-Sprint 2 bổ sung chi tiết/tùy chỉnh món, giỏ hàng, xác thực JWT, quote server-side, tạo đơn, ví/thẻ mô phỏng, lịch sử, trạng thái và hàng đợi nhân viên. Luồng thành công và thất bại được kiểm tra tại nhiều tầng; giao dịch mô phỏng hoặc VietQR không được mô tả như thanh toán tiền thật.
+Sprint 2 bổ sung chi tiết/tùy chỉnh món, giỏ hàng, xác thực JWT, quote server-side, tạo đơn, ví/thẻ mô phỏng, lịch sử, trạng thái và hàng đợi nhân viên. Luồng thành công và thất bại được kiểm tra tại nhiều tầng. Ví/Thẻ mô phỏng không trích tiền thật. VietQR cung cấp hướng dẫn chuyển khoản; việc quét QR chưa đủ để xác nhận đã nhận tiền, nên trạng thái chờ chỉ kết thúc sau khi nhân viên đối soát.
 
 ### 6.2 Kiểm thử và CI
 
@@ -277,7 +276,7 @@ Kết quả kiểm thử được tổng hợp trong [testing.md](testing.md):
 | PostgreSQL integration | 12 |
 | Playwright browser E2E | 4 |
 | CD orchestration (HTTP mô phỏng, không phải deploy thật) | 16 |
-| Tổng | 123 |
+| **Tổng cộng** | **123** |
 
 Các test bao gồm quote, quyền truy cập, chống lặp, tranh chấp tồn, callback/ledger, hoàn tồn và luồng browser. Unit test dùng mock được phân biệt với PostgreSQL integration. Các lần CI/Delivery GitHub được ghi trong [testing.md](testing.md); release notes và hướng dẫn rollback ở [deployment.md](deployment.md).
 
@@ -289,7 +288,7 @@ Các test bao gồm quote, quyền truy cập, chống lặp, tranh chấp tồn
 | API menu | [GET /api/products](https://brewlite-as2-api.onrender.com/api/products), trả năm sản phẩm khi kiểm tra |
 | Health | [GET /api/health](https://brewlite-as2-api.onrender.com/api/health), `status: ok` |
 | Phiên bản | Web `/version` và API cùng SHA `2af63a27619e7062e94bc6163643448e08a1b7f8` trong run đã kiểm chứng |
-| Release | [GitHub Release v0.2.0](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.0) trên mốc phát hành nền `ab5af17` |
+| Release | [GitHub Release v0.2.1](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.1), gồm mã nguồn bàn giao và video demo |
 | Database | Render PostgreSQL private inbound; `DATABASE_URL` có cấu hình nhưng secret không được đưa vào báo cáo |
 | CI/CD | [Run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367) quality/image/deploy/smoke success; CI triển khai source commit vào Render và gọi hook Vercel |
 | Video | [Checkout mobile production](demo/README.md), thanh toán mô phỏng, ghi bằng Playwright |
@@ -299,6 +298,12 @@ Các test bao gồm quote, quyền truy cập, chống lặp, tranh chấp tồn
 ### 6.4 Handover
 
 README hướng dẫn chạy local/test/build; deployment guide mô tả URL, kiểm tra health/version và rollback. Đã có [video checkout mobile](demo/README.md) ghi thao tác thật trên production bằng Playwright và thanh toán mô phỏng. Sprint Review/Retrospective cần nhóm ghi nhận từ buổi thực tế; video tự động không thay thế hoạt động này. Xem checklist tại [handover.md](process/handover.md).
+
+### 6.5 Sprint Review và Sprint Retrospective
+
+Sprint Review đánh giá chức năng theo Sprint Goal và tiêu chí chấp nhận; Sprint Retrospective xem xét cách làm việc, khó khăn và hành động cải tiến. Hai hoạt động này bổ sung bằng chứng về quy trình, khác với kiểm thử phần mềm hoặc review mã nguồn.
+
+[Dự thảo nội dung Review/Retrospective](process/sprint-review-retrospective.md) tổng hợp các kết quả có minh chứng, các lỗi triển khai đã gặp và kế hoạch cải tiến đề xuất. Tài liệu hiện là nội dung chuẩn bị thảo luận; thời gian, người tham dự, phản hồi và phân công cần được nhóm xác nhận sau buổi trao đổi thực tế. Báo cáo không xem bản dự thảo là minh chứng cuộc họp đã diễn ra.
 
 ---
 
@@ -317,27 +322,24 @@ Ma trận đầy đủ ở [traceability-matrix.md](traceability-matrix.md). M�
 | FR-09–14 quản trị/kho | US-07/US-09 | Use-case, Class | Admin/inventory modules, integration tests |
 | FR-16 VietQR | UC-01 | Activity, Sequence | QR/reference, staff reconciliation tests |
 | NFR-06 CI | US-02 | Deployment | GitHub Actions run evidence |
-| NFR-07 deployment | US-08 | Deployment | Production health/version, Release v0.2.0 |
+| NFR-07 deployment | US-08 | Deployment | Production health/version, Release v0.2.1 |
 
 ---
 
-## 8. Kết luận và nội dung nhóm cần bổ sung
+## 8. Kết luận và hướng phát triển
 
 Assignment 2 được triển khai theo đúng chuỗi yêu cầu → mô hình hóa → kiến trúc → Sprint 1 → Sprint 2/Delivery. Trọng tâm báo cáo là phân luồng UC-01 và sự thống nhất giữa use-case, activity, sequence, class và deployment diagram. Bộ sơ đồ có cả file nguồn PlantUML lẫn SVG; các nhánh chưa đăng nhập, hết hàng, thanh toán thất bại, retry/callback trùng và chuyển khoản cần đối soát được mô tả thay vì chỉ trình bày luồng thành công.
 
 Trạng thái hiện tại: code, sơ đồ, kiểm thử, production URL, release, CI deploy/smoke và video demo đã có. Cần trình bày trung thực các giới hạn: VNPay phụ thuộc Sandbox/merchant; không có giao dịch tiền thật được xác nhận; CI deploy source commit qua Render API và Vercel hook, không phải Render pull image GHCR; cấu hình database hai role chưa xác minh.
 
-**Nhóm tự hoàn thiện trước khi nộp:**
+Hướng phát triển tiếp theo gồm hoàn thiện nội dung thuyết minh, nghiệm thu trực tiếp các chức năng quản trị và đánh giá vận hành trên thiết bị di động. Các cổng thanh toán production chỉ được kích hoạt khi có merchant và thông tin cấu hình hợp lệ. Hồ sơ quy trình Sprint được hoàn thiện dựa trên buổi trao đổi thực tế của nhóm, sử dụng bản dự thảo ở mục 6.5.
 
-1. Bổ sung lớp/nhóm nếu mẫu yêu cầu.
-2. Xem video demo đã có và chuẩn bị thuyết minh/demo trực tiếp khi bảo vệ.
-3. Tổ chức/ghi nhận Sprint Review và Sprint Retrospective với người tham dự, phản hồi và hành động thật.
-4. Trước buổi chấm kiểm tra lại URL/health, đăng nhập và phiên bản đang chạy; minh chứng Task 5.3 đã được lưu trong [deployment.md](deployment.md).
+Trước buổi bảo vệ, nhóm kiểm tra lại URL frontend, API health, trạng thái đăng nhập và dữ liệu demo. Kết quả phiên bản trong báo cáo là snapshot của lần chạy CI được dẫn chứng; các commit tài liệu tiếp theo có thể làm thay đổi SHA đang phục vụ.
 
 ### Tài liệu tham khảo
 
 1. *BrewLite — Assignment 2: Requirements to Deployment*, phiên bản 1.0, Khoa Công nghệ Thông tin, Trường Đại học Sài Gòn, năm học 2026–2027.
 2. Kho mã nguồn: [github.com/https-monstiez/BrewLite-AS2](https://github.com/https-monstiez/BrewLite-AS2).
-3. [GitHub Actions CI run #13](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43635976686) và [Delivery run #2](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43635976761).
-4. [GitHub Release v0.2.0](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.0).
+3. [GitHub Actions Delivery run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367): quality gate, đóng gói, deploy và smoke thành công.
+4. [GitHub Release v0.2.1](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.1).
 5. Website production: [Vercel](https://brew-lite-as-2.vercel.app/); API health: [Render](https://brewlite-as2-api.onrender.com/api/health), kiểm tra ngày 15/11/2026.
