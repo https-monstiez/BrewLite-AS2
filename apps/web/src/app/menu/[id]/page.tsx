@@ -122,8 +122,38 @@ export default function Detail() {
           <>
             <hr />
 
-            <label>Lượng đường <select aria-label="Lượng đường" value={sugar} onChange={e => setSugar(e.target.value)}>{["0","30","50","70","100"].map(v => <option key={v} value={v}>{v}%</option>)}</select></label>
-            <label>Lượng đá <select aria-label="Lượng đá" value={ice} onChange={e => setIce(e.target.value)}>{["0","50","100"].map(v => <option key={v} value={v}>{v}%</option>)}</select></label>
+            <div className="option-group">
+              <h3>Lượng đường</h3>
+              <div className="choices">
+                {["0", "25", "50", "75", "100"].map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    className={sugar === v ? "selected" : ""}
+                    onClick={() => setSugar(v)}
+                  >
+                    {v}%
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="option-group">
+              <h3>Lượng đá</h3>
+              <div className="choices">
+                {["0", "50", "100"].map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    className={ice === v ? "selected" : ""}
+                    onClick={() => setIce(v)}
+                  >
+                    {v}%
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <h3>Chọn kích cỡ</h3>
 
             <div className="choices">

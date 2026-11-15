@@ -1,14 +1,10 @@
-import { ConfigService } from "@nestjs/config";
-import { BankTransferService } from "./bank-transfer.service";
-import { VnpayService } from "./vnpay.service";
-import { SimulationDto } from "./payments.dto";
+
 import { UserRole } from "@prisma/client";
 import {
-  Body,
+  Controller,
   Get,
   Header,
-  ServiceUnavailableException,
-  Controller,
+  Body,
   Headers,
   Param,
   Post,
@@ -21,6 +17,7 @@ import { Roles } from "../common/roles.decorator";
 import { RolesGuard } from "../common/roles.guard";
 import { CreatePaymentDto } from "./payments.dto";
 import { PaymentsService } from "./payments.service";
+import { BankTransferService } from "./bank-transfer.service";
 
 type AuthedRequest = Request & {
   user: { id: string; email: string; role: UserRole };
@@ -31,9 +28,7 @@ type AuthedRequest = Request & {
 export class PaymentsController {
   constructor(
     private payments: PaymentsService,
-    private vnpay: VnpayService,
     private bank: BankTransferService,
-    private config: ConfigService,
   ) {}
 
   @Get("methods")
@@ -42,11 +37,7 @@ export class PaymentsController {
     return {
       available: [
         "LOYALTY_POINTS",
-        ...(this.config.get("PAYMENT_MODE") === "simulation"
-          ? ["WALLET_SIM", "CARD_SIM"]
-          : []),
         ...(this.bank.isConfigured() ? ["BANK_TRANSFER"] : []),
-        ...(this.vnpay.isConfigured() ? ["VNPAY"] : []),
       ],
     };
   }
@@ -63,13 +54,11 @@ export class PaymentsController {
     @Headers("idempotency-key") key: string,
     @Body() dto: CreatePaymentDto,
   ) {
-    if (dto.method === "BANK_TRANSFER") this.bank.assertConfigured();
-    if (dto.method === "MOMO")
-      throw new ServiceUnavailableException(
-        "MoMo chưa được kích hoạt merchant. Vui lòng chọn phương thức đang hỗ trợ.",
-      );
-    if (dto.method === "VNPAY") this.vnpay.assertConfigured();
-    const payment = await this.payments.create(
+    if (dto.method === "BANK_TRANSFER") {
+      this.bank.assertConfigured();
+    }
+
+    return this.payments.create(
       req.user.id,
       key,
       dto,
@@ -82,18 +71,6 @@ export class PaymentsController {
             : undefined,
       },
     );
-    return dto.method === "VNPAY"
-      ? { ...payment, paymentUrl: this.vnpay.url(payment, req.ip) }
-      : payment;
-  }
-
-  @Post(":id/simulate")
-  simulate(
-    @Req() req: AuthedRequest,
-    @Param("id") id: string,
-    @Body() dto: SimulationDto,
-  ) {
-    return this.vnpay.simulate(req.user.id, id, dto.outcome);
   }
 
   @Post(":orderId/confirm")

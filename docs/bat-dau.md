@@ -21,7 +21,7 @@ docker compose exec api npm run db:seed
 Mở http://localhost:3200 nếu dùng cấu hình trên; health http://localhost:3201/api/health. Lần đầu build cần tải thư viện. DB có volume, khởi động lại không mất dữ liệu. Không dùng down -v nếu muốn giữ dữ liệu.
 
 ## 3. Thử chức năng
-Đăng ký tài khoản mới trên giao diện; chọn món/size/topping/đường/đá, thêm giỏ; chọn **Ví mô phỏng** hoặc **Thẻ mô phỏng**, kết quả thành công hoặc bị từ chối. Đây là demo không thu tiền. VNPay chỉ dùng sau khi nhóm có merchant sandbox.
+Đăng ký tài khoản mới trên giao diện; chọn món/size/topping/đường/đá, thêm giỏ; chọn **Thanh toán bằng điểm** hoặc **Chuyển khoản ngân hàng**, kết quả thành công hoặc bị từ chối.
 
 Để thử ba vai trò trên **máy local**, có thể seed tài khoản mẫu tường minh:
 ```sh

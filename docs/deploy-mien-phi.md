@@ -33,7 +33,7 @@ Vercel → Project → Settings → Environment Variables:
 NEXT_PUBLIC_API_URL=https://<api-host-thuc-te>.onrender.com/api
 ```
 
-Áp dụng cho **Production**, sau đó Redeploy web. Đây là URL công khai, không phải secret. Không dùng `localhost`, IP Docker hoặc internal DB URL trong frontend. Mở lại web bằng điện thoại; đăng ký tài khoản mới và thử Thẻ/Ví mô phỏng.
+Áp dụng cho **Production**, sau đó Redeploy web. Đây là URL công khai, không phải secret. Không dùng `localhost`, IP Docker hoặc internal DB URL trong frontend. Mở lại web bằng điện thoại; đăng ký tài khoản mới và thanh toán.
 
 Nếu đổi tên/domain frontend, cập nhật FRONTEND_ORIGIN trên Render và redeploy API. Nếu đổi API URL, sửa NEXT_PUBLIC_API_URL và build/redeploy web.
 

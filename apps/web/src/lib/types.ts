@@ -1,5 +1,5 @@
 export type Size = "S" | "M" | "L";
-export type Method = "LOYALTY_POINTS" | "BANK_TRANSFER" | "VNPAY" | "MOMO" | "WALLET_SIM" | "CARD_SIM";
+export type Method = "LOYALTY_POINTS" | "BANK_TRANSFER";
 
 export type Product = {
   id: string;

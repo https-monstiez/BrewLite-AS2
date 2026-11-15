@@ -555,9 +555,7 @@ export async function createAdminPromotion(
   );
 }
 export const quote = (items: unknown[], token: string, promotionCode?: string) => req<{ subtotal: number; discountAmount: number; total: number }>("/orders/quote", { method: "POST", body: JSON.stringify({ items, ...(promotionCode ? { promotionCode } : {}) }) }, token);
-export const simulatePayment = (id: string, token: string, outcome: "success" | "failure") => req<{ status: string }>(`/payments/${encodeURIComponent(id)}/simulate`, { method: "POST", body: JSON.stringify({ outcome }) }, token);
 export const getOrder = (id: string, token: string) => req<Order>(`/orders/${encodeURIComponent(id)}`, {}, token);
-export const paymentReturn = (query: string) => req<{ RspCode: string; orderId?: string }>(`/payments/vnpay/return?${query}`);
 
 export type Ingredient = { id: string; name: string; unit: string; stock: number; recipe: {productId: string; quantity: number; product: {id: string; name: string}}[]; movements: {id: string; quantity: number; reason: string; createdAt: string}[] };
 export const ingredients = (token: string) => req<Ingredient[]>("/inventory",{},token);
@@ -565,10 +563,48 @@ export const createIngredient = (token: string, name: string, unit: string) => r
 export const receiveIngredient = (token: string,id: string,quantity: number,reference: string) => req<Ingredient>(`/inventory/${encodeURIComponent(id)}/receive`,{method:"POST",body:JSON.stringify({quantity,reference})},token);
 export const saveRecipe = (token: string,productId: string,items: {ingredientId:string;quantity:number}[]) => req(`/inventory/recipes/${encodeURIComponent(productId)}`,{method:"PUT",body:JSON.stringify({items})},token);
 
+
+const fallbackProductImages: Record<string, string> = {
+  Americano:
+    "https://images.openai.com/static-rsc-4/Ri2HMExjAhuwRO-Gawi6oYhicFfQQIaFpi9a1sFBhR1pd_vLI1m5Uu2APTFQO30sPBZtGWxbvTia1C-yTdfs83RJdNqyZD_nt_qLEHTRAEMuKvMq-yastNvaK-pqzSsLzLSzcMJ91_Xw1_Je8NkX7mXe6lMoPpwWf73deLQgpwN-tLtKSXxwWGmYna_F4_pD?purpose=fullsize",
+  "Bạc xỉu":
+    "https://chaosuonbebu.com/cdn/shop/files/cafe-sua-tuoi-bac-siu_2.jpg?v=1738581102",
+  "Cà phê sữa đá":
+    "https://www.coffeebrewhub.com/uploads/images/engine_images/master-authentic-vietnamese-iced-coffee-ca-phe-sua-da-at-hom-2026-04-11.webp",
+  "Matcha latte":
+    "https://images.openai.com/static-rsc-4/2GMalk9B0h3H8-L0EKjsy2P2D6u6jER9f8vcIHS9HsFkDPzvr23QDryQEPba0yaiHcc0XHnj8m5x2fiyJfveBDwnjPttEj57b6EBy5xePKX3oT3_okQGsGmVGjXO31lZ5hzhvmOIG9OfDOIOKYo4tdlkGx7Dg0OkwXpy9686CaC_Go20bIjuEnIDWT6OetIx?purpose=fullsize",
+  "Trà đào cam sả":
+    "https://images.openai.com/static-rsc-4/byUp2mcw_xQHltNxqPxWdgZTyYuqacZvnua0uqMm6GfcwiWA51bTlwElVOfUO5nGR98W5IUgNJp_wJ-klkExtM_YhyOzQYFUDBkY6QbkqiaQvuSt_obxO849P2TPJ6BtMVysbpgUuirOJJz7ygeZHWVYExBQ5ig8NzIG1RaIhWSYyWqZwWtqpvu63cAmmmTA?purpose=fullsize",
+};
+
 export async function getProduct(id: string): Promise<Product> {
- const x=await req<ManagedProduct>(`/products/${encodeURIComponent(id)}`);
- return {id:x.id,name:x.name,price:x.price,stock:x.stock,image:x.imageUrl||undefined,description:x.description||'',category:'Đồ uống'};
+  const [result, x] = await Promise.all([
+    products(),
+    req<ManagedProduct>(
+      `/products/${encodeURIComponent(id)}`
+    ),
+  ]);
+
+  const homepageProduct = result.list.find(
+    (p) => p.id === String(id)
+  );
+
+  return {
+    id: x.id,
+    name: x.name,
+    price: x.price,
+    stock: x.stock,
+    image:
+      homepageProduct?.image ||
+      x.imageUrl ||
+      fallbackProductImages[x.name] ||
+      undefined,
+    description: x.description || "",
+    category: homepageProduct?.category || "Đồ uống",
+  };
 }
+
+
 
 export type BankInstructions = { bankBin:string; bankName:string; accountNumber:string; accountName:string; orderId:string; paymentId:string; amount:number; transferContent:string; qrImageUrl:string; confirmation:'STAFF_RECONCILIATION' };
 export const paymentMethods = (token:string) => req<{available:Method[]}>("/payments/methods",{},token);

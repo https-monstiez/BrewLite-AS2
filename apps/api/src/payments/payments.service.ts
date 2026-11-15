@@ -291,9 +291,9 @@ export class PaymentsService {
         );
       }
 
-      if (['LOYALTY_POINTS', 'VNPAY', 'WALLET_SIM', 'CARD_SIM'].includes(pendingPayment.method)) {
+      if (pendingPayment.method !== 'BANK_TRANSFER') {
         throw new BadRequestException(
-          'Thanh toán bằng điểm không cần xác nhận thủ công',
+          'Chỉ giao dịch chuyển khoản ngân hàng mới cần xác nhận thủ công',
         );
       }
 
