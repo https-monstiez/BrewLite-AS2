@@ -22,3 +22,11 @@ Giới hạn: VNPay sandbox chỉ hoạt động khi có merchant; QR chuyển k
 - Catalog seed chỉ khi trống, không ghi đè giá/tồn; bootstrap quản trị viên từ secret nhập trên hosting, không cấp quyền cho tài khoản khách có sẵn.
 - VietQR chuyển khoản ngân hàng thật, reference/amount từ DB, đối soát bởi staff; dữ liệu người nhận không nằm trong repo.
 - Ẩn phương thức chưa cấu hình; MoMo chưa merchant không được coi là cổng hoạt động; VNPay hiện sandbox.
+
+## Bổ sung kiểm chứng cuối — 15/11/2026
+
+- [CI deploy/smoke production thành công](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367) trên `2af63a27619e7062e94bc6163643448e08a1b7f8`, web/API cùng SHA; Git-backed Render nhận commitId, hỗ trợ response 202 Queued.
+- Nhóm chọn bật demo accounts tường minh; không reset credential/role hay catalog hiện có. Ba role đã đăng nhập online thành công.
+- Lỗi login 401 hiển thị email/mật khẩu không đúng thay cho phiên hết hạn.
+- [Video demo checkout mobile](demo/README.md) trên API thật, thanh toán mô phỏng.
+- 107 test ứng dụng và 16 test orchestration CD; biên bản Review/Retrospective vẫn cần nhóm thực hiện.

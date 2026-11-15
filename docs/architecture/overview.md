@@ -24,7 +24,7 @@ Client chỉ gửi productId/qty/tùy chọn/mã ưu đãi; không quyết đị
 Local dùng `.env` ngoài Git; CI dùng GitHub Secrets và DB test tách riêng; production dùng secret Vercel/Render. NEXT_PUBLIC_API_URL là URL công khai build-time, không phải secret. Database URL/JWT/VNPay secret tuyệt đối không mang tiền tố NEXT_PUBLIC_.
 
 ## Triển khai
-Production hiện phục vụ Next.js/PWA trên Vercel và NestJS API/PostgreSQL trên Render; GHCR lưu image tag SHA cho luồng Delivery. Web/API đã được kiểm tra công khai cùng SHA; endpoint và giới hạn xác minh được ghi trong [deployment.md](../deployment.md). Sơ đồ [deployment.svg](../diagrams/deployment.svg) mô tả deployment target và không thay thế dashboard evidence. Render blueprint khai báo DB private, nhưng cần xác minh dashboard để loại trừ cấu hình drift.
+Production hiện phục vụ Next.js/PWA trên Vercel và NestJS API/PostgreSQL trên Render; GHCR lưu image tag SHA cho luồng Delivery. Web/API đã được kiểm tra công khai cùng SHA; endpoint và giới hạn xác minh được ghi trong [deployment.md](../deployment.md). Sơ đồ [deployment.svg](../diagrams/deployment.svg) mô tả deployment target và không thay thế dashboard evidence. Render dashboard đã xác nhận inbound DB private; CI deploy/smoke thành công ở run 43685179367. Cấu hình quyền DB/backup cần minh chứng riêng, không suy ra từ health.
 
 ## Ưu điểm và trade-off
 Monolith module đơn giản cho nhóm nhỏ và transaction SQL; khó scale độc lập từng domain. Giữ tiền số nguyên VND đơn giản nhưng chưa hỗ trợ đa tiền tệ. OCC tránh bán âm mà không giữ khóa kéo dài, nhưng có thể phải retry khi tranh chấp. Service worker không cache dữ liệu cá nhân nên offline chỉ có thông báo/giỏ cục bộ. Ghép Vercel/Render dễ triển khai nhưng cần CORS, build-time URL và quản lý hai nền tảng.
