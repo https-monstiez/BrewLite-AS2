@@ -27,7 +27,7 @@ Dashboard đã xác nhận API/DB gói Free, database inbound rules trống (Ren
 
 ## CI và deploy bằng secrets
 
-CI PR/main chạy install, lint, unit/UI, PostgreSQL integration, build, browser E2E và test orchestration CD. Main có required check `Lint, tests and build`, strict/up-to-date và enforce admins.
+CI PR/main chạy install, lint, unit/UI, PostgreSQL integration, build, browser E2E và test orchestration CD. Main có required check `Lint, tests and build`, strict/up-to-date. Theo yêu cầu chủ repo ngày 15/11/2026, tắt enforce admins để tài khoản quản trị được push trực tiếp; không yêu cầu reviewer. Admin có thể bỏ qua required checks khi push, nhưng job deploy vẫn phụ thuộc quality gate của workflow.
 
 Delivery chạy trên main sau quality gate:
 

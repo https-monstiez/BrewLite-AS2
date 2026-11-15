@@ -6,7 +6,7 @@
 
 ## CI
 
-PR/main chạy install → lint → unit/UI → PostgreSQL integration → build → Playwright E2E, cùng test orchestration CD. Bộ hiện tại gồm 107 test ứng dụng (84 backend, 7 frontend, 12 PostgreSQL, 4 browser) và 16 test CD; 123 test tổng. Main có required check `Lint, tests and build`, strict và enforce admins.
+PR/main chạy install → lint → unit/UI → PostgreSQL integration → build → Playwright E2E, cùng test orchestration CD. Bộ hiện tại gồm 107 test ứng dụng (84 backend, 7 frontend, 12 PostgreSQL, 4 browser) và 16 test CD; 123 test tổng. Main có required check `Lint, tests and build` và strict. Theo yêu cầu chủ repo ngày 15/11/2026, tài khoản quản trị được push trực tiếp (enforce admins tắt, không yêu cầu reviewer); do đó required checks không ngăn admin ghi code lên main. CI vẫn chạy trên main, còn deploy chỉ chạy khi quality gate đạt.
 
 ## Đóng gói và triển khai
 

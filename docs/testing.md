@@ -92,3 +92,7 @@ Thông báo 401 khi login được sửa thành lỗi email/mật khẩu; reques
 Bộ kiểm tra hiện có: **84 backend + 7 frontend + 12 PostgreSQL + 4 browser = 107 test ứng dụng**, cộng **16 test CD orchestration**, tổng **123**. CI quality trên run nêu trên đã đạt.
 
 [Video mobile](demo/README.md) ghi checkout trên production bằng Playwright: đăng nhập CUSTOMER, chọn Americano M/đường đá 50%, giỏ giữ qua reload, thanh toán Thẻ mô phỏng 40.000đ và xác nhận PAID từ API. Không mock API/không chuyển tiền thật; video dài khoảng 20,12 giây, 390×844. Đây là ghi hình tự động, không phải Sprint Review hay nghiệm thu của giảng viên.
+
+## Thay đổi quyền push theo yêu cầu chủ repo — 15/11/2026
+
+GitHub đã tắt enforce_admins trên main, không yêu cầu PR review. Admin được push thẳng và có quyền bypass required checks. Required check `Lint, tests and build`/strict vẫn được cấu hình cho đối tượng chịu branch protection; CI trên main và quality gate trước deploy vẫn giữ. Các ghi nhận enforce_admins phía trên là snapshot trước thay đổi này.
