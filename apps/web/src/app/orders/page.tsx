@@ -25,11 +25,8 @@ const orderStatuses: Record<string, string> = {
 };
 
 const paymentMethods: Record<string, string> = {
-  POINTS: "Điểm tích lũy",
   LOYALTY_POINTS: "Điểm tích lũy",
   BANK_TRANSFER: "Chuyển khoản ngân hàng",
-  VNPAY: "VNPay",
-  MOMO: "MoMo",
 };
 
 const cancellationReasons = [

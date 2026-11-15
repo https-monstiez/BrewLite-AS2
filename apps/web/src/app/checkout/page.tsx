@@ -12,7 +12,6 @@ import {
   validatePromotion,
   quote,
   getOrder,
-  simulatePayment,
 } from "@/lib/api";
 import type { Method } from "@/lib/types";
 
@@ -24,16 +23,6 @@ const paymentOptions: {
   description: string;
 }[] = [
   {
-    method: "WALLET_SIM",
-    title: "Ví mô phỏng",
-    description: "Thử nghiệm AS2, không thu tiền thật.",
-  },
-  {
-    method: "CARD_SIM",
-    title: "Thẻ mô phỏng",
-    description: "Thử nghiệm AS2, không nhập thông tin thẻ thật.",
-  },
-  {
     method: "LOYALTY_POINTS",
     title: "Thanh toán bằng điểm",
     description: "Sử dụng điểm tích lũy BrewLite để thanh toán.",
@@ -41,12 +30,7 @@ const paymentOptions: {
   {
     method: "BANK_TRANSFER",
     title: "Chuyển khoản ngân hàng",
-    description: "Chuyển tiền thật bằng app ngân hàng, nhân viên đối soát.",
-  },
-  {
-    method: "VNPAY",
-    title: "Ví VNPay",
-    description: "Thanh toán thử nghiệm qua VNPay sandbox.",
+    description: "Chuyển tiền qua ứng dụng ngân hàng, nhân viên đối soát.",
   },
 ];
 
@@ -57,10 +41,7 @@ export default function Checkout() {
   const [availableMethods, setAvailableMethods] = useState<Method[] | null>(
     null,
   );
-  const [method, M] = useState<Method>("WALLET_SIM");
-  const [simulationOutcome, setSimulationOutcome] = useState<
-    "success" | "failure"
-  >("success");
+  const [method, M] = useState<Method>("BANK_TRANSFER");
   const [error, E] = useState("");
   const [busy, B] = useState(false);
   useEffect(() => {
@@ -76,9 +57,7 @@ export default function Checkout() {
         M(
           result.available.includes("BANK_TRANSFER")
             ? "BANK_TRANSFER"
-            : result.available.includes("WALLET_SIM")
-              ? "WALLET_SIM"
-              : result.available[0] || "LOYALTY_POINTS",
+            : "LOYALTY_POINTS",
         );
       })
       .catch((e) => {
@@ -332,17 +311,7 @@ export default function Checkout() {
       }
 
       const paymentKey = `${idempotencyRef.current.key}:${method}`;
-      const payment = await pay(id, method, token, paymentKey);
-      if (method === "VNPAY") {
-        if (!payment.paymentUrl)
-          throw Error("VNPay chưa trả về đường dẫn thanh toán.");
-        window.location.assign(payment.paymentUrl);
-        return;
-      }
-      const result =
-        method === "WALLET_SIM" || method === "CARD_SIM"
-          ? await simulatePayment(payment.id, token, simulationOutcome)
-          : payment;
+      const result = await pay(id, method, token, paymentKey);
       const status =
         result.status === "SUCCEEDED"
           ? "PAID"
@@ -563,11 +532,7 @@ export default function Checkout() {
               ? "Đang xử lý..."
               : method === "LOYALTY_POINTS"
                 ? "Đặt hàng, sử dụng điểm ↗"
-                : method === "VNPAY"
-                  ? "Tiếp tục với VNPay sandbox ↗"
-                  : ["WALLET_SIM", "CARD_SIM"].includes(method)
-                    ? "Đặt hàng và thanh toán mô phỏng ↗"
-                    : "Tạo đơn và xem QR ngân hàng ↗"}
+                : "Tạo đơn và xem QR ngân hàng ↗"}
           </button>
 
           {!token && (

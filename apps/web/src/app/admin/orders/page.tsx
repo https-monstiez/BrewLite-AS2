@@ -37,17 +37,11 @@ const paymentLabels: Record<string, string> = {
 };
 
 const methodLabels: Record<string, string> = {
-  BANK_TRANSFER: "Chuyển khoản",
-  POINTS: "Điểm tích lũy",
+  BANK_TRANSFER: "Chuyển khoản ngân hàng",
   LOYALTY_POINTS: "Điểm tích lũy",
-  CASH: "Tiền mặt",
-  MOMO: "Ví MoMo",
-  VNPAY: "VNPay sandbox",
-  WALLET_SIM: "Ví mô phỏng",
-  CARD_SIM: "Thẻ mô phỏng",
 };
 
-const externalPaymentMethods = ["BANK_TRANSFER", "MOMO"];
+const externalPaymentMethods = ["BANK_TRANSFER"];
 
 const money = (value: number) =>
   Number(value || 0).toLocaleString("vi-VN") + "đ";

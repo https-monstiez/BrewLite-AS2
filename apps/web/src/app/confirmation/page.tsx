@@ -17,11 +17,7 @@ const labels: Record<string, string> = {
 };
 const methods: Record<string, string> = {
   BANK_TRANSFER: "Chuyển khoản ngân hàng",
-  VNPAY: "VNPay sandbox",
-  WALLET_SIM: "Ví mô phỏng",
-  CARD_SIM: "Thẻ mô phỏng",
   LOYALTY_POINTS: "Điểm tích lũy",
-  MOMO: "MoMo",
 };
 function Content() {
   const id = useSearchParams().get("id");

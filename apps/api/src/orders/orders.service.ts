@@ -878,7 +878,7 @@ export class OrdersService {
       const hasPendingPayment = order.payments.some(
         (payment) =>
           payment.status === PaymentStatus.PENDING &&
-          ['BANK_TRANSFER', 'VNPAY', 'MOMO'].includes(payment.method),
+          payment.method === 'BANK_TRANSFER',
       );
 
       if (!hasPendingPayment) {
