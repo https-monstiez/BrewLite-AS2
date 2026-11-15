@@ -17,6 +17,7 @@ function harness(overrides = {}) {
     const url = String(input);
     calls.push({ url, ...options });
     if (overrides[url]) return overrides[url](options);
+    if (url.endsWith("/deploys?limit=100")) return json([]);
     if (url.endsWith("/deploys")) return json({ id: "dep-test" }, 201);
     if (url.endsWith("/deploys/dep-test")) return json({ status: "live" });
     if (url === env.API_HEALTH_URL) return json({ status: "ok", version: sha });
@@ -31,7 +32,8 @@ function harness(overrides = {}) {
 test("deploys pinned Git commit, then checks API/menu and web before success", async () => {
   const h = harness();
   assert.deepEqual(await deploy(env, h.options), { version: sha, renderDeployId: "dep-test" });
-  const trigger = h.calls[0];
+  const trigger = h.calls.find((call) => call.url.endsWith("/deploys") && call.method === "POST");
+  assert.ok(trigger);
   assert.deepEqual(JSON.parse(trigger.body), { commitId: sha });
   assert.equal(trigger.headers.Authorization, "Bearer test-key");
   assert.equal(h.calls.filter((c) => c.url === env.VERCEL_DEPLOY_HOOK).length, 1);
@@ -100,4 +102,34 @@ test("transport errors do not expose deploy hook URL or credentials", async () =
     assert.ok(!error.message.includes(env.RENDER_API_KEY));
     return /HTTP request failed/.test(error.message);
   });
+});
+
+test("handles Render 202 with an empty body and waits for a new deployment of the expected commit", async () => {
+  let reads = 0;
+  const old = { deploy: { id: "dep-old", commit: { id: sha }, status: "live" } };
+  const unrelated = { deploy: { id: "dep-other", commit: { id: "b".repeat(40) }, status: "live" } };
+  const h = harness({
+    "https://api.render.com/v1/services/srv-test/deploys": () => new Response(null, { status: 202 }),
+    "https://api.render.com/v1/services/srv-test/deploys?limit=100": () => {
+      reads++;
+      return json(reads < 3 ? [old, unrelated] : [old, unrelated, { deploy: { id: "dep-test", commit: { id: sha } } }]);
+    },
+  });
+  const result = await deploy(env, h.options);
+  assert.equal(result.renderDeployId, "dep-test");
+  assert.equal(reads, 3);
+});
+
+test("a queued request cannot pass using an old deployment of the same SHA", async () => {
+  const h = harness({
+    "https://api.render.com/v1/services/srv-test/deploys": () => new Response(null, { status: 202 }),
+    "https://api.render.com/v1/services/srv-test/deploys?limit=100": () => json([{ deploy: { id: "old", commit: { id: sha }, status: "live" } }]),
+  });
+  await assert.rejects(deploy(env, h.options), /Queued Render deployment did not appear/);
+  assert.ok(!h.calls.some((call) => call.url === env.VERCEL_DEPLOY_HOOK));
+});
+
+test("empty 201 response fails clearly without claiming a successful deploy", async () => {
+  const h = harness({ "https://api.render.com/v1/services/srv-test/deploys": () => new Response(null, { status: 201 }) });
+  await assert.rejects(deploy(env, h.options), /did not return a deployment id/);
 });

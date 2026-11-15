@@ -75,3 +75,12 @@ Kết quả local bổ sung đã đạt: 84 backend unit/HTTP + 5 frontend + 11 
 Nhóm yêu cầu dùng tài khoản demo trong seed cho bản đồ án online. Startup được sửa để chỉ tạo demo accounts khi `SEED_DEMO_ACCOUNTS=true`, kể cả khi catalog đã tồn tại. Mặc định tắt; không ghi đè mật khẩu/role tài khoản đã có hoặc reset giá/tồn catalog. Test PostgreSQL dùng schema riêng để kiểm tra bật/tắt, login hash và không reset/nâng quyền.
 
 Thông báo 401 khi login được sửa thành lỗi email/mật khẩu; request đã có token vẫn báo phiên hết hạn. Hai test frontend mới kiểm tra hai trường hợp riêng. Trước khi bật opt-in, tài khoản ADMIN mặc định trả 401 trên Render; không suy ra từ đó rằng database hoàn toàn không có ADMIN.
+
+## Rà soát cuối sau khi bật demo — 15/11/2026
+
+- Ba lần POST `/api/auth/login` với tài khoản demo trả HTTP **201**, đúng các role ADMIN, STAFF và CUSTOMER. Token/passwordHash không được in hoặc lưu trong hồ sơ kiểm chứng.
+- Playwright trên trang login production xác nhận đăng nhập sai trả 401 và hiển thị “Email hoặc mật khẩu không đúng.”; không còn báo nhầm phiên hết hạn. Kiểm tra browser ban đầu chạy trước hydration bị timeout; chạy lại sau `networkidle` đã quan sát đúng request/response và thông báo.
+- API và web đã lên commit `ebff7514ffa1f576889bf7aa61bfa49ec23e3c8d`.
+- [Delivery run 43684074987](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43684074987) qua quality/image nhưng job deploy lỗi `Unexpected end of JSON input` sau khi gửi yêu cầu deploy. Chưa đánh dấu Task 5.3 hoàn tất. Render API có phản hồi 202 Queued; script cần chấp nhận body rỗng, tìm deployment mới đúng SHA rồi chờ live thay vì parse JSON vô điều kiện.
+- `npm run test:delivery`: **16/16** test local đạt sau bản sửa queued response, gồm loại deployment cũ cùng SHA và không nhận nhầm deployment của SHA khác. Cấu trúc list response được đối chiếu với API/CLI chính thức của Render.
+- PR #7 CI đạt: frontend 7 test, PostgreSQL 12 test (thêm seed regression), backend 84 test và browser 4 test. Đây là **107 test ứng dụng**, tách riêng với test orchestration CD.

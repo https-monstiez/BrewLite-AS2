@@ -15,8 +15,9 @@
 - [x] GitHub Release/tag `v0.2.0` trên commit production — [Release](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.0).
 - [x] README có họ tên/MSSV; báo cáo đã điền Lê Ngọc Hiếu và Nguyễn Tiến Đạt.
 - [x] Báo cáo có giảng viên Từ Lãng Phiêu và mốc nộp sản phẩm/bảo vệ do nhóm cung cấp.
-- [ ] Kiểm tra ADMIN/STAFF online sau khi nhóm bật demo opt-in; tài khoản có trong seed chưa chứng minh đã tồn tại trên database Render. Đây là kiểm tra phần quản trị mở rộng.
-- [ ] Video/demo trực tiếp có người nghiệm thu.
+- [x] Đăng nhập ba tài khoản demo trên Render trả HTTP 201 và đúng quyền ADMIN/STAFF/CUSTOMER, kiểm tra 15/11/2026 sau khi bật opt-in.
+- [ ] Demo thao tác quản lý đơn/thực đơn trực tiếp bằng các tài khoản đã xác minh.
+- [ ] Video hoặc demo trực tiếp luồng end-to-end có người nghiệm thu (nhóm dự kiến bảo vệ 18/11/2026).
 - [ ] Sprint Review/Retrospective có thành viên, thời điểm và phản hồi thật.
 
 Ghi chú vận hành (không phải tiêu chí nghiệm thu trong PDF): Render thông báo database Free sẽ bị xóa ngày 15/12/2026. Nhóm nên tự quyết định kế hoạch lưu trữ/chuyển dữ liệu trước hạn.

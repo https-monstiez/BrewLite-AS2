@@ -49,14 +49,39 @@ export async function deploy(env, {
     "Content-Type": "application/json",
   };
   const service = `https://api.render.com/v1/services/${encodeURIComponent(env.RENDER_SERVICE_ID)}`;
+  async function listDeploys() {
+    const response = await fetchSafe(`${service}/deploys?limit=100`, { headers });
+    if (!response.ok) throw new Error(`Render deploy list failed (${response.status})`);
+    const rows = await response.json();
+    if (!Array.isArray(rows)) throw new Error("Render deploy list has an invalid format");
+    return rows.map((row) => row.deploy).filter((item) => item?.id);
+  }
+  // Remember IDs before triggering so an old deployment of the same SHA cannot
+  // accidentally satisfy a queued request that has not started yet.
+  const previousIds = new Set((await listDeploys()).map((item) => item.id));
   // Current Render service is Git-backed: pin the source commit, not a GHCR image.
   const created = await fetchSafe(`${service}/deploys`, {
     method: "POST", headers,
     body: JSON.stringify({ commitId: env.EXPECTED_VERSION }),
   });
   if (!created.ok) throw new Error(`Render deploy request failed (${created.status})`);
-  const deployment = await created.json();
-  if (!deployment.id) throw new Error("Render did not return a deployment id");
+  console.log(`Render deploy accepted (HTTP ${created.status})`);
+  const raw = await created.text();
+  let deployment;
+  try {
+    deployment = raw.trim() ? JSON.parse(raw) : {};
+  } catch {
+    throw new Error(`Render returned invalid deploy JSON (HTTP ${created.status})`);
+  }
+  // Render documents 202 Queued; it can return no deployment body yet.
+  if (!deployment.id && created.status === 202) {
+    await poll(async () => {
+      deployment = (await listDeploys()).find((item) =>
+        !previousIds.has(item.id) && item.commit?.id === env.EXPECTED_VERSION);
+      return Boolean(deployment);
+    }, "Queued Render deployment did not appear for the expected SHA");
+  }
+  if (!deployment?.id) throw new Error(`Render did not return a deployment id (HTTP ${created.status})`);
   await poll(async () => {
     const response = await fetchSafe(`${service}/deploys/${encodeURIComponent(deployment.id)}`, { headers });
     if (!response.ok) throw new Error(`Render status failed (${response.status})`);
@@ -64,6 +89,8 @@ export async function deploy(env, {
     if (failedStates.has(state.status)) throw new Error(`Render deployment failed: ${state.status}`);
     return state.status === "live";
   }, "Render deployment timed out");
+
+  console.log(`Render deployment ${deployment.id} is live; checking API health and menu`);
 
   async function jsonMatches(url, predicate) {
     try {
@@ -85,6 +112,7 @@ export async function deploy(env, {
 
   // Hook must track production main. Hooks deploy the branch head; the SHA check
   // below rejects a concurrent newer commit instead of reporting false success.
+  console.log("API smoke passed; triggering Vercel production hook");
   const hook = await fetchSafe(env.VERCEL_DEPLOY_HOOK, { method: "POST" });
   if (!hook.ok) throw new Error(`Vercel deploy hook failed (${hook.status})`);
   await poll(() => jsonMatches(new URL("/version", env.WEB_URL), (status) =>
