@@ -45,7 +45,13 @@ async function req<T>(
         : "";
 
     if (r.status === 401) {
-      throw Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+      if (path === "/auth/login") {
+        throw Error("Email hoặc mật khẩu không đúng.");
+      }
+      if (token) {
+        throw Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+      }
+      throw Error("Vui lòng đăng nhập để tiếp tục.");
     }
 
     if (r.status === 409) {

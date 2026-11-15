@@ -27,7 +27,7 @@ Mở http://localhost:3200 nếu dùng cấu hình trên; health http://localhos
 ```sh
 docker compose exec -e SEED_DEMO_ACCOUNTS=true api npm run db:seed
 ```
-Tài khoản demo hiện có trong apps/api/prisma/seed.ts; chỉ dùng dữ liệu mẫu local. Không bật tùy chọn này trên máy chủ công khai. Đăng nhập STAFF để nhận đơn đã trả tiền, ADMIN để quản lý món/voucher/nguyên liệu. Có thể tự đăng ký rồi cấp role bằng DB thay cho demo accounts.
+Tài khoản demo được định nghĩa trong apps/api/prisma/seed.ts. Nhóm đã chọn dùng tài khoản demo trên bản online của đồ án; trên Render đặt SEED_DEMO_ACCOUNTS=true và redeploy bản code hỗ trợ opt-in. Chỉ dùng dữ liệu mẫu cho các tài khoản công khai này. Đăng nhập STAFF để nhận đơn đã trả tiền, ADMIN để quản lý món/voucher/nguyên liệu. Có thể tự đăng ký rồi cấp role bằng DB thay cho demo accounts.
 
 ## 4. Làm việc nhóm
 Mọi thay đổi ở repo AS2, mở nhánh/PR; đợi required CI xanh mới merge. Không sửa/push repo AS1. Đọc backlog, SRS và ma trận truy vết trước khi sửa nghiệp vụ; cập nhật tài liệu/test liên quan cùng PR. GitHub Project có thể bổ sung sau, không cản việc chạy app.
