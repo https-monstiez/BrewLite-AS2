@@ -26,4 +26,4 @@ Nguồn thiết kế trong docs/diagrams, mã nguồn trong apps/api và apps/we
 | NFR-04 | US-02 | deployment | Dockerfile/compose/migrations/seed | Compose smoke và migrations | Compose build/up/health/seed local đã đạt |
 | NFR-05 | UC-01 | ADR-002 | transaction/unique/OCC/row claims | PostgreSQL concurrent integration | Đã có test tranh chấp |
 | NFR-06 | US-02 | ADR-001 | ci.yml | GitHub PR workflow runs | CI GitHub đạt, main required check đã bật; xem testing.md |
-| NFR-07 | US-08 | deployment/ADR-004 | Render Git deploy (`render.yaml`); GH Actions build SHA (`cd.yml`) | Public web, API health/menu và version smoke; CI/Delivery runs | Production web/API hoạt động; DB private và release v0.2.0 có minh chứng; CI deploy/smoke chưa chạy vì thiếu secrets, video/demo chưa có; xem deployment.md và cd-setup.md |
+| NFR-07 | US-08 | deployment/ADR-004 | Render Git deploy (`render.yaml`); GH Actions build SHA (`cd.yml`) | Public web, API health/menu và version smoke; CI/Delivery runs | Production web/API cùng SHA trong run CI deploy/smoke 43685179367; DB private, release v0.2.0 và video mobile có minh chứng; Review/Retrospective nhóm chưa ghi nhận |

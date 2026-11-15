@@ -84,3 +84,11 @@ Thông báo 401 khi login được sửa thành lỗi email/mật khẩu; reques
 - [Delivery run 43684074987](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43684074987) qua quality/image nhưng job deploy lỗi `Unexpected end of JSON input` sau khi gửi yêu cầu deploy. Chưa đánh dấu Task 5.3 hoàn tất. Render API có phản hồi 202 Queued; script cần chấp nhận body rỗng, tìm deployment mới đúng SHA rồi chờ live thay vì parse JSON vô điều kiện.
 - `npm run test:delivery`: **16/16** test local đạt sau bản sửa queued response, gồm loại deployment cũ cùng SHA và không nhận nhầm deployment của SHA khác. Cấu trúc list response được đối chiếu với API/CLI chính thức của Render.
 - PR #7 CI đạt: frontend 7 test, PostgreSQL 12 test (thêm seed regression), backend 84 test và browser 4 test. Đây là **107 test ứng dụng**, tách riêng với test orchestration CD.
+
+## CD hoàn chỉnh và video production — 15/11/2026
+
+[Run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367) có quality, image, **deploy** và delivery-status success; deploy-vps skipped đúng target Render. Web `/version` và API health cùng trả `2af63a27619e7062e94bc6163643448e08a1b7f8`, health/menu HTTP 200 và catalog có 5 món. Đây là lần quan sát CI deploy/smoke production đã thành công, thay thế trạng thái pending trong các snapshot lịch sử phía trên.
+
+Bộ kiểm tra hiện có: **84 backend + 7 frontend + 12 PostgreSQL + 4 browser = 107 test ứng dụng**, cộng **16 test CD orchestration**, tổng **123**. CI quality trên run nêu trên đã đạt.
+
+[Video mobile](demo/README.md) ghi checkout trên production bằng Playwright: đăng nhập CUSTOMER, chọn Americano M/đường đá 50%, giỏ giữ qua reload, thanh toán Thẻ mô phỏng 40.000đ và xác nhận PAID từ API. Không mock API/không chuyển tiền thật; video dài khoảng 20,12 giây, 390×844. Đây là ghi hình tự động, không phải Sprint Review hay nghiệm thu của giảng viên.

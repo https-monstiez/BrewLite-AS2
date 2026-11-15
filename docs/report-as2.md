@@ -6,7 +6,7 @@
 **Trường Đại học Sài Gòn — Khoa Công nghệ Thông tin**<br>
 **Năm học 2026–2027**
 
-> **Nhóm cần hoàn thiện trước khi nộp:** bổ sung lớp/nhóm nếu mẫu yêu cầu; bổ sung link video demo; ghi nhận Sprint Review và Sprint Retrospective thực tế. Các thông tin này không được giả định trong báo cáo.
+> **Nhóm cần hoàn thiện trước khi nộp:** bổ sung lớp/nhóm nếu mẫu yêu cầu; xem video demo và chuẩn bị thuyết minh; ghi nhận Sprint Review và Sprint Retrospective thực tế. Các thông tin này không được giả định trong báo cáo.
 
 | Thành viên | MSSV |
 |---|---|
@@ -19,9 +19,7 @@
 
 ---
 
-> **Cập nhật mới:** ba tài khoản demo online đã đăng nhập được, đúng quyền ADMIN/STAFF/CUSTOMER; web/API đã lên SHA `ebff751`. Task 5.3 còn chờ run deploy/smoke xanh sau bản sửa phản hồi queued.
-
-> **Lịch sử kiểm tra 15/11/2026 khoảng 12:34 ICT:** web đã lên SHA `e9b3949`, API vẫn ở `ab5af17`; cả hai trả 200. Các đoạn ghi cùng SHA dưới đây mô tả lần kiểm tra trước. Task 5.3 còn thiếu run CI deploy/smoke thật; xem [cd-setup.md](cd-setup.md).
+> **Minh chứng cuối:** [CI deploy/smoke thành công](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367) trên SHA `2af63a27619e7062e94bc6163643448e08a1b7f8`; web/API cùng phiên bản trong lần kiểm tra. Ba tài khoản demo online đăng nhập đúng quyền; [video checkout mobile](demo/README.md) đã ghi trên production. Review/Retrospective vẫn cần nhóm thực hiện thật.
 
 ## Tóm tắt
 
@@ -29,7 +27,7 @@ BrewLite là hệ thống đặt thức uống trực tuyến. Báo cáo tập t
 
 Hệ thống dùng Next.js/PWA cho giao diện, NestJS cho REST API và PostgreSQL/Prisma cho dữ liệu. Bên cạnh ví/thẻ mô phỏng, hệ thống có VietQR cần nhân viên đối soát; VNPay chỉ được mô tả là Sandbox khi đã cấu hình merchant. Các sơ đồ trong báo cáo được liên kết với yêu cầu, mô hình dữ liệu và kiểm thử để người đọc có thể lần theo cùng một nghiệp vụ từ yêu cầu đến triển khai.
 
-Tại thời điểm kiểm tra ngày 15/11/2026, website và API production hoạt động tại Vercel/Render, trả cùng SHA `ab5af1728c75be75c6b5c7d150fcd6ed6028d409`; GitHub Release `v0.2.0` đã được tạo. GitHub Actions kiểm tra và đóng gói image lên GHCR; production hiện được triển khai qua Git integration của Render/Vercel, không khẳng định GH Actions đã triển khai image đó.
+Tại lần kiểm tra sau [Delivery run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367), website và API production hoạt động tại Vercel/Render, trả cùng SHA `2af63a27619e7062e94bc6163643448e08a1b7f8`. CI đóng gói image SHA lên GHCR, điều khiển Render Git-backed deploy đúng source commit và gọi hook Vercel, rồi smoke cả API/web. Image GHCR là tạo phẩm đóng gói; Render build Docker từ Git commit, không khẳng định production đã pull chính image đó. Release nền `v0.2.0` vẫn lưu mốc phát hành trước và có release notes.
 
 **Từ khóa:** yêu cầu phần mềm, phân luồng nghiệp vụ, UML, Activity diagram, Sequence diagram, Next.js, NestJS, PostgreSQL, CI/CD.
 
@@ -245,7 +243,7 @@ Sơ đồ thể hiện:
 - **Cấu hình:** API nhận connection string database và secrets qua biến môi trường; secret không được đưa vào repository.
 - **Ranh giới triển khai:** Render hiện dùng Git-backed deploy từ `main`/`checksPass`, không lấy image GHCR do workflow tạo. Vercel cũng được ghi là triển khai từ Git integration.
 
-Ngày 15/11/2026, website, API health và menu được kiểm tra công khai; web/API cùng báo SHA `ab5af1728c75be75c6b5c7d150fcd6ed6028d409`. Database Render Free có cảnh báo sẽ bị xóa ngày 15/12/2026 nếu không nâng cấp. Cấu hình hai database role trên production chưa được xác minh.
+Sau Delivery run 43685179367 ngày 15/11/2026, website, API health và menu được kiểm tra công khai; web/API cùng báo SHA `2af63a27619e7062e94bc6163643448e08a1b7f8`. Database Render Free có cảnh báo sẽ bị xóa ngày 15/12/2026 nếu không nâng cấp. Cấu hình hai database role trên production chưa được xác minh.
 
 ---
 
@@ -275,10 +273,11 @@ Kết quả kiểm thử được tổng hợp trong [testing.md](testing.md):
 | Loại kiểm thử | Kết quả đã ghi nhận |
 |---|---:|
 | Backend Jest unit/HTTP authorization | 84 |
-| Frontend Vitest | 5 |
-| PostgreSQL integration | 11 |
+| Frontend Vitest | 7 |
+| PostgreSQL integration | 12 |
 | Playwright browser E2E | 4 |
-| Tổng | 104 |
+| CD orchestration (HTTP mô phỏng, không phải deploy thật) | 16 |
+| Tổng | 123 |
 
 Các test bao gồm quote, quyền truy cập, chống lặp, tranh chấp tồn, callback/ledger, hoàn tồn và luồng browser. Unit test dùng mock được phân biệt với PostgreSQL integration. Các lần CI/Delivery GitHub được ghi trong [testing.md](testing.md); release notes và hướng dẫn rollback ở [deployment.md](deployment.md).
 
@@ -289,16 +288,17 @@ Các test bao gồm quote, quyền truy cập, chống lặp, tranh chấp tồn
 | Frontend | [brew-lite-as-2.vercel.app](https://brew-lite-as-2.vercel.app/) |
 | API menu | [GET /api/products](https://brewlite-as2-api.onrender.com/api/products), trả năm sản phẩm khi kiểm tra |
 | Health | [GET /api/health](https://brewlite-as2-api.onrender.com/api/health), `status: ok` |
-| Phiên bản | Web `/version` và API cùng SHA `ab5af1728c75be75c6b5c7d150fcd6ed6028d409` |
-| Release | [GitHub Release v0.2.0](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.0) trên commit production |
+| Phiên bản | Web `/version` và API cùng SHA `2af63a27619e7062e94bc6163643448e08a1b7f8` trong run đã kiểm chứng |
+| Release | [GitHub Release v0.2.0](https://github.com/https-monstiez/BrewLite-AS2/releases/tag/v0.2.0) trên mốc phát hành nền `ab5af17` |
 | Database | Render PostgreSQL private inbound; `DATABASE_URL` có cấu hình nhưng secret không được đưa vào báo cáo |
-| CI/CD | GitHub Actions build/push image lên GHCR; production hiện deploy qua Render/Vercel Git integration |
+| CI/CD | [Run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367) quality/image/deploy/smoke success; CI triển khai source commit vào Render và gọi hook Vercel |
+| Video | [Checkout mobile production](demo/README.md), thanh toán mô phỏng, ghi bằng Playwright |
 
-**Đối chiếu với tiêu chí CD của PDF:** đề yêu cầu pipeline thể hiện quality gate, image theo SHA, registry, deploy bằng secrets, migration an toàn, post-deploy smoke test và rollback. Repo có workflow build/đóng gói; hệ thống production hoạt động và có runbook. Tuy nhiên, bằng chứng hiện có không cho thấy GitHub Actions đã trực tiếp triển khai image GHCR lên production và chạy post-deploy smoke. Vì vậy không khẳng định pipeline GitHub đã hoàn tất toàn bộ chuỗi CD trên production. Task 5.3 bắt buộc chuỗi này: nhóm cần cấu hình secrets và chạy workflow deploy/smoke thành công trước khi đánh dấu hoàn thành. Script đã được sửa để Render Git-backed nhận `commitId` và kiểm tra SHA của cả API/web; xem [hướng dẫn bật CD](cd-setup.md).
+**Đối chiếu với tiêu chí CD của PDF:** pipeline đã chạy quality gate, build Docker images theo SHA, push GHCR, deploy bằng GitHub secrets, migration trong startup, post-deploy health/menu/version smoke và dừng khi lỗi. [Run thành công](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367) có job deploy success; các run lỗi và cách sửa được lưu trong [testing.md](testing.md). Render hiện là service Git-backed nên CI dùng `commitId`, không phải `imageUrl`; cách triển khai này được mô tả đúng trong deployment diagram. Runbook rollback giữ dữ liệu/schema, chưa có diễn tập rollback production nên không ghi là đã diễn tập. Cấu hình tái lập ở [cd-setup.md](cd-setup.md).
 
 ### 6.4 Handover
 
-README hướng dẫn chạy local/test/build; deployment guide mô tả URL, kiểm tra health/version và rollback. Các mục cần chứng minh bằng hoạt động thực tế — video demo end-to-end và Sprint Review/Retrospective — chưa thể tạo thay nhóm. Xem checklist tại [handover.md](process/handover.md).
+README hướng dẫn chạy local/test/build; deployment guide mô tả URL, kiểm tra health/version và rollback. Đã có [video checkout mobile](demo/README.md) ghi thao tác thật trên production bằng Playwright và thanh toán mô phỏng. Sprint Review/Retrospective cần nhóm ghi nhận từ buổi thực tế; video tự động không thay thế hoạt động này. Xem checklist tại [handover.md](process/handover.md).
 
 ---
 
@@ -325,14 +325,14 @@ Ma trận đầy đủ ở [traceability-matrix.md](traceability-matrix.md). M�
 
 Assignment 2 được triển khai theo đúng chuỗi yêu cầu → mô hình hóa → kiến trúc → Sprint 1 → Sprint 2/Delivery. Trọng tâm báo cáo là phân luồng UC-01 và sự thống nhất giữa use-case, activity, sequence, class và deployment diagram. Bộ sơ đồ có cả file nguồn PlantUML lẫn SVG; các nhánh chưa đăng nhập, hết hàng, thanh toán thất bại, retry/callback trùng và chuyển khoản cần đối soát được mô tả thay vì chỉ trình bày luồng thành công.
 
-Trạng thái hiện tại: code, sơ đồ, kiểm thử, production URL và release đã có. Cần trình bày trung thực các giới hạn: VNPay phụ thuộc Sandbox/merchant; không có giao dịch tiền thật được xác nhận; production deploy qua Git integration, không phải GH Actions deploy image; cấu hình database hai role chưa xác minh.
+Trạng thái hiện tại: code, sơ đồ, kiểm thử, production URL, release, CI deploy/smoke và video demo đã có. Cần trình bày trung thực các giới hạn: VNPay phụ thuộc Sandbox/merchant; không có giao dịch tiền thật được xác nhận; CI deploy source commit qua Render API và Vercel hook, không phải Render pull image GHCR; cấu hình database hai role chưa xác minh.
 
 **Nhóm tự hoàn thiện trước khi nộp:**
 
 1. Bổ sung lớp/nhóm nếu mẫu yêu cầu.
-2. Quay và bổ sung link video demo thực tế luồng end-to-end.
+2. Xem video demo đã có và chuẩn bị thuyết minh/demo trực tiếp khi bảo vệ.
 3. Tổ chức/ghi nhận Sprint Review và Sprint Retrospective với người tham dự, phản hồi và hành động thật.
-4. Hoàn tất Task 5.3: cấu hình secrets trong GitHub settings theo [cd-setup.md](cd-setup.md), chạy workflow deploy/smoke và lưu bằng chứng thành công; không đưa secrets vào repo hoặc báo cáo.
+4. Trước buổi chấm kiểm tra lại URL/health, đăng nhập và phiên bản đang chạy; minh chứng Task 5.3 đã được lưu trong [deployment.md](deployment.md).
 
 ### Tài liệu tham khảo
 

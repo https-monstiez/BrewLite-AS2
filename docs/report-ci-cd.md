@@ -1,27 +1,23 @@
 # CI/CD và triển khai hệ thống
 
-## Continuous Integration
+## Kết quả đã kiểm chứng
 
-Dự án sử dụng GitHub Actions để tự động kiểm tra các thay đổi khi có Pull Request và khi cập nhật các nhánh được cấu hình. Quy trình CI gồm cài đặt dependencies, sinh Prisma Client, chạy ESLint, chạy unit test và kiểm thử HTTP authorization cho backend bằng Jest, chạy test giao diện bằng Vitest, áp dụng migration trên PostgreSQL dùng riêng cho kiểm thử, chạy integration test với PostgreSQL thật, build backend/frontend và chạy kiểm thử end-to-end trên trình duyệt bằng Playwright. Workflow lưu browser report và test results làm artifact khi chạy CI. Branch protection trên `main` yêu cầu check `Lint, tests and build` theo cấu hình đã được ghi nhận trong hồ sơ CI.
+[Delivery run 43685179367](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367) thành công trên `2af63a27619e7062e94bc6163643448e08a1b7f8`: quality, image, **deploy** và delivery-status đều success. Web `/version` và API `/api/health` cùng SHA khi smoke sau run; menu trả 5 sản phẩm. Xem [deployment.md](deployment.md) để phân biệt snapshot với phiên bản sau các commit tiếp theo.
 
-Các lần chạy trên nhánh `main` tại [CI run #13](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43635976686) và trong quy trình Delivery đã hoàn tất thành công. Repo cũng cấu hình required check trên `main` theo hồ sơ kiểm chứng của dự án; thay đổi không đạt quality gate không được xem là đủ điều kiện để tích hợp.
+## CI
 
-## Đóng gói và phát hành image
+PR/main chạy install → lint → unit/UI → PostgreSQL integration → build → Playwright E2E, cùng test orchestration CD. Bộ hiện tại gồm 107 test ứng dụng (84 backend, 7 frontend, 12 PostgreSQL, 4 browser) và 16 test CD; 123 test tổng. Main có required check `Lint, tests and build`, strict và enforce admins.
 
-Sau quality gate, workflow Delivery build Docker image cho API và web, gắn tag theo commit SHA rồi đẩy image lên GitHub Container Registry (GHCR). [Delivery run #2](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43635976761) hoàn tất thành công trên commit `ab5af1728c75be75c6b5c7d150fcd6ed6028d409`, cũng là SHA được quan sát trên website và API production. Việc build/push image lên GHCR là bước đóng gói; không tự nó chứng minh workflow đã triển khai image đó lên production.
+## Đóng gói và triển khai
 
-## Triển khai production
+Image API/web có tag SHA và được đẩy GHCR. Render đang là Docker service Git-backed: CI dùng secret gọi Render API với `commitId`, chờ deployment live, startup migration, kiểm API health/SHA/menu. Response 202 Queued không có body được xử lý bằng tìm deployment mới cùng commit; không chấp nhận deployment cũ. Sau đó CI gọi Vercel hook main, kiểm web version/trang chủ và API version lần cuối.
 
-Hệ thống production sử dụng Vercel cho frontend Next.js và Render cho API NestJS cùng PostgreSQL. Theo cấu hình `render.yaml`, Render Web Service được liên kết trực tiếp với repository AS2 và nhánh `main`, đặt `autoDeployTrigger: checksPass`; Render triển khai service từ repository sau khi các kiểm tra tương ứng đạt. Vercel cung cấp website tại [brew-lite-as-2.vercel.app](https://brew-lite-as-2.vercel.app/). API và health check lần lượt ở [API menu](https://brewlite-as2-api.onrender.com/api/products) và [API health](https://brewlite-as2-api.onrender.com/api/health).
+GHCR image là tạo phẩm đóng gói; không tuyên bố Render đã pull chính image đó. Git integration của nền tảng vẫn là một cơ chế riêng; run có job deploy success mới chứng minh CI deploy. Secrets/variables và bước tái lập xem [cd-setup.md](cd-setup.md).
 
-Ngày 15/11/2026, smoke check công khai xác nhận API health trả `status: ok`, API menu trả năm sản phẩm, và endpoint phiên bản của web cùng API báo SHA `ab5af1728c75be75c6b5c7d150fcd6ed6028d409`.
+## Lỗi và khôi phục
 
-Workflow GitHub Actions đã được sửa để job Render triển khai service Git-backed bằng `commitId`; VPS là phương án thay thế. Các job deploy chỉ chạy trên main khi bật biến `PRODUCTION_DEPLOY_ENABLED` và khai báo secrets/URLs phù hợp. Hướng dẫn cấu hình ở [cd-setup.md](cd-setup.md); Task 5.3 vẫn chờ run deploy/smoke thật. Môi trường production đang mô tả ở trên được triển khai qua tích hợp Git của Render và Vercel; không đồng nhất cơ chế này với việc GitHub Actions trực tiếp triển khai image production.
+Các run trước đã phát hiện sai contract menu và response deploy rỗng; lịch sử minh chứng giữ trong [testing.md](testing.md). Pipeline dừng khi lỗi và hiển thị runbook [rollback](deployment.md#rollback), không reset/drop database. Chưa thực hiện diễn tập rollback production.
 
-## Kiểm tra sau triển khai và giới hạn
+## Demo
 
-Render kiểm tra health tại `/api/health`. Các endpoint production đã được gọi để xác nhận khả năng phản hồi và phiên bản đang chạy. Những kiểm tra này không thay thế kiểm thử end-to-end giao dịch trên dữ liệu production. Không thực hiện thanh toán thật trong kiểm thử; VNPay chỉ là sandbox khi merchant được cấu hình, còn phương thức chuyển khoản cần nhân viên đối soát theo quy trình nghiệp vụ.
-
-## Cập nhật kiểm chứng 15/11/2026 khoảng 12:34 ICT
-
-Web báo SHA `e9b3949`, API báo `ab5af17`; hai endpoint hoạt động nhưng chưa đồng bộ phiên bản. [Delivery run 43644852017](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43644852017) có quality/image thành công, deploy bị skipped. Các kết quả cùng SHA ở phần trên là lịch sử lần kiểm tra trước, không đại diện trạng thái mới nhất.
+[Video mobile production](demo/README.md) ghi checkout bằng Playwright trên API thật, thanh toán mô phỏng. Ba tài khoản demo đã đăng nhập online đúng quyền. Không có tiền thật được chuyển trong kiểm thử; VNPay sandbox phụ thuộc merchant, VietQR cần nhân viên đối soát. Video không phải biên bản Sprint Review/Retrospective.

@@ -156,9 +156,9 @@ Production hiện dùng Vercel + Render. Bộ [deploy/vps](deploy/vps) là phư�
 
 ## CI/CD và production
 
-Task 5.3 đã có cấu hình secrets; còn chốt một run deploy/smoke qua CI thành công. Xem [hướng dẫn bật CD](docs/cd-setup.md); job đóng gói màu xanh không chứng minh production đã được workflow triển khai.
+Task 5.3 đã có [run deploy/smoke CI thành công](https://github.com/https-monstiez/BrewLite-AS2/actions/runs/43685179367), xác minh web/API cùng SHA. Xem [hướng dẫn bật CD](docs/cd-setup.md); job đóng gói màu xanh không chứng minh production đã được workflow triển khai.
 [Hướng dẫn triển khai/rollback](docs/deployment.md), [ma trận truy vết](docs/traceability-matrix.md), [checklist](docs/process/handover.md).
-[Báo cáo Assignment 2](docs/report-as2.md). Nhóm cần bổ sung thông tin lớp nếu mẫu yêu cầu, video demo và biên bản Review/Retrospective thực tế trước khi nộp.
+[Báo cáo Assignment 2](docs/report-as2.md). Đã có video demo; nhóm cần bổ sung lớp nếu mẫu yêu cầu và biên bản Review/Retrospective thực tế trước khi nộp.
 
 CI chạy Install→Lint→Test→Build, integration PostgreSQL và browser E2E. Nhánh `main` có required check `Lint, tests and build`. CD đóng gói API image SHA lên GHCR và chỉ chạy job deploy khi `PRODUCTION_DEPLOY_ENABLED=true` cùng đủ secret/URLs.
 
@@ -168,6 +168,7 @@ CI chạy Install→Lint→Test→Build, integration PostgreSQL và browser E2E.
 
 | Nội dung | Tài liệu |
 | --- | --- |
+| Video demo mobile | [Xem/tải video](docs/demo/README.md) |
 | Đối chiếu yêu cầu và việc còn lại | [Rà soát AS2](docs/as2-audit.md) |
 | Báo cáo tổng hợp AS2 | [Báo cáo](docs/report-as2.md) |
 | Phạm vi và yêu cầu | [Phạm vi](docs/requirements/context-and-scope.md), [SRS](docs/requirements/srs.md), [Use case checkout](docs/requirements/checkout-use-case.md) |
